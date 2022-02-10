@@ -68,7 +68,7 @@ public class RenderingManager
             timer.start();
         }
 
-        public void paint(Graphics g)
+        public void paint(Graphics g) //write raster 
         {
             super.paint(g);
             drawTriangles(g);
