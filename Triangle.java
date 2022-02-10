@@ -9,6 +9,7 @@ public class Triangle
 
     public Triangle(Vector3 p1, Vector3 p2, Vector3 p3)
     {
+        Main.ObjectManager.triangles.add(this);
         point1 = p1;
         point2 = p2;
         point3 = p3;
@@ -16,6 +17,7 @@ public class Triangle
 
     public Triangle(Vector3 p1, Vector3 p2, Vector3 p3, Color colorIn)
     {
+        Main.ObjectManager.triangles.add(this);
         point1 = p1;
         point2 = p2;
         point3 = p3;
@@ -24,6 +26,7 @@ public class Triangle
 
     public Triangle(Vector3 p1, Vector3 p2, Vector3 p3, boolean fillIn)
     {
+        Main.ObjectManager.triangles.add(this);
         point1 = p1;
         point2 = p2;
         point3 = p3;
@@ -32,6 +35,7 @@ public class Triangle
 
     public Triangle(Vector3 p1, Vector3 p2, Vector3 p3, Color colorIn, boolean fillIn)
     {
+        Main.ObjectManager.triangles.add(this);
         point1 = p1;
         point2 = p2;
         point3 = p3;
