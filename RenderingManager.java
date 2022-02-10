@@ -20,6 +20,8 @@ public class RenderingManager
         window.setVisible(true);
     }
 
+    
+
     private static class Panel extends JPanel
     {
         public Panel()
@@ -31,7 +33,6 @@ public class RenderingManager
         {
             super.paintComponent(g);
             g.setColor(Color.BLACK);
-            g.drawLine(0, 0, 500, 500);
         }
     }
 }

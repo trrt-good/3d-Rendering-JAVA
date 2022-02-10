@@ -9,6 +9,6 @@ public class Main
 
     public static class ObjectManager
     {
-        public static List<Point3> renderPoint3s = new ArrayList<Point3>();
+        public static List<Triangle> triangles = new ArrayList<Triangle>();
     }
 }
