@@ -3,8 +3,8 @@ import java.awt.event.*;
 import java.awt.MouseInfo;
 public class Camera implements KeyListener
 {
-    public double h_fov = 60;
-    public double v_fov = 33.75;
+    public double h_fov = 70;
+    public double v_fov = 40;
     public Vector3 position = new Vector3(0, 10, 0);
     public double h_orientation = 0;
     public double v_orientation = 0;
