@@ -1,6 +1,16 @@
 import java.awt.event.*;
 public class InputManager implements KeyListener, MouseMotionListener, MouseListener
 {
+    public static final class KEYBINDS
+    {
+        public static final char FORWARD = 'w'; 
+        public static final char BACKWARD = 's';
+        public static final char LEFTWARD = 'a';  
+        public static final char RIGHTWARD = 'd'; 
+        public static final char UPWARD = 'e'; 
+        public static final char DOWNWARD = 'q'; 
+    }
+
     public boolean L_Down;
     public boolean R_Down;
 
@@ -8,7 +18,7 @@ public class InputManager implements KeyListener, MouseMotionListener, MouseList
     public int mouseY;
 
     public int R_mouseClickedX;
-    public int L_mouseClickedY;
+    public int R_mouseClickedY;
 
     public boolean forward;
     public boolean backward;
@@ -16,9 +26,6 @@ public class InputManager implements KeyListener, MouseMotionListener, MouseList
     public boolean right;
     public boolean upward;
     public boolean downward;
-
-    @Override
-    public void keyTyped(KeyEvent e) {}
 
     @Override
     public void keyPressed(KeyEvent e) 
@@ -70,16 +77,6 @@ public class InputManager implements KeyListener, MouseMotionListener, MouseList
         }   
     }
 
-    public static final class KEYBINDS
-    {
-        public static final char FORWARD = 'w'; 
-        public static final char BACKWARD = 's';
-        public static final char LEFTWARD = 'a';  
-        public static final char RIGHTWARD = 'd'; 
-        public static final char UPWARD = 'e'; 
-        public static final char DOWNWARD = 'q'; 
-    }
-
     @Override
     public void mouseDragged(MouseEvent e) 
     {
@@ -103,12 +100,10 @@ public class InputManager implements KeyListener, MouseMotionListener, MouseList
                 break;
             case MouseEvent.BUTTON3:
                 R_mouseClickedX = e.getX();
-                L_mouseClickedY = e.getY();
+                R_mouseClickedY = e.getY();
                 R_Down = true;
                 break;
         }
-
-        
     }
 
     @Override
@@ -124,6 +119,7 @@ public class InputManager implements KeyListener, MouseMotionListener, MouseList
         }
     }
 
+//#region unused event listeners
 
     @Override
     public void mouseClicked(MouseEvent e){}
@@ -133,4 +129,9 @@ public class InputManager implements KeyListener, MouseMotionListener, MouseList
 
     @Override
     public void mouseExited(MouseEvent e) {}
+
+    @Override
+    public void keyTyped(KeyEvent e) {}
+
+//#endregion
 }

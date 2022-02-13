@@ -4,10 +4,10 @@ public class Camera
 {
     public static final int TICK_SPEED = 200;
     public static int movementSpeed = 50;
-    public static int sensitivity = 10;
+    public static int sensitivity = 20;
 
-    public static double h_fov = 70;
-    public static double v_fov = 40;
+    public static double h_fov = 90;
+    public static double v_fov = 50;
     public static Vector3 position = new Vector3(0, 10, 0);
     public static double h_orientation = 0;
     public static double v_orientation = 0;
@@ -48,8 +48,8 @@ public class Camera
                     sensitivity = 100;
                 if (sensitivity < 1)
                     sensitivity = 1;
-                h_orientation = clickedHorientation + (double)(Main.inputManager.mouseX-Main.inputManager.R_mouseClickedX)/(-200/sensitivity);
-                v_orientation = clickedVorientation + (double)(Main.inputManager.mouseY-Main.inputManager.L_mouseClickedY)/(-200/sensitivity);
+                h_orientation = clickedHorientation + (double)(Main.inputManager.mouseX-Main.inputManager.R_mouseClickedX)/(-200.0/sensitivity);
+                v_orientation = clickedVorientation + (double)(Main.inputManager.mouseY-Main.inputManager.R_mouseClickedY)/(-200.0/sensitivity);
                 h_orientation%=360;
                 v_orientation%=360;
             }
@@ -60,17 +60,27 @@ public class Camera
 
     private static void moveForward(double distanceIn)
     {
-        position.add(Math.sin(Math.toRadians(90-h_orientation))*distanceIn, Math.sin(Math.toRadians(v_orientation))*distanceIn, Math.cos(Math.toRadians(90-h_orientation))*distanceIn);
+        position.add(
+            Math.sin(Math.toRadians(90-h_orientation))*distanceIn, //x
+            Math.sin(Math.toRadians(v_orientation))*distanceIn, //y
+            Math.cos(Math.toRadians(90-h_orientation))*distanceIn); //z
     }
 
     private static void moveLeft(double distanceIn)
     {
         distanceIn*=-1;
-        position.add(Math.cos(Math.toRadians(h_orientation-90))*distanceIn, 0, Math.sin(Math.toRadians(h_orientation-90))*distanceIn);
+        position.add(
+            Math.cos(Math.toRadians(h_orientation-90))*distanceIn, //x
+            0, //y
+            Math.sin(Math.toRadians(h_orientation-90))*distanceIn); //z
     }
 
     private static void moveUp(double distanceIn)
     {
-        position.add((-Math.sin(Math.toRadians(90-h_orientation)))*Math.cos(Math.toRadians(90-v_orientation))*distanceIn, Math.sin(Math.toRadians(90-v_orientation))*distanceIn, -Math.cos(Math.toRadians(90-h_orientation))*Math.cos(Math.toRadians(90-v_orientation))*distanceIn);
+        position.add(
+            (-Math.sin(Math.toRadians(90-h_orientation)))*Math.cos(Math.toRadians(90-v_orientation))*distanceIn, //x 
+            Math.sin(Math.toRadians(90-v_orientation))*distanceIn, //y
+            -Math.cos(Math.toRadians(90-h_orientation))*Math.cos(Math.toRadians(90-v_orientation))*distanceIn //z
+        );
     }
 }
