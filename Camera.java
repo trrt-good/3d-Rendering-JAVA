@@ -1,51 +1,74 @@
 import javax.swing.*;
 import java.awt.event.*;
-import java.awt.MouseInfo;
-public class Camera implements KeyListener
+public class Camera
 {
-    public double h_fov = 70;
-    public double v_fov = 40;
-    public Vector3 position = new Vector3(0, 10, 0);
-    public double h_orientation = 0;
-    public double v_orientation = 0;
+    public static final int TICK_SPEED = 200;
+    public static int movementSpeed = 50;
+    public static int sensitivity = 70;
 
-    @Override
-    public void keyTyped(KeyEvent e) 
+    public static double h_fov = 70;
+    public static double v_fov = 40;
+    public static Vector3 position = new Vector3(0, 10, 0);
+    public static double h_orientation = 0;
+    public static double v_orientation = 0;
+
+    public static Timer timer = new Timer(1000/TICK_SPEED + 1, new ActionListener()
     {
-        if (e.getKeyChar() == 'e')
-            h_orientation += 0.01;    
-        if (e.getKeyChar() == 'q')
-            h_orientation -=0.01;
+        boolean first = true;
+        double clickedHorientation = 0;
+        double clickedVorientation = 0;
 
-        if (e.getKeyChar() == 'r')
-            v_orientation +=0.01;
-        if (e.getKeyChar() == 'f')
-            v_orientation -=0.01;
+        @Override
+        public void actionPerformed(ActionEvent e) 
+        {
+            if (Main.inputManager.forward)
+                moveForward((double)movementSpeed/100);
+            if (Main.inputManager.backward)
+                moveForward(-(double)movementSpeed/100);
 
-        if (e.getKeyChar() == 'w')
-        {
-            position.x += 1;
+            if (Main.inputManager.left)
+                moveLeft((double)movementSpeed/100);
+            if (Main.inputManager.right)
+                moveLeft(-(double)movementSpeed/100);
+
+            if (Main.inputManager.upward)
+                moveUp((double)movementSpeed/100);
+            if (Main.inputManager.downward)
+                moveUp(-(double)movementSpeed/100);
+            
+            if (Main.inputManager.R_Down && first)
+            {
+                first = false;
+                clickedHorientation = h_orientation;
+                clickedVorientation = v_orientation;
+            }
+            if (Main.inputManager.R_Down)
+            {
+                if (sensitivity > 100)  
+                    sensitivity = 100;
+                if (sensitivity < 1)
+                    sensitivity = 1;
+                h_orientation = clickedHorientation + (double)(Main.inputManager.mouseX-Main.inputManager.R_mouseClickedX)/(sensitivity-101);
+                v_orientation = clickedVorientation + (double)(Main.inputManager.mouseY-Main.inputManager.L_mouseClickedY)/(sensitivity-101);
+            }
+            if (Main.inputManager.R_Down == false && first == false)
+                first = true;
         }
-        if (e.getKeyChar() == 'd')
-        {
-            position.z += 1;
-        }
-        if (e.getKeyChar() == 'a')
-        {
-            position.z -= 1;
-        }
-        if (e.getKeyChar() == 's')
-        {
-            position.x -= 1;
-        }
+    });
+
+    private static void moveForward(double distanceIn)
+    {
+        position.add(Math.sin(Math.toRadians(90-h_orientation))*distanceIn, Math.sin(Math.toRadians(v_orientation))*distanceIn, Math.cos(Math.toRadians(90-h_orientation))*distanceIn);
     }
-    @Override
-    public void keyPressed(KeyEvent e) {
 
+    private static void moveLeft(double distanceIn)
+    {
+        distanceIn*=-1;
+        position.add(Math.cos(Math.toRadians(h_orientation-90))*distanceIn, 0, Math.sin(Math.toRadians(h_orientation-90))*distanceIn);
     }
-    @Override
-    public void keyReleased(KeyEvent e) {
-        // TODO Auto-generated method stub
-        
+
+    private static void moveUp(double distanceIn)
+    {
+        position.add(Math.sin(Math.toRadians(90-h_orientation))*distanceIn*(-1), Math.cos(Math.toRadians(90-v_orientation))*distanceIn, Math.sin(Math.toRadians(v_orientation))*distanceIn);
     }
 }

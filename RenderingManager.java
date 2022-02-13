@@ -18,7 +18,9 @@ public class RenderingManager
         window.setSize(defaultWidth, defaultHeight);
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.getContentPane().add(panel);
-        window.addKeyListener(Main.camera);
+        window.addKeyListener(Main.inputManager);
+        window.addMouseListener(Main.inputManager);
+        window.addMouseMotionListener(Main.inputManager);
         window.setVisible(true);
     }
 
@@ -47,14 +49,14 @@ public class RenderingManager
         Point screenCoord = new Point();
 
         //calculate the x screen coordinate
-        double h_pointDistance = Math.sqrt(Math.pow(worldCoords.x - Main.camera.position.x, 2) + Math.pow(worldCoords.z - Main.camera.position.z, 2));
-        double h_pointAngle = Math.atan((worldCoords.z - Main.camera.position.z)/(worldCoords.x - Main.camera.position.x))-Main.camera.h_orientation;
-        screenCoord.x = (int)(window.getWidth()*((Math.tan(Math.toRadians(Main.camera.h_fov/2))*h_pointDistance*Math.cos(h_pointAngle)-h_pointDistance*Math.sin(h_pointAngle))/(2*Math.tan(Math.toRadians(Main.camera.h_fov/2))*h_pointDistance*Math.cos(h_pointAngle))));
+        double h_pointDistance = Math.sqrt(Math.pow(worldCoords.x - Camera.position.x, 2) + Math.pow(worldCoords.z - Camera.position.z, 2));
+        double h_pointAngle = Math.atan((worldCoords.z - Camera.position.z)/(worldCoords.x - Camera.position.x))-Math.toRadians(Camera.h_orientation);
+        screenCoord.x = (int)(window.getWidth()*((Math.tan(Math.toRadians(Camera.h_fov/2))*h_pointDistance*Math.cos(h_pointAngle)-h_pointDistance*Math.sin(h_pointAngle))/(2*Math.tan(Math.toRadians(Camera.h_fov/2))*h_pointDistance*Math.cos(h_pointAngle))));
 
         //calculate the y screen coordinate
-        double v_pointDistance = Math.sqrt(h_pointDistance*h_pointDistance + (worldCoords.y-Main.camera.position.y)*(worldCoords.y-Main.camera.position.y));
-        double v_pointAngle = Math.atan((worldCoords.y - Main.camera.position.y)/(h_pointDistance))-Main.camera.v_orientation;
-        screenCoord.y = (int)(window.getHeight()*((Math.tan(Math.toRadians(Main.camera.v_fov/2))*v_pointDistance*Math.cos(v_pointAngle)-v_pointDistance*Math.sin(v_pointAngle))/(2*Math.tan(Math.toRadians(Main.camera.v_fov/2))*v_pointDistance*Math.cos(v_pointAngle))));
+        double v_pointDistance = Math.sqrt(h_pointDistance*h_pointDistance + (worldCoords.y-Camera.position.y)*(worldCoords.y-Camera.position.y));
+        double v_pointAngle = Math.atan((worldCoords.y - Camera.position.y)/(h_pointDistance))-Math.toRadians(Camera.v_orientation);
+        screenCoord.y = (int)(window.getHeight()*((Math.tan(Math.toRadians(Camera.v_fov/2))*v_pointDistance*Math.cos(v_pointAngle)-v_pointDistance*Math.sin(v_pointAngle))/(2*Math.tan(Math.toRadians(Camera.v_fov/2))*v_pointDistance*Math.cos(v_pointAngle))));
         return screenCoord;
     }
 
