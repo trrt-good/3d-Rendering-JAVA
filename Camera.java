@@ -4,7 +4,7 @@ public class Camera
 {
     public static final int TICK_SPEED = 200;
     public static int movementSpeed = 50;
-    public static int sensitivity = 70;
+    public static int sensitivity = 10;
 
     public static double h_fov = 70;
     public static double v_fov = 40;
@@ -22,19 +22,19 @@ public class Camera
         public void actionPerformed(ActionEvent e) 
         {
             if (Main.inputManager.forward)
-                moveForward((double)movementSpeed/100);
+                moveForward(movementSpeed/100.0);
             if (Main.inputManager.backward)
-                moveForward(-(double)movementSpeed/100);
+                moveForward(-movementSpeed/100.0);
 
             if (Main.inputManager.left)
-                moveLeft((double)movementSpeed/100);
+                moveLeft(movementSpeed/100.0);
             if (Main.inputManager.right)
-                moveLeft(-(double)movementSpeed/100);
+                moveLeft(-movementSpeed/100.0);
 
             if (Main.inputManager.upward)
-                moveUp((double)movementSpeed/100);
+                moveUp(movementSpeed/100.0);
             if (Main.inputManager.downward)
-                moveUp(-(double)movementSpeed/100);
+                moveUp(-movementSpeed/100.0);
             
             if (Main.inputManager.R_Down && first)
             {
@@ -48,8 +48,10 @@ public class Camera
                     sensitivity = 100;
                 if (sensitivity < 1)
                     sensitivity = 1;
-                h_orientation = clickedHorientation + (double)(Main.inputManager.mouseX-Main.inputManager.R_mouseClickedX)/(sensitivity-101);
-                v_orientation = clickedVorientation + (double)(Main.inputManager.mouseY-Main.inputManager.L_mouseClickedY)/(sensitivity-101);
+                h_orientation = clickedHorientation + (double)(Main.inputManager.mouseX-Main.inputManager.R_mouseClickedX)/(-200/sensitivity);
+                v_orientation = clickedVorientation + (double)(Main.inputManager.mouseY-Main.inputManager.L_mouseClickedY)/(-200/sensitivity);
+                h_orientation%=360;
+                v_orientation%=360;
             }
             if (Main.inputManager.R_Down == false && first == false)
                 first = true;
@@ -69,6 +71,6 @@ public class Camera
 
     private static void moveUp(double distanceIn)
     {
-        position.add(Math.sin(Math.toRadians(90-h_orientation))*distanceIn*(-1), Math.cos(Math.toRadians(90-v_orientation))*distanceIn, Math.sin(Math.toRadians(v_orientation))*distanceIn);
+        position.add((-Math.sin(Math.toRadians(90-h_orientation)))*Math.cos(Math.toRadians(90-v_orientation))*distanceIn, Math.sin(Math.toRadians(90-v_orientation))*distanceIn, -Math.cos(Math.toRadians(90-h_orientation))*Math.cos(Math.toRadians(90-v_orientation))*distanceIn);
     }
 }
