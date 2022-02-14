@@ -6,8 +6,8 @@ public class Camera
     public static int movementSpeed = 50;
     public static int sensitivity = 20;
 
-    public static double h_fov = 90;
-    public static double v_fov = 50;
+    public static double h_fov = 70;
+    public static double v_fov = 33;
     public static Vector3 position = new Vector3(0, 10, 0);
     public static double h_orientation = 0;
     public static double v_orientation = 0;

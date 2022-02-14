@@ -65,9 +65,10 @@ public class RenderingManager
         double v_pointAngle = Math.atan((worldCoords.y - Camera.position.y)/(Math.sqrt(Math.pow(worldCoords.x - v_offsetCamPos.x, 2) + Math.pow(worldCoords.z - v_offsetCamPos.z, 2))))-Math.toRadians(Camera.v_orientation);
         double v_pointDistance = Math.sqrt((Math.pow(worldCoords.x - v_offsetCamPos.x, 2) + Math.pow(worldCoords.z - v_offsetCamPos.z, 2) + (worldCoords.y-Camera.position.y)*(worldCoords.y-Camera.position.y)));
         screenCoord.y = (int)(window.getHeight()*((Math.tan(Math.toRadians(Camera.v_fov/2))*v_pointDistance*Math.cos(v_pointAngle)-v_pointDistance*Math.sin(v_pointAngle))/(2*Math.tan(Math.toRadians(Camera.v_fov/2))*v_pointDistance*Math.cos(v_pointAngle))));
+        
 
         //calculate the x screen coordinate
-        Vector3 h_offsetCamPos = new Vector3((-Math.sin(Math.toRadians(90-Camera.h_orientation)))*Math.cos(Math.toRadians(90-Camera.v_orientation)) * v_pointDistance*Math.sin(v_pointAngle) + Camera.position.x, 0, (-Math.cos(Math.toRadians(90-Camera.h_orientation))*Math.cos(Math.toRadians(90-Camera.v_orientation))) + Camera.position.z);
+        Vector3 h_offsetCamPos = new Vector3((-Math.sin(Math.toRadians(90-Camera.h_orientation)))*Math.cos(Math.toRadians(90-Camera.v_orientation)) * Math.atan((worldCoords.y - Camera.position.y)/(Math.sqrt(Math.pow(worldCoords.x - Camera.position.x, 2) + Math.pow(worldCoords.z - Camera.position.z, 2))))-Math.toRadians(Camera.v_orientation)*Math.sin(Math.atan((worldCoords.y - Camera.position.y)/(Math.sqrt(Math.pow(worldCoords.x - Camera.position.x, 2) + Math.pow(worldCoords.z - Camera.position.z, 2))))-Math.toRadians(Camera.v_orientation)) + Camera.position.x, 0, (-Math.cos(Math.toRadians(90-Camera.h_orientation))*Math.cos(Math.toRadians(90-Camera.v_orientation))) + Camera.position.z);
         double h_pointAngle = Math.atan((worldCoords.z - h_offsetCamPos.z)/(worldCoords.x - h_offsetCamPos.x))-Math.toRadians(Camera.h_orientation);
         double h_pointDistance = Math.sqrt(Math.pow(worldCoords.x - h_offsetCamPos.x, 2) + Math.pow(worldCoords.z - h_offsetCamPos.z, 2));
         screenCoord.x = (int)(window.getWidth()*((Math.tan(Math.toRadians(Camera.h_fov/2))*h_pointDistance*Math.cos(h_pointAngle)-h_pointDistance*Math.sin(h_pointAngle))/(2*Math.tan(Math.toRadians(Camera.h_fov/2))*h_pointDistance*Math.cos(h_pointAngle))));
