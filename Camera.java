@@ -68,11 +68,10 @@ public class Camera
 
     private static void moveLeft(double distanceIn)
     {
-        distanceIn*=-1;
         position.add(
-            Math.cos(Math.toRadians(h_orientation-90))*distanceIn, //x
+            -Math.cos(Math.toRadians(h_orientation-90))*distanceIn, //x
             0, //y
-            Math.sin(Math.toRadians(h_orientation-90))*distanceIn); //z
+            (-Math.sin(Math.toRadians(h_orientation-90))*distanceIn)); //z
     }
 
     private static void moveUp(double distanceIn)
@@ -80,7 +79,7 @@ public class Camera
         position.add(
             (-Math.sin(Math.toRadians(90-h_orientation)))*Math.cos(Math.toRadians(90-v_orientation))*distanceIn, //x 
             Math.sin(Math.toRadians(90-v_orientation))*distanceIn, //y
-            -Math.cos(Math.toRadians(90-h_orientation))*Math.cos(Math.toRadians(90-v_orientation))*distanceIn //z
+            (-Math.cos(Math.toRadians(90-h_orientation))*Math.cos(Math.toRadians(90-v_orientation)))*distanceIn //z
         );
     }
 }
