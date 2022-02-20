@@ -54,4 +54,9 @@ public class Vector3 //An object which represents 3d points or vectors
         y*=multiplier.y;
         z*=multiplier.z;
     }
+
+    public String toString()
+    {
+        return new String(String.format("[%.1f, %.1f, %.1f]", x, y, z));
+    }
 }
