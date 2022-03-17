@@ -8,9 +8,8 @@ public class Main
 
     public static void main(String [] args)
     {
-        new Triangle(new Vector3(100, 0, 15), new Vector3(130, 0, -20), new Vector3(100, 30, 0), Color.YELLOW, true);
-        new Triangle(new Vector3(100, 0, 15), new Vector3(100, 0, -15), new Vector3(100, 30, 0), Color.BLUE, true);
-        new Triangle(new Vector3(100, 0, 50), new Vector3(100, 0, 30), new Vector3(100, 17.32051, 40), Color.MAGENTA, false);
+        new Triangle(new Vector3(-10, 0, 100), new Vector3(10, 0, 100), new Vector3(0, 20, 100), Color.YELLOW, true);
+        new Triangle(new Vector3(-30, 0, 100), new Vector3(-10, 0, 100), new Vector3(-20, 20, 100), Color.BLUE, true);
         
         Camera.timer.start();
         RenderingManager.startRendering("Test");
