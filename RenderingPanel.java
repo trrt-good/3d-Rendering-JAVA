@@ -1,54 +1,44 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-public class RenderingManager 
+public class RenderingPanel extends JPanel implements ActionListener
 {
-    public static Panel panel;
-    public static JFrame window;
-
-    public static int defaultWidth = 1600;
-    public static int defaultHeight = 900;
-
-    public static int FPS = 200;
-
-    public static void startRendering(String name)
+    Timer timer;
+    public RenderingPanel(int fpsIn)
     {
-        window = new JFrame(name);
-        panel = new Panel();
-        window.setSize(defaultWidth, defaultHeight);
-        window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        window.getContentPane().add(panel);
-        window.addKeyListener(Main.inputManager);
-        window.addMouseListener(Main.inputManager);
-        window.addMouseMotionListener(Main.inputManager);
-        window.setVisible(true);
+        timer = new Timer(1000/fpsIn + 1, this);
+        timer.start();
     }
 
-    private static Vector3 point = new Vector3(0, 0, 100);
-    private static void drawTriangles(Graphics g)
+    public void paint(Graphics g) //write raster 
     {
-        // for (int i = 0; i < Main.ObjectManager.triangles.size(); i ++)
-        // {
-        //     Triangle tempTriangle = Main.ObjectManager.triangles.get(i);
-        //     Point p1ScreenCoords = translateToScreenCoords(tempTriangle.point1);
-        //     Point p2ScreenCoords = translateToScreenCoords(tempTriangle.point2);
-        //     Point p3ScreenCoords = translateToScreenCoords(tempTriangle.point3);
+        super.paint(g);
+        drawTriangles(g);
+        g.setColor(Color.BLACK);
+    }
 
-        //     Polygon screenTriangle = new Polygon(new int[]{p1ScreenCoords.x, p2ScreenCoords.x, p3ScreenCoords.x}, new int[]{p1ScreenCoords.y, p2ScreenCoords.y, p3ScreenCoords.y}, 3);
+    private void drawTriangles(Graphics g)
+    {
+        for (int i = 0; i < Main.ObjectManager.triangles.size(); i ++)
+        {
+            Triangle tempTriangle = Main.ObjectManager.triangles.get(i);
+            Point p1ScreenCoords = translateToScreenCoords(tempTriangle.point1);
+            Point p2ScreenCoords = translateToScreenCoords(tempTriangle.point2);
+            Point p3ScreenCoords = translateToScreenCoords(tempTriangle.point3);
 
-        //     g.setColor(tempTriangle.color);
+            Polygon screenTriangle = new Polygon(new int[]{p1ScreenCoords.x, p2ScreenCoords.x, p3ScreenCoords.x}, new int[]{p1ScreenCoords.y, p2ScreenCoords.y, p3ScreenCoords.y}, 3);
+
+            g.setColor(tempTriangle.color);
             
-        //     if (tempTriangle.fill)
-        //         g.fillPolygon(screenTriangle);
-        //     else
-        //         g.drawPolygon(screenTriangle);
-        // }
-        
-        g.fillOval(translateToScreenCoords(point).x, translateToScreenCoords(point).y, 10, 10);
+            if (tempTriangle.fill)
+                g.fillPolygon(screenTriangle);
+            else
+                g.drawPolygon(screenTriangle);
+        }
     }
 
         
-    private static Point translateToScreenCoords(Vector3 worldCoords)
+    private Point translateToScreenCoords(Vector3 worldCoords)
     {
         Point screenCoord = new Point();
 
@@ -73,13 +63,13 @@ public class RenderingManager
         double hVAmt = Math.tan(vHf/2)*dTPP*2;
         double hpDOP = Math.tan(hPA)*dTPP + hVAmt/2;
 
-        screenCoord.x = (int)(panel.getWidth()*(hpDOP/hVAmt));
+        screenCoord.x = (int)(getWidth()*(hpDOP/hVAmt));
 
         double vPA = cVo-Math.atan(wY/xzD);
         double vVAmt = Math.tan(cVf/2)*dTPP*2;
         double vpDOP = Math.tan(vPA) * dTPP + vVAmt/2;
 
-        screenCoord.y = (int)(panel.getWidth()*(vpDOP/vVAmt));
+        screenCoord.y = (int)(getWidth()*(vpDOP/vVAmt));
         //screenCoord.y = panel.getWidth()/2 + (int)(Math.random()*10);
 
         // Vector3 h_offsetCamPos = new Vector3((-Math.sin(Math.toRadians(90+Camera.h_orientation)))*Math.cos(Math.toRadians(90+Camera.v_orientation)) * Math.atan((worldCoords.y - Camera.position.y)/(Math.sqrt(Math.pow(worldCoords.x - Camera.position.x, 2) + Math.pow(worldCoords.z - Camera.position.z, 2))))-Math.toRadians(Camera.v_orientation)*Math.sin(Math.atan((worldCoords.y - Camera.position.y)/(Math.sqrt(Math.pow(worldCoords.x - Camera.position.x, 2) + Math.pow(worldCoords.z - Camera.position.z, 2))))-Math.toRadians(Camera.v_orientation)) + Camera.position.x, 0, (-Math.cos(Math.toRadians(90+Camera.h_orientation))*Math.cos(Math.toRadians(90+Camera.v_orientation))) + Camera.position.z);
@@ -96,28 +86,10 @@ public class RenderingManager
         return screenCoord;
     }
 
-    private static class Panel extends JPanel implements ActionListener
+    @Override
+    public void actionPerformed(ActionEvent e) 
     {
-        Timer timer;
-        public Panel()
-        {
-            setBackground(Color.WHITE);
-            timer = new Timer(1000/FPS + 1, this);
-            timer.start();
-        }
-
-        public void paint(Graphics g) //write raster 
-        {
-            super.paint(g);
-            drawTriangles(g);
-            g.setColor(Color.BLACK);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) 
-        {
-            repaint();
-        }
+        repaint();
     }
 }
 
