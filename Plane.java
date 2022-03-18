@@ -9,8 +9,4 @@ public class Plane
         planePoint = pointIn;
     }
 
-    public Vector3 getIntersectionPoint(Vector3 lineDirection, Vector3 linePoint)
-    {
-        return Vector3.add(linePoint, Vector3.multiply(lineDirection, Vector3.dotProduct(Vector3.subtract(planePoint, linePoint), planeNormal)/Vector3.dotProduct(lineDirection, planeNormal)));
-    }
 }

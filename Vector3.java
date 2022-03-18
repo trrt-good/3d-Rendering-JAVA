@@ -61,6 +61,8 @@ public class Vector3 //An object which represents 3d points or vectors
         return new String(String.format("[%.1f, %.1f, %.1f]", x, y, z));
     }
 
+//============================= static methods ===============================
+
     public static double dotProduct(Vector3 a, Vector3 b)
     {
         return a.x*b.x+a.y*b.y+a.z*b.z;
@@ -79,5 +81,26 @@ public class Vector3 //An object which represents 3d points or vectors
     public static Vector3 multiply(Vector3 vector, double scalar)
     {
         return new Vector3(vector.x*scalar, vector.y*scalar, vector.z*scalar);
+    }
+
+    public static Vector3 negate(Vector3 vector)
+    {
+        return new Vector3(-vector.x, -vector.y, -vector.z);
+    }
+
+    public static Vector3 degAngleToVector(double horizontalAng, double verticalAng)
+    {
+        return new Vector3(Math.sin(Math.toRadians(horizontalAng)), Math.sin(Math.toRadians(verticalAng)), Math.cos(Math.toRadians(horizontalAng)));
+    }
+
+    public static Vector3 radAngleToVector(double horizontalAng, double verticalAng)
+    {
+        return new Vector3(Math.sin(horizontalAng), Math.sin(verticalAng), Math.cos(horizontalAng));
+    }
+
+    public static Vector3 getIntersectionPoint(Vector3 lineDirection, Vector3 linePoint, Plane plane)
+    {
+        return Vector3.add(linePoint, Vector3.multiply(lineDirection, Vector3.dotProduct(Vector3.subtract(plane.planePoint, linePoint), plane.planeNormal)/Vector3.dotProduct(lineDirection, plane.planeNormal)));
+
     }
 }

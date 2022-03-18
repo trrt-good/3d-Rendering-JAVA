@@ -85,4 +85,9 @@ public class Camera
             0, distanceIn, 0
         );
     }
+
+    public static Vector3 getDirectionVector()
+    {
+        return new Vector3(Math.sin(Math.toRadians(h_orientation)), Math.sin(Math.toRadians(v_orientation)), Math.cos(Math.toRadians(h_orientation)));
+    }
 }
