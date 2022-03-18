@@ -51,8 +51,12 @@ public class RenderingPanel extends JPanel implements ActionListener
         Vector3 topRightCoord = Vector3.getIntersectionPoint(topRightFovVector, Camera.position, perpendicularRenderPlane);
         Vector3 bottomLeftCoord = Vector3.getIntersectionPoint(bottomLeftFovVector, Camera.position, perpendicularRenderPlane);
 
+        Vector3 topLeftToPointVector = Vector3.subtract(worldPoint, topLeftCoord);
+        Vector3 topLeftToBottomLeftVector = Vector3.subtract(bottomLeftCoord, topLeftCoord);
+        Vector3 topLeftToTopRightVector = Vector3.subtract(topRightCoord, topLeftCoord);
         
-
+        // u(normalized(Va))+v(normalized(Vb)) = Vkp
+        
         //screenCoord.y = panel.getWidth()/2 + (int)(Math.random()*10);
 
         // Vector3 h_offsetCamPos = new Vector3((-Math.sin(Math.toRadians(90+Camera.h_orientation)))*Math.cos(Math.toRadians(90+Camera.v_orientation)) * Math.atan((worldPoint.y - Camera.position.y)/(Math.sqrt(Math.pow(worldPoint.x - Camera.position.x, 2) + Math.pow(worldPoint.z - Camera.position.z, 2))))-Math.toRadians(Camera.v_orientation)*Math.sin(Math.atan((worldPoint.y - Camera.position.y)/(Math.sqrt(Math.pow(worldPoint.x - Camera.position.x, 2) + Math.pow(worldPoint.z - Camera.position.z, 2))))-Math.toRadians(Camera.v_orientation)) + Camera.position.x, 0, (-Math.cos(Math.toRadians(90+Camera.h_orientation))*Math.cos(Math.toRadians(90+Camera.v_orientation))) + Camera.position.z);

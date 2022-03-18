@@ -35,6 +35,12 @@ public class Vector3 //An object which represents 3d points or vectors
         return (x*x+z*z) + y*y;
     }
 
+    public Vector3 getNormalized()
+    {
+        double magnitude = getMagnitude();
+        return new Vector3(x/magnitude, y/magnitude, z/magnitude);
+    }
+
     public void add(Vector3 vectorIn)
     {
         x+= vectorIn.x;
@@ -73,8 +79,8 @@ public class Vector3 //An object which represents 3d points or vectors
         return new Vector3(a.x+b.x, a.y+b.y, a.z+b.z);
     }
 
-    public static Vector3 subtract(Vector3 a, Vector3 b) //subtracts b from a
-    {
+    public static Vector3 subtract(Vector3 a, Vector3 b) //subtracts b from a || to find vector from a start point to a terminal point
+    { //a is the terminal point and a is the starting point. 
         return new Vector3(a.x-b.x, a.y-b.y, a.z-b.z);
     }
 
@@ -101,6 +107,10 @@ public class Vector3 //An object which represents 3d points or vectors
     public static Vector3 getIntersectionPoint(Vector3 lineDirection, Vector3 linePoint, Plane plane)
     {
         return Vector3.add(linePoint, Vector3.multiply(lineDirection, Vector3.dotProduct(Vector3.subtract(plane.planePoint, linePoint), plane.planeNormal)/Vector3.dotProduct(lineDirection, plane.planeNormal)));
+    }
 
+    public static Vector3 divide(Vector3 vector, Vector3 divisorVector)
+    {
+        return new Vector3();
     }
 }
