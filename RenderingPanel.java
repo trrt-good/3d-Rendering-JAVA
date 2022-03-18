@@ -44,10 +44,12 @@ public class RenderingPanel extends JPanel implements ActionListener
 
         Plane perpendicularRenderPlane = new Plane(worldPoint, Vector3.negate(Camera.getDirectionVector()));
         Vector3 topLeftFovVector = Vector3.degAngleToVector(Camera.h_orientation-Camera.h_fov/2, Camera.v_orientation+Camera.v_fov/2);
-        Vector3 bottomRightFovVector = Vector3.degAngleToVector(Camera.h_orientation+Camera.h_fov/2, Camera.v_orientation-Camera.v_fov/2);
-
+        Vector3 topRightFovVector = Vector3.degAngleToVector(Camera.h_orientation+Camera.h_fov/2, Camera.v_orientation+Camera.v_fov/2);
+        Vector3 bottomLeftFovVector = Vector3.degAngleToVector(Camera.h_orientation-Camera.h_fov/2, Camera.v_orientation-Camera.v_fov/2);
+     
         Vector3 topLeftCoord = Vector3.getIntersectionPoint(topLeftFovVector, Camera.position, perpendicularRenderPlane);
-        Vector3 bottomRightCoord = Vector3.getIntersectionPoint(bottomRightFovVector, Camera.position, perpendicularRenderPlane);
+        Vector3 topRightCoord = Vector3.getIntersectionPoint(topRightFovVector, Camera.position, perpendicularRenderPlane);
+        Vector3 bottomLeftCoord = Vector3.getIntersectionPoint(bottomLeftFovVector, Camera.position, perpendicularRenderPlane);
 
         
 
