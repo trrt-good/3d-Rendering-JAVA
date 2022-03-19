@@ -64,7 +64,7 @@ public class Vector3 //An object which represents 3d points or vectors
 
     public String toString()
     {
-        return new String(String.format("[%.1f, %.1f, %.1f]", x, y, z));
+        return new String(String.format("[%.2f, %.2f, %.2f]", x, y, z));
     }
 
 //============================= static methods ===============================
@@ -112,5 +112,11 @@ public class Vector3 //An object which represents 3d points or vectors
     public static Vector3 divide(Vector3 vector, Vector3 divisorVector)
     {
         return new Vector3();
+    }
+
+    public static double getAngleBetween(Vector3 a, Vector3 b) //in radians 
+    {
+        double aDotb = Vector3.dotProduct(a, b);
+        return Math.acos(aDotb/(a.getMagnitude()*b.getMagnitude()));
     }
 }
