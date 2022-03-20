@@ -101,7 +101,8 @@ public class Vector3 //An object which represents 3d points or vectors
 
     public static Vector3 degAngleToVector(double horizontalAng, double verticalAng)
     {
-        return new Vector3(Math.sin(Math.toRadians(horizontalAng)), Math.sin(Math.toRadians(verticalAng)), Math.cos(Math.toRadians(horizontalAng)));
+        double h = Math.cos(Math.toRadians(verticalAng));
+        return new Vector3(Math.sin(Math.toRadians(horizontalAng))*h, Math.sin(Math.toRadians(verticalAng)), Math.cos(Math.toRadians(horizontalAng))*h);
     }
 
     public static Vector3 radAngleToVector(double horizontalAng, double verticalAng)
