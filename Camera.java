@@ -8,11 +8,11 @@ public class Camera
 
     public static double clippingDistance = 5; 
 
-    public static double h_fov = 80;
-    public static double v_fov = 45;
+    public static double h_fov = 60;
+    public static double v_fov = 33.75;
     public static Vector3 position = new Vector3(0, 0, 0);
     public static double h_orientation = 0;
-    public static double v_orientation = 0;
+    public static double v_orientation = -90;
 
     public static Timer timer = new Timer(1000/TICK_SPEED + 1, new ActionListener()
     {
@@ -23,7 +23,7 @@ public class Camera
         @Override
         public void actionPerformed(ActionEvent e) 
         {
-            //System.out.println(h_orientation);
+            System.out.println(v_orientation);
             if (Main.inputManager.forward)
                 moveForward(movementSpeed/100.0);
             if (Main.inputManager.backward)

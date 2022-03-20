@@ -37,7 +37,8 @@ public class RenderingPanel extends JPanel implements ActionListener
                 g.drawPolygon(screenTriangle);
         }
 
-        //translateToScreenCoords(new Vector3(0, 0, 100));
+        // Point point = translateToScreenCoords(new Vector3(0, -100, 0));
+        // g.fillOval(point.x, point.y, 5, 5);
     }
 
         
@@ -49,22 +50,30 @@ public class RenderingPanel extends JPanel implements ActionListener
         Vector3 topLeftFovVector = Vector3.degAngleToVector(Camera.h_orientation-Camera.h_fov/2, Camera.v_orientation+Camera.v_fov/2);
         Vector3 topRightFovVector = Vector3.degAngleToVector(Camera.h_orientation+Camera.h_fov/2, Camera.v_orientation+Camera.v_fov/2);
         Vector3 bottomLeftFovVector = Vector3.degAngleToVector(Camera.h_orientation-Camera.h_fov/2, Camera.v_orientation-Camera.v_fov/2);
+        Vector3 bottomRightFoVector = Vector3.degAngleToVector(Camera.h_orientation+Camera.h_fov/2, Camera.v_orientation-Camera.v_fov/2);
      
         Vector3 topLeftCoord = Vector3.getIntersectionPoint(topLeftFovVector, Camera.position, perpendicularRenderPlane);
         Vector3 topRightCoord = Vector3.getIntersectionPoint(topRightFovVector, Camera.position, perpendicularRenderPlane);
         Vector3 bottomLeftCoord = Vector3.getIntersectionPoint(bottomLeftFovVector, Camera.position, perpendicularRenderPlane);
+        Vector3 bottomRightCoord = Vector3.getIntersectionPoint(bottomRightFoVector, Camera.position, perpendicularRenderPlane);
 
-        Vector3 topLeftToPointVector = Vector3.subtract(worldPoint, topLeftCoord);
-        Vector3 topLeftToBottomLeftVector = Vector3.subtract(bottomLeftCoord, topLeftCoord);
-        Vector3 topLeftToTopRightVector = Vector3.subtract(topRightCoord, topLeftCoord);
-
-        double topLeftToPointAngleWithTopVector = Vector3.getAngleBetween(topLeftToPointVector, topLeftToTopRightVector);
+        double fovHeight = Vector3.subtract(bottomLeftCoord, topLeftCoord).getMagnitude();
+        double fovWidth = Vector3.subtract(topRightCoord, topLeftCoord).getMagnitude();
         
-        double pointRelativeH = Math.cos(topLeftToPointAngleWithTopVector)*topLeftToPointVector.getMagnitude();
-        double pointRelativeV = Math.cos(1.5707963267948966-topLeftToPointAngleWithTopVector)*topLeftToPointVector.getMagnitude();
+        double hPointDistFromLeft = Vector3.distanceToLineSegment(worldPoint, topLeftCoord, bottomLeftCoord);
+        double hPointDistFromRight = Vector3.distanceToLineSegment(worldPoint, topRightCoord, bottomRightCoord);
+        double vPointDistFromTop = Vector3.distanceToLineSegment(worldPoint, topLeftCoord, topRightCoord);
+        double vPointDistFromBottom = Vector3.distanceToLineSegment(worldPoint, bottomLeftCoord, bottomRightCoord);
 
-        screenCoord.x = (int)(pointRelativeH/topLeftToTopRightVector.getMagnitude()*getWidth());
-        screenCoord.y = (int)(pointRelativeV/topLeftToBottomLeftVector.getMagnitude()*getWidth());
+        if ((int)(hPointDistFromRight) > (int)fovWidth)
+            hPointDistFromLeft *= -1;
+        if ((int)(vPointDistFromBottom) > (int)fovHeight)
+            vPointDistFromTop *= -1;
+
+        screenCoord.x = (int)((hPointDistFromLeft/fovWidth)*getWidth());
+        screenCoord.y = (int)((vPointDistFromTop/fovHeight)*getHeight());
+
+        //System.out.println(screenCoord.x + " | " + screenCoord.y);
 
         // Vector3 h_offsetCamPos = new Vector3((-Math.sin(Math.toRadians(90+Camera.h_orientation)))*Math.cos(Math.toRadians(90+Camera.v_orientation)) * Math.atan((worldPoint.y - Camera.position.y)/(Math.sqrt(Math.pow(worldPoint.x - Camera.position.x, 2) + Math.pow(worldPoint.z - Camera.position.z, 2))))-Math.toRadians(Camera.v_orientation)*Math.sin(Math.atan((worldPoint.y - Camera.position.y)/(Math.sqrt(Math.pow(worldPoint.x - Camera.position.x, 2) + Math.pow(worldPoint.z - Camera.position.z, 2))))-Math.toRadians(Camera.v_orientation)) + Camera.position.x, 0, (-Math.cos(Math.toRadians(90+Camera.h_orientation))*Math.cos(Math.toRadians(90+Camera.v_orientation))) + Camera.position.z);
         // double h_pointAngle = Math.atan((worldPoint.z - h_offsetCamPos.z)/(worldPoint.x - h_offsetCamPos.x))-Math.toRadians(Camera.h_orientation);
