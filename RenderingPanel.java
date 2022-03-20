@@ -19,25 +19,25 @@ public class RenderingPanel extends JPanel implements ActionListener
 
     private void drawTriangles(Graphics g)
     {
-        for (int i = 0; i < Main.ObjectManager.triangles.size(); i ++)
-        {
-            Triangle tempTriangle = Main.ObjectManager.triangles.get(i);
-            Point p1ScreenCoords = translateToScreenCoords(tempTriangle.point1);
-            Point p2ScreenCoords = translateToScreenCoords(tempTriangle.point2);
-            Point p3ScreenCoords = translateToScreenCoords(tempTriangle.point3);
+        // for (int i = 0; i < Main.ObjectManager.triangles.size(); i ++)
+        // {
+        //     Triangle tempTriangle = Main.ObjectManager.triangles.get(i);
+        //     Point p1ScreenCoords = translateToScreenCoords(tempTriangle.point1);
+        //     Point p2ScreenCoords = translateToScreenCoords(tempTriangle.point2);
+        //     Point p3ScreenCoords = translateToScreenCoords(tempTriangle.point3);
 
-            Polygon screenTriangle = new Polygon(new int[]{p1ScreenCoords.x, p2ScreenCoords.x, p3ScreenCoords.x}, new int[]{p1ScreenCoords.y, p2ScreenCoords.y, p3ScreenCoords.y}, 3);
+        //     Polygon screenTriangle = new Polygon(new int[]{p1ScreenCoords.x, p2ScreenCoords.x, p3ScreenCoords.x}, new int[]{p1ScreenCoords.y, p2ScreenCoords.y, p3ScreenCoords.y}, 3);
 
-            g.setColor(tempTriangle.color);
+        //     g.setColor(tempTriangle.color);
             
-            if (tempTriangle.fill)
-                g.fillPolygon(screenTriangle);
-            else
-                g.drawPolygon(screenTriangle);
-        }
+        //     if (tempTriangle.fill)
+        //         g.fillPolygon(screenTriangle);
+        //     else
+        //         g.drawPolygon(screenTriangle);
+        // }
 
-        // Point point = translateToScreenCoords(new Vector3(0, -100, 0));
-        // g.fillOval(point.x, point.y, 5, 5);
+        Point point = translateToScreenCoords(new Vector3(0, -100, 0));
+        g.fillOval(point.x, point.y, 5, 5);
     }
 
         
@@ -45,6 +45,7 @@ public class RenderingPanel extends JPanel implements ActionListener
     {
         Point screenCoord = new Point();
 
+        //TODO: fix camera get direction vector
         Plane perpendicularRenderPlane = new Plane(worldPoint, Vector3.negate(Camera.getDirectionVector().getNormalized()));
         Vector3 topLeftFovVector = Vector3.degAngleToVector(Camera.h_orientation-Camera.h_fov/2, Camera.v_orientation+Camera.v_fov/2);
         Vector3 topRightFovVector = Vector3.degAngleToVector(Camera.h_orientation+Camera.h_fov/2, Camera.v_orientation+Camera.v_fov/2);
@@ -72,7 +73,7 @@ public class RenderingPanel extends JPanel implements ActionListener
         screenCoord.x = (int)((hPointDistFromLeft/fovWidth)*getWidth());
         screenCoord.y = (int)((vPointDistFromTop/fovHeight)*getHeight());
 
-        //System.out.println(screenCoord.x + " | " + screenCoord.y);
+        System.out.println(Camera.getDirectionVector().getNormalized());
 
         // Vector3 h_offsetCamPos = new Vector3((-Math.sin(Math.toRadians(90+Camera.h_orientation)))*Math.cos(Math.toRadians(90+Camera.v_orientation)) * Math.atan((worldPoint.y - Camera.position.y)/(Math.sqrt(Math.pow(worldPoint.x - Camera.position.x, 2) + Math.pow(worldPoint.z - Camera.position.z, 2))))-Math.toRadians(Camera.v_orientation)*Math.sin(Math.atan((worldPoint.y - Camera.position.y)/(Math.sqrt(Math.pow(worldPoint.x - Camera.position.x, 2) + Math.pow(worldPoint.z - Camera.position.z, 2))))-Math.toRadians(Camera.v_orientation)) + Camera.position.x, 0, (-Math.cos(Math.toRadians(90+Camera.h_orientation))*Math.cos(Math.toRadians(90+Camera.v_orientation))) + Camera.position.z);
         // double h_pointAngle = Math.atan((worldPoint.z - h_offsetCamPos.z)/(worldPoint.x - h_offsetCamPos.x))-Math.toRadians(Camera.h_orientation);

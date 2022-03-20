@@ -11,7 +11,7 @@ public class Camera
     public static double h_fov = 60;
     public static double v_fov = 33.75;
     public static Vector3 position = new Vector3(0, 0, 0);
-    public static double h_orientation = 0;
+    public static double h_orientation = 90;
     public static double v_orientation = -90;
 
     public static Timer timer = new Timer(1000/TICK_SPEED + 1, new ActionListener()
@@ -23,7 +23,7 @@ public class Camera
         @Override
         public void actionPerformed(ActionEvent e) 
         {
-            System.out.println(v_orientation);
+            System.out.println(h_orientation);
             if (Main.inputManager.forward)
                 moveForward(movementSpeed/100.0);
             if (Main.inputManager.backward)
@@ -52,7 +52,7 @@ public class Camera
                 if (sensitivity < 1)
                     sensitivity = 1;
                 h_orientation = clickedHorientation + (double)(Main.inputManager.mouseX-Main.inputManager.R_mouseClickedX)/(200.0/sensitivity);
-                v_orientation = clickedVorientation + (double)(Main.inputManager.mouseY-Main.inputManager.R_mouseClickedY)/(-200.0/sensitivity);
+                //v_orientation = clickedVorientation + (double)(Main.inputManager.mouseY-Main.inputManager.R_mouseClickedY)/(-200.0/sensitivity);
                 h_orientation%=360;
                 v_orientation%=360;
             }
