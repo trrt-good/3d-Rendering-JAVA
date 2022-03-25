@@ -73,8 +73,8 @@ public class RenderingPanel extends JPanel implements ActionListener
         screenCoord.x = (int)((hPointDistFromLeft/fovWidth)*getWidth());
         screenCoord.y = (int)((vPointDistFromTop/fovHeight)*getHeight());
 
-        System.out.println(Vector3.subtract(topRightCoord, topLeftCoord).getMagnitude() + " " + Vector3.subtract(bottomRightCoord, bottomLeftCoord).getMagnitude());
-        System.out.println(Vector3.subtract(bottomLeftCoord, topLeftCoord).getMagnitude() + " " + Vector3.subtract(bottomRightCoord, topRightCoord).getMagnitude());
+        System.out.println("Horizontal Distances: " + Vector3.subtract(topRightCoord, topLeftCoord).getMagnitude() + " " + Vector3.subtract(bottomRightCoord, bottomLeftCoord).getMagnitude());
+        System.out.println("Vertical Distances: " + Vector3.subtract(bottomLeftCoord, topLeftCoord).getMagnitude() + " " + Vector3.subtract(bottomRightCoord, topRightCoord).getMagnitude());
 
         // Vector3 h_offsetCamPos = new Vector3((-Math.sin(Math.toRadians(90+Camera.h_orientation)))*Math.cos(Math.toRadians(90+Camera.v_orientation)) * Math.atan((worldPoint.y - Camera.position.y)/(Math.sqrt(Math.pow(worldPoint.x - Camera.position.x, 2) + Math.pow(worldPoint.z - Camera.position.z, 2))))-Math.toRadians(Camera.v_orientation)*Math.sin(Math.atan((worldPoint.y - Camera.position.y)/(Math.sqrt(Math.pow(worldPoint.x - Camera.position.x, 2) + Math.pow(worldPoint.z - Camera.position.z, 2))))-Math.toRadians(Camera.v_orientation)) + Camera.position.x, 0, (-Math.cos(Math.toRadians(90+Camera.h_orientation))*Math.cos(Math.toRadians(90+Camera.v_orientation))) + Camera.position.z);
         // double h_pointAngle = Math.atan((worldPoint.z - h_offsetCamPos.z)/(worldPoint.x - h_offsetCamPos.x))-Math.toRadians(Camera.h_orientation);
