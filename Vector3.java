@@ -112,12 +112,7 @@ public class Vector3 //An object which represents 3d points or vectors
 
     public static Vector3 getIntersectionPoint(Vector3 lineDirection, Vector3 linePoint, Plane plane)
     {
-        return Vector3.add(linePoint, Vector3.multiply(lineDirection, Vector3.dotProduct(Vector3.subtract(plane.planePoint, linePoint), plane.planeNormal)/Vector3.dotProduct(lineDirection, plane.planeNormal)));
-    }
-
-    public static Vector3 divide(Vector3 vector, Vector3 divisorVector)
-    {
-        return new Vector3();
+        return Vector3.add(linePoint, Vector3.multiply(lineDirection, Vector3.dotProduct(Vector3.subtract(plane.pointOnPlane, linePoint), plane.normal)/Vector3.dotProduct(lineDirection, plane.normal)));
     }
 
     public static double getAngleBetween(Vector3 a, Vector3 b) //in radians 
@@ -129,5 +124,10 @@ public class Vector3 //An object which represents 3d points or vectors
     public static double distanceToLineSegment(Vector3 point, Vector3 segmentStart, Vector3 segmentEnd)
     {
         return (Vector3.crossProduct(Vector3.subtract(point, segmentStart), Vector3.subtract(segmentStart, segmentEnd)).getMagnitude())/(Vector3.subtract(segmentEnd, segmentStart).getMagnitude());
+    }
+
+    public static double distanceToPlane(Vector3 point, Plane plane)
+    {
+        return Math.abs(plane.normal.x*point.x + plane.normal.y*point.y + plane.normal.z*point.z - plane.normal.x*plane.pointOnPlane.x - plane.normal.y*plane.pointOnPlane.y - plane.normal.z*plane.pointOnPlane.z)/Math.sqrt(plane.normal.x*plane.normal.x + plane.normal.y*plane.normal.y + plane.normal.z* plane.normal.z);
     }
 }

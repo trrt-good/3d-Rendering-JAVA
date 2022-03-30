@@ -4,15 +4,14 @@ public class Camera
 {
     public static final int TICK_SPEED = 200;
     public static int movementSpeed = 200;
-    public static int sensitivity = 20;
+    public static int sensitivity = 15;
 
-    public static double clippingDistance = 5; 
+    public static double clippingDistance = 5; //TODO: implement this
 
-    public static double h_fov = 60;
-    public static double v_fov = 33.75;
+    public static double fov = 70; //strictly reffers to the horizontal fov as vertical fov is based off screen height 
     public static Vector3 position = new Vector3(0, 0, 0);
     public static double h_orientation = 0;
-    public static double v_orientation = -90;
+    public static double v_orientation = 0;
 
     public static Timer timer = new Timer(1000/TICK_SPEED + 1, new ActionListener()
     {
@@ -53,6 +52,10 @@ public class Camera
                 h_orientation = clickedHorientation + (double)(Main.inputManager.mouseX-Main.inputManager.R_mouseClickedX)/(200.0/sensitivity);
                 v_orientation = clickedVorientation + (double)(Main.inputManager.mouseY-Main.inputManager.R_mouseClickedY)/(-200.0/sensitivity);
                 h_orientation%=360;
+                if (v_orientation >= 90)
+                    v_orientation = 89;
+                if (v_orientation <= -90)
+                    v_orientation = -89;
                 v_orientation%=360;
             }
             if (Main.inputManager.R_Down == false && first == false)
@@ -67,8 +70,7 @@ public class Camera
 
     private static void moveLeft(double distanceIn)
     {
-        double h = Math.cos(Math.toRadians(v_orientation));
-        position.add(Vector3.multiply(new Vector3(Math.sin(Math.toRadians(h_orientation-90))*h, 0, Math.cos(Math.toRadians(h_orientation-90))*h), distanceIn));
+        position.add(Vector3.multiply(Vector3.degAngleToVector(h_orientation-90, 0), distanceIn));
     }
 
     private static void moveUp(double distanceIn)
