@@ -7,7 +7,7 @@ public class RenderingPanel extends JPanel implements ActionListener
     private Color backgroundColor;
     public RenderingPanel(int fpsIn)
     {
-        backgroundColor = Color.BLACK;
+        backgroundColor = Color.WHITE;
         setBackground(backgroundColor);
         timer = new Timer(1000/fpsIn + 1, this);
         timer.start();
@@ -23,6 +23,11 @@ public class RenderingPanel extends JPanel implements ActionListener
     private void drawTriangles(Graphics g)
     {
         Graphics2D g2d = (Graphics2D) g;
+        RenderingHints rh = new RenderingHints(
+             RenderingHints.KEY_TEXT_ANTIALIASING,
+             RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g2d.setRenderingHints(rh);
+
         for (int i = 0; i < Main.ObjectManager.triangles.size(); i ++)
         {
             Triangle tempTriangle = Main.ObjectManager.triangles.get(i);
@@ -44,7 +49,6 @@ public class RenderingPanel extends JPanel implements ActionListener
                 g2d.drawPolygon(screenTriangle);
             }
         }
-
         // Point point = translateToScreenCoords(new Vector3(0, 0, 100));
         // g.fillOval(point.x, point.y, 5, 5);
     }
@@ -53,9 +57,7 @@ public class RenderingPanel extends JPanel implements ActionListener
     private Point translateToScreenCoords(Vector3 worldPoint)
     {
         Point screenCoord = new Point();
-
-        //TODO: fix the fov angles when looking down 
-
+        //TODO: sort by distance
         Plane renderPlane = new Plane(worldPoint, Vector3.negate(Camera.getDirectionVector()));
         double distanceToRenderPlane = Vector3.distanceToPlane(Camera.position, renderPlane);
         double pixelsPerUnit = getWidth()/(2*Math.tan(Camera.fov*0.017453292519943295/2)*distanceToRenderPlane);
@@ -72,7 +74,6 @@ public class RenderingPanel extends JPanel implements ActionListener
         
         screenCoord.x = (int)(getWidth()/2 + Math.cos(angle)*vectorToPoint.getMagnitude()*pixelsPerUnit);
         screenCoord.y = (int)(getHeight()/2 - Math.sin(angle)*vectorToPoint.getMagnitude()*pixelsPerUnit);
-
         
         // Vector3 topLeftFovVector = Vector3.degAngleToVector(Camera.h_orientation-Camera.h_fov/2, Camera.v_orientation+Camera.v_fov/2);
         // Vector3 topRightFovVector = Vector3.degAngleToVector(Camera.h_orientation+Camera.h_fov/2, Camera.v_orientation+Camera.v_fov/2);
