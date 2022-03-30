@@ -8,7 +8,7 @@ public class Camera
 
     public static double clippingDistance = 5; //TODO: implement this
 
-    public static double fov = 90; //strictly reffers to the horizontal fov as vertical fov is based off screen height 
+    public static double fov = 60; //strictly reffers to the horizontal fov as vertical fov is based off screen height 
     public static Vector3 position = new Vector3(0, 0, 0);
     public static double h_orientation = 0;
     public static double v_orientation = 0;
