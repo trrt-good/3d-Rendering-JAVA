@@ -13,8 +13,10 @@ public class Main
         
         new Triangle(new Vector3(50, 0, 100), new Vector3(30, 0, 100), new Vector3(40, 17.32051, 100), Color.MAGENTA);
         
-        Camera.timer.start();
+        Camera.mainCamera.timer.start();
         GraphicsManager.startGraphics("3d");
+
+        System.out.println(Vector3.rotateAroundYaxis(new Vector3(43, 12, 54), 3));
     }
 
     public static class ObjectManager

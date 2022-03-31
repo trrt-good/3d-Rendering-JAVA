@@ -99,10 +99,10 @@ public class Vector3 //An object which represents 3d points or vectors
         return new Vector3(-vector.x, -vector.y, -vector.z);
     }
 
+    //TODO: remove this
     public static Vector3 degAngleToVector(double horizontalAng, double verticalAng)
     {
-        double h = Math.cos(Math.toRadians(verticalAng));
-        return new Vector3(Math.sin(Math.toRadians(horizontalAng))*h, Math.sin(Math.toRadians(verticalAng)), Math.cos(Math.toRadians(horizontalAng))*h);
+        return new Vector3(Math.sin(Math.toRadians(horizontalAng))*Math.cos(Math.toRadians(verticalAng)), Math.sin(Math.toRadians(verticalAng)), Math.cos(Math.toRadians(horizontalAng))*Math.cos(Math.toRadians(verticalAng)));
     }
 
     public static Vector3 radAngleToVector(double horizontalAng, double verticalAng)
@@ -117,8 +117,7 @@ public class Vector3 //An object which represents 3d points or vectors
 
     public static double getAngleBetween(Vector3 a, Vector3 b) //in radians 
     {
-        double aDotb = Vector3.dotProduct(a, b);
-        return Math.acos(aDotb/(a.getMagnitude()*b.getMagnitude()));
+        return Math.acos(Vector3.dotProduct(a, b)/(a.getMagnitude()*b.getMagnitude()));
     }
 
     public static double distanceToLineSegment(Vector3 point, Vector3 segmentStart, Vector3 segmentEnd)
@@ -129,5 +128,31 @@ public class Vector3 //An object which represents 3d points or vectors
     public static double distanceToPlane(Vector3 point, Plane plane)
     {
         return Math.abs(plane.normal.x*point.x + plane.normal.y*point.y + plane.normal.z*point.z - plane.normal.x*plane.pointOnPlane.x - plane.normal.y*plane.pointOnPlane.y - plane.normal.z*plane.pointOnPlane.z)/Math.sqrt(plane.normal.x*plane.normal.x + plane.normal.y*plane.normal.y + plane.normal.z* plane.normal.z);
+    }
+
+    public static double angleBetweenPlanes(Plane plane1, Plane plane2)
+    {
+        return Math.abs(Math.acos(Vector3.dotProduct(plane1.normal, plane2.normal)/Math.sqrt((plane1.normal.x*plane1.normal.x + plane1.normal.y*plane1.normal.y + plane1.normal.z*plane1.normal.z)*(plane2.normal.x*plane2.normal.x + plane2.normal.y*plane2.normal.y + plane2.normal.z*plane2.normal.z)))); 
+    }
+
+    public static Vector3 rotateAroundXaxis(Vector3 point, double angle) //clockwise
+    {
+        double cos = Math.cos(angle);
+        double sin = Math.sin(angle);
+        return new Vector3(Vector3.dotProduct(new Vector3(1, 0, 0), point), Vector3.dotProduct(new Vector3(0, cos, -sin), point), Vector3.dotProduct(new Vector3(0, sin, cos), point));
+    }
+
+    public static Vector3 rotateAroundYaxis(Vector3 point, double angle)
+    {
+        double cos = Math.cos(angle);
+        double sin = Math.sin(angle);
+        return new Vector3(Vector3.dotProduct(new Vector3(cos, 0, sin), point), Vector3.dotProduct(new Vector3(0, 1, 0), point), Vector3.dotProduct(new Vector3(-sin, 0, cos), point));
+    }
+
+    public static Vector3 rotateAroundZaxis(Vector3 point, double angle)
+    {
+        double cos = Math.cos(angle);
+        double sin = Math.sin(angle);
+        return new Vector3(Vector3.dotProduct(new Vector3(cos, -sin, 0), point), Vector3.dotProduct(new Vector3(-sin, cos, 0), point), Vector3.dotProduct(new Vector3(0, 0, 1), point));
     }
 }

@@ -2,18 +2,22 @@ import javax.swing.*;
 import java.awt.event.*;
 public class Camera
 {
-    public static final int TICK_SPEED = 500;
-    public static int movementSpeed = 200;
-    public static int sensitivity = 15;
+    public static Camera mainCamera = new Camera();
 
-    public static double clippingDistance = 5; //TODO: implement this
+    public final int TICK_SPEED = 500;
+    public int movementSpeed = 200;
+    public int sensitivity = 15;
 
-    public static double fov = 60; //strictly reffers to the horizontal fov as vertical fov is based off screen height 
-    public static Vector3 position = new Vector3(0, 0, 0);
-    public static double h_orientation = 0;
-    public static double v_orientation = 0;
+    public double nearClippingPlaneDistance = 5; //TODO: implement these
+    public double renderPlaneDistance = 10;
+    public double farClippingPlaneDistance = 1000;
 
-    public static Timer timer = new Timer(1000/TICK_SPEED + 1, new ActionListener()
+    public double fov = 60; //strictly reffers to the horizontal fov as vertical fov is based off screen height 
+    public Vector3 position = new Vector3(0, 0, 0);
+    public double h_orientation = 0;
+    public double v_orientation = 0;
+
+    public Timer timer = new Timer(1000/TICK_SPEED + 1, new ActionListener()
     {
         boolean first = true;
         double clickedHorientation = 0;
@@ -63,23 +67,28 @@ public class Camera
         }
     });
 
-    private static void moveForward(double distanceIn)
+    private void moveForward(double distanceIn)
     {
         position.add(Vector3.multiply(Vector3.degAngleToVector(h_orientation, v_orientation), distanceIn));
     }
 
-    private static void moveLeft(double distanceIn)
+    private void moveLeft(double distanceIn)
     {
         position.add(Vector3.multiply(Vector3.degAngleToVector(h_orientation-90, 0), distanceIn));
     }
 
-    private static void moveUp(double distanceIn)
+    private void moveUp(double distanceIn)
     {
         position.add(Vector3.multiply(Vector3.degAngleToVector(h_orientation, v_orientation+90), distanceIn));
     }
 
-    public static Vector3 getDirectionVector()
+    public Vector3 getDirectionVector()
     {
         return Vector3.degAngleToVector(h_orientation, v_orientation);
     }
+
+    // public Plane getRenderPlane()
+    // {
+
+    // }
 }
