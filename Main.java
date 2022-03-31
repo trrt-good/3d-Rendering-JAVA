@@ -3,7 +3,6 @@ import java.util.ArrayList;
 import java.awt.Color;
 public class Main 
 {
-    public static int tps = 100;
     public static InputManager inputManager = new InputManager();
 
     public static void main(String [] args)

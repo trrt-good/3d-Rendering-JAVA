@@ -13,9 +13,9 @@ public class RenderingPanel extends JPanel implements ActionListener
         timer.start();
     }
 
-    public void paint(Graphics g) //write raster 
+    public void paintComponent(Graphics g) //write raster 
     {
-        super.paint(g);
+        super.paintComponent(g);
         drawTriangles(g);
         g.setColor(Color.BLACK);
     }
@@ -57,7 +57,6 @@ public class RenderingPanel extends JPanel implements ActionListener
     private Point translateToScreenCoords(Vector3 worldPoint)
     {
         Point screenCoord = new Point();
-        //TODO: sort by distance
         Plane renderPlane = new Plane(worldPoint, Camera.mainCamera.getDirectionVector());
         double pixelsPerUnit = getWidth()/(2*Math.tan(Camera.mainCamera.fov*0.017453292519943295/2)*Vector3.distanceToPlane(Camera.mainCamera.position, renderPlane));
         Vector3 camCenterPoint = Vector3.getIntersectionPoint(Camera.mainCamera.getDirectionVector(), Camera.mainCamera.position, renderPlane);
@@ -65,7 +64,6 @@ public class RenderingPanel extends JPanel implements ActionListener
             Vector3.subtract(worldPoint, camCenterPoint), //moves the point to be centered around 0,0,0
             -Camera.mainCamera.h_orientation*0.017453292519943295), //amount to be rotated by horizontally
             Camera.mainCamera.v_orientation*0.017453292519943295); //amount to  be rotated by vertically
-        
         screenCoord.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
         screenCoord.y = (int)(getHeight()/2 - rotatedPoint.y*pixelsPerUnit);
         return screenCoord;
