@@ -58,22 +58,16 @@ public class RenderingPanel extends JPanel implements ActionListener
     {
         Point screenCoord = new Point();
         //TODO: sort by distance
-        Plane renderPlane = new Plane(worldPoint, Vector3.negate(Camera.getDirectionVector()));
-        double distanceToRenderPlane = Vector3.distanceToPlane(Camera.position, renderPlane);
-        double pixelsPerUnit = getWidth()/(2*Math.tan(Camera.fov*0.017453292519943295/2)*distanceToRenderPlane);
-
-        Vector3 camCenterPoint = Vector3.getIntersectionPoint(Camera.getDirectionVector(), Camera.position, renderPlane);
-
-        Vector3 vectorToPoint = Vector3.subtract(worldPoint, camCenterPoint);
-        Vector3 rightVector = Vector3.degAngleToVector(Camera.h_orientation + 90, 0);
-        Vector3 downVector = Vector3.degAngleToVector(Camera.h_orientation, Camera.v_orientation-90);
-
-        double angle = Vector3.getAngleBetween(vectorToPoint, rightVector);
-        if (Vector3.dotProduct(vectorToPoint, downVector) > 0)
-            angle = -angle;
+        Plane renderPlane = new Plane(worldPoint, Camera.mainCamera.getDirectionVector());
+        double pixelsPerUnit = getWidth()/(2*Math.tan(Camera.mainCamera.fov*0.017453292519943295/2)*Vector3.distanceToPlane(Camera.mainCamera.position, renderPlane));
+        Vector3 camCenterPoint = Vector3.getIntersectionPoint(Camera.mainCamera.getDirectionVector(), Camera.mainCamera.position, renderPlane);
+        Vector3 rotatedPoint = Vector3.rotateAroundXaxis(Vector3.rotateAroundYaxis( //rotates the points to only be on the XY plane
+            Vector3.subtract(worldPoint, camCenterPoint), //moves the point to be centered around 0,0,0
+            -Camera.mainCamera.h_orientation*0.017453292519943295), //amount to be rotated by horizontally
+            Camera.mainCamera.v_orientation*0.017453292519943295); //amount to  be rotated by vertically
         
-        screenCoord.x = (int)(getWidth()/2 + Math.cos(angle)*vectorToPoint.getMagnitude()*pixelsPerUnit);
-        screenCoord.y = (int)(getHeight()/2 - Math.sin(angle)*vectorToPoint.getMagnitude()*pixelsPerUnit);
+        screenCoord.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
+        screenCoord.y = (int)(getHeight()/2 - rotatedPoint.y*pixelsPerUnit);
         return screenCoord;
     }
 
