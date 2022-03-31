@@ -53,7 +53,6 @@ public class RenderingPanel extends JPanel implements ActionListener
         // g.fillOval(point.x, point.y, 5, 5);
     }
 
-        
     private Point translateToScreenCoords(Vector3 worldPoint)
     {
         Point screenCoord = new Point();

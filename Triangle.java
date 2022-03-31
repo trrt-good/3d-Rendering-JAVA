@@ -61,4 +61,6 @@ public class Triangle
         color = colorIn;
         lineThickness = 1;
     }
+
+    
 }

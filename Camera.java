@@ -87,8 +87,21 @@ public class Camera
         return Vector3.degAngleToVector(h_orientation, v_orientation);
     }
 
-    // public Plane getRenderPlane()
-    // {
+    public Plane getRenderPlane()
+    {
+        Vector3 directionVector = getDirectionVector();
+        return new Plane(Vector3.add(Vector3.multiply(directionVector, renderPlaneDistance), position), directionVector);
+    }
 
-    // }
+    public Plane getNearClippingPlane()
+    {
+        Vector3 directionVector = getDirectionVector();
+        return new Plane(Vector3.add(Vector3.multiply(directionVector, nearClippingPlaneDistance), position), directionVector);
+    }    
+
+    public Plane getFarClippingPlane()
+    {
+        Vector3 directionVector = getDirectionVector();
+        return new Plane(Vector3.add(Vector3.multiply(directionVector, farClippingPlaneDistance), position), directionVector);
+    }    
 }
