@@ -77,8 +77,8 @@ public class GameObject
             {
                 if (line.startsWith("v "))
                 {
-                    String[] lineArr = line.split(" ");
-                    vertices.add(new Vector3(Double.parseDouble(lineArr[1]), Double.parseDouble(lineArr[2]), Double.parseDouble(lineArr[3])));
+                    String[] lineArr = line.substring(1).trim().split(" ");
+                    vertices.add(new Vector3(Double.parseDouble(lineArr[0]), Double.parseDouble(lineArr[1]), Double.parseDouble(lineArr[2])));
                 }
                 if (line.startsWith("f "))
                 {
