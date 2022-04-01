@@ -5,7 +5,7 @@ public class Camera
     public static Camera mainCamera;
 
     public final int TICK_SPEED = 500;
-    public int movementSpeed = 200;
+    public int movementSpeed = 10000;
     public int sensitivity = 15;
 
     public double fov = 60; //strictly reffers to the horizontal fov as vertical fov is based off screen height 
