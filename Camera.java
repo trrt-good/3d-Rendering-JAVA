@@ -5,7 +5,7 @@ public class Camera
     public static Camera mainCamera;
 
     public final int TICK_SPEED = 200;
-    public int movementSpeed = 10000;
+    public int movementSpeed = 5000;
     public int sensitivity = 15;
 
     public double fov = 60; //strictly reffers to the horizontal fov as vertical fov is based off screen height 
@@ -28,7 +28,7 @@ public class Camera
         @Override
         public void actionPerformed(ActionEvent e) 
         {
-            Main.cat.rotate(new EulerAngle(0, 0.1, 0));
+            Main.gameObject.rotate(new EulerAngle(0, 0.1, 0));
             if (Main.inputManager.forward)
                 moveForward(movementSpeed/100.0);
             if (Main.inputManager.backward)

@@ -76,11 +76,17 @@ public class GameObject
                 else if (word.equals("f"))
                 {
                     String index1String = scanner.next();
-                    int index1 = Integer.parseInt(index1String.substring(0, index1String.indexOf('/')))-1;
+                    int index1 = 0;
+                    if (index1String.contains("/"))
+                        index1 = Integer.parseInt(index1String.substring(0, index1String.indexOf('/')))-1;
                     String index2String = scanner.next();
-                    int index2 = Integer.parseInt(index2String.substring(0, index2String.indexOf('/')))-1;
+                    int index2 = 0;
+                    if (index2String.contains("/"))
+                        index2 = Integer.parseInt(index2String.substring(0, index2String.indexOf('/')))-1;
                     String index3String = scanner.next();
-                    int index3 = Integer.parseInt(index3String.substring(0, index3String.indexOf('/')))-1;
+                    int index3 = 0;
+                    if (index3String.contains("/"))
+                        index3 = Integer.parseInt(index3String.substring(0, index3String.indexOf('/')))-1;
                     triangles.add(new Triangle(vertices.get(index1), vertices.get(index2), vertices.get(index3), !wireframe));
                 }
             }
