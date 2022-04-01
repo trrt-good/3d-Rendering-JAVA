@@ -88,7 +88,7 @@ public class GameObject
                     {
                         indexArr[i-1] = Integer.parseInt(lineArr[i].substring(0, lineArr[i].indexOf("/")))-1;
                     }
-                    if (indexArr.length <= 3)
+                    if (indexArr.length <= 3 || wireframe == true)
                     {
                         triangles.add(new Triangle(vertices.get(indexArr[0]), vertices.get(indexArr[1]), vertices.get(indexArr[2])));
                     }
