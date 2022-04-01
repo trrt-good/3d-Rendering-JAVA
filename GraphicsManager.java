@@ -13,13 +13,16 @@ public class GraphicsManager
     public static void startGraphics(String name)
     {
         mainFrame = new JFrame(name);
-        renderingPanel = new RenderingPanel(FPS);
+
         mainFrame.setSize(defaultWidth, defaultHeight);
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        mainFrame.getContentPane().add(renderingPanel);
-        mainFrame.addKeyListener(Main.inputManager);
-        mainFrame.addMouseListener(Main.inputManager);
-        mainFrame.addMouseMotionListener(Main.inputManager);
         mainFrame.setVisible(true);
+
+        renderingPanel = new RenderingPanel(FPS);
+        mainFrame.getContentPane().add(renderingPanel);
+        renderingPanel.addKeyListener(Main.inputManager);
+        renderingPanel.addMouseListener(Main.inputManager);
+        renderingPanel.addMouseMotionListener(Main.inputManager);
+        renderingPanel.setVisible(true);
     }
 }

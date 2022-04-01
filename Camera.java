@@ -2,20 +2,22 @@ import javax.swing.*;
 import java.awt.event.*;
 public class Camera
 {
-    public static Camera mainCamera = new Camera();
+    public static Camera mainCamera;
 
     public final int TICK_SPEED = 500;
     public int movementSpeed = 200;
     public int sensitivity = 15;
 
-    public double nearClippingPlaneDistance = 5; //TODO: implement these
-    public double renderPlaneDistance = 10;
-    public double farClippingPlaneDistance = 1000;
-
     public double fov = 60; //strictly reffers to the horizontal fov as vertical fov is based off screen height 
     public Vector3 position = new Vector3(0, 0, 0);
     public double h_orientation = 0;
     public double v_orientation = 0;
+
+    public double nearClippingPlaneDistance = 5; 
+    public double renderPlaneDistance = 10;
+    public double farClippingPlaneDistance = 1000;
+
+    public double renderPlaneWidth = getRenderPlaneWidth();
 
     public Timer timer = new Timer(1000/TICK_SPEED + 1, new ActionListener()
     {
@@ -104,4 +106,9 @@ public class Camera
         Vector3 directionVector = getDirectionVector();
         return new Plane(Vector3.add(Vector3.multiply(directionVector, farClippingPlaneDistance), position), directionVector);
     }    
+
+    private double getRenderPlaneWidth()
+    {
+        return Math.tan(fov*0.017453292519943295/2)*renderPlaneDistance*2;
+    }
 }
