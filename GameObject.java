@@ -19,18 +19,7 @@ public class GameObject
         orientation = orientationIn;
         wireframe = wireframeIn;
         readObjFile(objName);
-        for (int i = 0; i < triangles.size(); i++)
-        {
-            triangles.get(i).point1 = Vector3.rotateAroundXaxis(triangles.get(i).point1, orientation.x);
-            triangles.get(i).point1 = Vector3.rotateAroundYaxis(triangles.get(i).point1, orientation.y);
-            triangles.get(i).point1 = Vector3.rotateAroundZaxis(triangles.get(i).point1, orientation.z);
-            triangles.get(i).point2 = Vector3.rotateAroundXaxis(triangles.get(i).point2, orientation.x);
-            triangles.get(i).point2 = Vector3.rotateAroundYaxis(triangles.get(i).point2, orientation.y);
-            triangles.get(i).point2 = Vector3.rotateAroundZaxis(triangles.get(i).point2, orientation.z);
-            triangles.get(i).point3 = Vector3.rotateAroundXaxis(triangles.get(i).point3, orientation.x);
-            triangles.get(i).point3 = Vector3.rotateAroundYaxis(triangles.get(i).point3, orientation.y);
-            triangles.get(i).point3 = Vector3.rotateAroundZaxis(triangles.get(i).point3, orientation.z);
-        }
+        setRotation(orientation);
     }
 
     public void rotate(EulerAngle angle)
@@ -49,11 +38,27 @@ public class GameObject
         }
     }
 
+    public void setRotation(EulerAngle angle)
+    {
+        for (int i = 0; i < triangles.size(); i++)
+        {
+            triangles.get(i).point1 = Vector3.rotateAroundXaxis(triangles.get(i).point1, angle.x-orientation.x);
+            triangles.get(i).point1 = Vector3.rotateAroundYaxis(triangles.get(i).point1, angle.y-orientation.x);
+            triangles.get(i).point1 = Vector3.rotateAroundZaxis(triangles.get(i).point1, angle.z-orientation.x);
+            triangles.get(i).point2 = Vector3.rotateAroundXaxis(triangles.get(i).point2, angle.x-orientation.x);
+            triangles.get(i).point2 = Vector3.rotateAroundYaxis(triangles.get(i).point2, angle.y-orientation.x);
+            triangles.get(i).point2 = Vector3.rotateAroundZaxis(triangles.get(i).point2, angle.z-orientation.x);
+            triangles.get(i).point3 = Vector3.rotateAroundXaxis(triangles.get(i).point3, angle.x-orientation.x);
+            triangles.get(i).point3 = Vector3.rotateAroundYaxis(triangles.get(i).point3, angle.y-orientation.x);
+            triangles.get(i).point3 = Vector3.rotateAroundZaxis(triangles.get(i).point3, angle.z-orientation.x);
+        }
+    }
+
     private void readObjFile(String fileName)
     {
         List<Vector3> vertices = new ArrayList<Vector3>();
         Scanner scanner;
-        String word = "";
+        String line = "";
         try 
         {
             scanner = new Scanner(new File(Main.resourcesDirectory, fileName));   
@@ -64,30 +69,35 @@ public class GameObject
             return;
         }
 
-        while(scanner.hasNext())
+        while(scanner.hasNextLine())
         {
-            word = scanner.next();
-            if (!(word.charAt(0) == '#'))
+            line = scanner.nextLine();
+            
+            if (!line.equals(""))
             {
-                if (word.equals("v"))
+                if (line.startsWith("v "));
                 {
-                    vertices.add(new Vector3(scanner.nextDouble(), scanner.nextDouble(), scanner.nextDouble()));
+                    System.out.println(line);
+                    String[] lineArr = line.split(" ");
+                    vertices.add(new Vector3(Double.parseDouble(lineArr[1]), Double.parseDouble(lineArr[2]), Double.parseDouble(lineArr[3])));
                 }
-                else if (word.equals("f"))
+                if (line.startsWith("f "))
                 {
-                    String index1String = scanner.next();
-                    int index1 = 0;
-                    if (index1String.contains("/"))
-                        index1 = Integer.parseInt(index1String.substring(0, index1String.indexOf('/')))-1;
-                    String index2String = scanner.next();
-                    int index2 = 0;
-                    if (index2String.contains("/"))
-                        index2 = Integer.parseInt(index2String.substring(0, index2String.indexOf('/')))-1;
-                    String index3String = scanner.next();
-                    int index3 = 0;
-                    if (index3String.contains("/"))
-                        index3 = Integer.parseInt(index3String.substring(0, index3String.indexOf('/')))-1;
-                    triangles.add(new Triangle(vertices.get(index1), vertices.get(index2), vertices.get(index3), !wireframe));
+                    String[] lineArr = line.split(" ");
+                    int[] indexArr = new int[lineArr.length-1];
+                    for (int i = 1; i < lineArr.length; i ++)
+                    {
+                        indexArr[i-1] = Integer.parseInt(lineArr[i].substring(0, lineArr[i].indexOf("/")))-1;
+                    }
+                    if (indexArr.length <= 3)
+                    {
+                        triangles.add(new Triangle(vertices.get(indexArr[1]), vertices.get(indexArr[2]), vertices.get(indexArr[3])));
+                    }
+                    else
+                    {
+                        triangles.add(new Triangle(vertices.get(indexArr[1]), vertices.get(indexArr[2]), vertices.get(indexArr[3])));
+                        triangles.add(new Triangle(vertices.get(indexArr[2]), vertices.get(indexArr[3]), vertices.get(indexArr[4])));
+                    }
                 }
             }
         }
