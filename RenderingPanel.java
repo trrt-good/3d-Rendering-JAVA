@@ -1,7 +1,4 @@
 import javax.swing.*;
-import javax.swing.border.StrokeBorder;
-
-import org.w3c.dom.css.ViewCSS;
 
 import java.awt.*;
 import java.awt.event.*;
