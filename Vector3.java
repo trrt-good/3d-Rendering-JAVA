@@ -1,6 +1,3 @@
-import javax.sound.midi.Track;
-import javax.sql.rowset.spi.TransactionalWriter;
-
 public class Vector3 //An object which represents 3d points or vectors 
 {
     public double x;

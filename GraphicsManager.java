@@ -8,7 +8,7 @@ public class GraphicsManager
     public static int defaultWidth = 1600;
     public static int defaultHeight = 900;
 
-    public static final int FPS = 1000;
+    public static final int FPS = 100;
 
     public static void startGraphics(String name)
     {
