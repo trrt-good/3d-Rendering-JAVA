@@ -72,12 +72,11 @@ public class GameObject
         while(scanner.hasNextLine())
         {
             line = scanner.nextLine();
-            
+
             if (!line.equals(""))
             {
-                if (line.startsWith("v "));
+                if (line.startsWith("v "))
                 {
-                    System.out.println(line);
                     String[] lineArr = line.split(" ");
                     vertices.add(new Vector3(Double.parseDouble(lineArr[1]), Double.parseDouble(lineArr[2]), Double.parseDouble(lineArr[3])));
                 }
@@ -91,12 +90,12 @@ public class GameObject
                     }
                     if (indexArr.length <= 3)
                     {
-                        triangles.add(new Triangle(vertices.get(indexArr[1]), vertices.get(indexArr[2]), vertices.get(indexArr[3])));
+                        triangles.add(new Triangle(vertices.get(indexArr[0]), vertices.get(indexArr[1]), vertices.get(indexArr[2])));
                     }
                     else
                     {
+                        triangles.add(new Triangle(vertices.get(indexArr[0]), vertices.get(indexArr[1]), vertices.get(indexArr[2])));
                         triangles.add(new Triangle(vertices.get(indexArr[1]), vertices.get(indexArr[2]), vertices.get(indexArr[3])));
-                        triangles.add(new Triangle(vertices.get(indexArr[2]), vertices.get(indexArr[3]), vertices.get(indexArr[4])));
                     }
                 }
             }
