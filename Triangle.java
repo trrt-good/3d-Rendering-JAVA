@@ -81,8 +81,6 @@ public class Triangle
         if (angle < Math.PI/2)
             darkness = (int)(Math.abs(angle/(Math.PI)-0.5)*(lighting.shadowIntensity/100)*255);
         
-        //System.out.println("bright: " + brightness + "     dark: " + darkness);
-        
         int red = color.getRed() + brightness - darkness;
         int green = color.getGreen() + brightness - darkness;
         int blue = color.getBlue() + brightness - darkness;

@@ -9,24 +9,24 @@ public class RenderingPanel extends JPanel implements ActionListener
 
     private Plane renderPlane;
     private Plane farClippingPlane;
+    private boolean antiAliasing;
 
     public Lighting mainLight; 
 
-    public RenderingPanel(int fpsIn)
+    public RenderingPanel(int fpsIn, boolean antiAliasingIn)
     {
-        backgroundColor = Color.WHITE;
+        backgroundColor = new Color(200, 220, 255);
         setBackground(backgroundColor);
+        antiAliasing = antiAliasingIn;
 
         Camera.mainCamera = new Camera();
         Camera.mainCamera.timer.start();
 
-        mainLight = new Lighting(new Vector3(0, -1, 0), 500, 50);
+        mainLight = new Lighting(new Vector3(0, 1, 0), 60, 60);
 
         farClippingPlane = Camera.mainCamera.getNearClippingPlane();
         renderPlane = Camera.mainCamera.getRenderPlane();
 
-        
-        
         timer = new Timer(1000/fpsIn + 1, this);
         timer.start();
     }
@@ -47,28 +47,35 @@ public class RenderingPanel extends JPanel implements ActionListener
 
         public Lighting(Vector3 lightDirectionIn, double lightIntensityIn, double shadowIntensityIn)
         {
-            long start = System.nanoTime();
             direction = lightDirectionIn;
             intensity = lightIntensityIn;
-            shadowIntensity = shadowIntensityIn;   
+            shadowIntensity = shadowIntensityIn;
+        }
+
+        public void updateLighting()
+        {
+            long start = System.nanoTime();
             System.out.print("\tlighting... ");
-            for (int i = 0; i < Main.ObjectManager.gameObjects.size(); i++)
-                Main.ObjectManager.gameObjects.get(i).recalculateLighting(this);
-            System.out.println("finished in " + (System.nanoTime()-start)/1000000 + "ms");     
+                for (int i = 0; i < Main.ObjectManager.gameObjects.size(); i++)
+                    Main.ObjectManager.gameObjects.get(i).recalculateLighting(mainLight);
+            System.out.println("finished in " + (System.nanoTime()-start)/1000000 + "ms");
         }
     }
 
     private void drawTriangles(Graphics g)
     {
         Graphics2D g2d = (Graphics2D)g;
-        RenderingHints rh = new RenderingHints(
-            RenderingHints.KEY_ANTIALIASING,
-            RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.setRenderingHints(rh);
+        if (antiAliasing)
+        {
+            RenderingHints rh = new RenderingHints(
+                RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
+            g2d.setRenderingHints(rh);
+        }
         renderPlane = Camera.mainCamera.getRenderPlane();
         farClippingPlane = Camera.mainCamera.getFarClippingPlane();
 
-        orderTriangles();
+        orderTriangles();    
 
         for (int i = 0; i < Main.ObjectManager.triangles.size(); i ++)
         {

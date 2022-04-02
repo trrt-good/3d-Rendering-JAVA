@@ -10,8 +10,9 @@ public class Main
 
     public static void main(String [] args)
     {
-        gameObject = new GameObject(new Vector3(0, 0, 0), "cat.obj", new Color(0, 0, 0), new EulerAngle(0, 0, 0), 1, false);
+        gameObject = new GameObject(new Vector3(0, 0, 0), "airplane.obj", new Color(200, 200, 200), new EulerAngle(0, Math.toRadians(-90), Math.toRadians(90)), 1, false);
         GraphicsManager.startGraphics("3d");
+        
 
         // Triangle t1 = new Triangle(null, new Vector3(-20, 0, 100), new Vector3(20, 0, 100), new Vector3(0, 30, 100), new Color(150, 150, 150));
         // Triangle t2 = new Triangle(null, new Vector3(-50, 0, 100), new Vector3(-10, 0, 100), new Vector3(-30, 30, 110), new Color(150, 150, 150));

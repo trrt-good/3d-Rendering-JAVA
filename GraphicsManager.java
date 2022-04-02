@@ -20,12 +20,13 @@ public class GraphicsManager
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         mainFrame.setVisible(true);
 
-        renderingPanel = new RenderingPanel(FPS);
+        renderingPanel = new RenderingPanel(FPS, false);
         mainFrame.getContentPane().add(renderingPanel);
         renderingPanel.addKeyListener(Main.inputManager);
         renderingPanel.addMouseListener(Main.inputManager);
         renderingPanel.addMouseMotionListener(Main.inputManager);
         renderingPanel.setVisible(true);
+        renderingPanel.mainLight.updateLighting();
         System.out.println("finished creating graphics in " + (System.nanoTime()-start)/1000000 + "ms");
 
     }
