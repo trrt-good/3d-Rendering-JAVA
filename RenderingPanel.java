@@ -7,18 +7,20 @@ public class RenderingPanel extends JPanel implements ActionListener
     private Timer timer;
     private Color backgroundColor;
 
-    private Plane nearClippingPlane;
     private Plane renderPlane;
     private Plane farClippingPlane;
+
+    public Vector3 lightDirectionVector;
+    public double lightingIntensity; 
 
     public RenderingPanel(int fpsIn)
     {
         backgroundColor = Color.WHITE;
         setBackground(backgroundColor);
 
-        
+        lightDirectionVector = new Vector3(0, -1, 0);
+        lightingIntensity = 5;
 
-        nearClippingPlane = Camera.mainCamera.getNearClippingPlane();
         farClippingPlane = Camera.mainCamera.getNearClippingPlane();
         renderPlane = Camera.mainCamera.getRenderPlane();
 
@@ -41,13 +43,32 @@ public class RenderingPanel extends JPanel implements ActionListener
             RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHints(rh);
 
-        nearClippingPlane = Camera.mainCamera.getNearClippingPlane();
         renderPlane = Camera.mainCamera.getRenderPlane();
         farClippingPlane = Camera.mainCamera.getFarClippingPlane();
+
+        orderTriangles();
 
         for (int i = 0; i < Main.ObjectManager.triangles.size(); i ++)
         {
             renderTriangle(g2d, Main.ObjectManager.triangles.get(i));
+        }
+    }
+
+    private void orderTriangles()
+    {
+        boolean changed = false;
+        while (!changed)
+        {
+            for (int i = 0; i < Main.ObjectManager.triangles.size()-1; i++)
+            {
+                if (Vector3.subtract(Camera.mainCamera.position, Vector3.centerOfTriangle(Main.ObjectManager.triangles.get(i))).getMagnitude() < Vector3.subtract(Camera.mainCamera.position, Vector3.centerOfTriangle(Main.ObjectManager.triangles.get(i+1))).getMagnitude())
+                {
+                    Triangle closerTriangle = Main.ObjectManager.triangles.get(i);
+                    Main.ObjectManager.triangles.set(i, Main.ObjectManager.triangles.get(i+1));
+                    Main.ObjectManager.triangles.set(i + 1, closerTriangle);
+                    changed = true;
+                }
+            }
         }
     }
 
@@ -100,9 +121,29 @@ public class RenderingPanel extends JPanel implements ActionListener
 
         if (shouldDrawTriangle)
         {
+            int brightness = (int)(Math.abs((Math.PI/Vector3.getAngleBetween(lightDirectionVector, Vector3.crossProduct(Vector3.subtract(triangle.point1, triangle.point2), Vector3.subtract(triangle.point2, triangle.point3))))/(lightingIntensity/100)));
+            int red = triangle.color.getRed() - brightness;
+            int green = triangle.color.getGreen() - brightness;
+            int blue = triangle.color.getBlue() - brightness;
+
+            if (red > 255)
+                red = 255;
+            if (red < 0)
+                red = 0;
+            if (green > 255)
+                green = 255;
+            if (green < 0)
+                green = 0;
+            if (blue > 255)
+                blue = 255;
+            if (blue < 0)
+                blue = 0;
+            
+            Color triangleColor = new Color(red, green, blue);
+
             Polygon screenTriangle = new Polygon(new int[]{p1ScreenCoords.x, p2ScreenCoords.x, p3ScreenCoords.x}, new int[]{p1ScreenCoords.y, p2ScreenCoords.y, p3ScreenCoords.y}, 3);
 
-            g2d.setColor(triangle.color);
+            g2d.setColor(triangleColor);
             if (triangle.fill)
                 g2d.fillPolygon(screenTriangle);
             else

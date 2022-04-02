@@ -7,19 +7,32 @@ import java.io.FileNotFoundException;
 public class GameObject 
 {
     public List<Triangle> triangles;
-    public Vector3 position;
+    private Vector3 position;
     public Vector3 centerOfRotation;
-    public EulerAngle orientation;
+    private EulerAngle orientation;
+    public Color color;
 
     public boolean wireframe;
 
-    public GameObject(String objName, EulerAngle orientationIn, boolean wireframeIn)
+    public GameObject(String objName, Color colorIn, EulerAngle orientationIn, double scaleIn, boolean wireframeIn)
     {
         triangles = new ArrayList<Triangle>();
         orientation = orientationIn;
         wireframe = wireframeIn;
+        color = colorIn;
         readObjFile(objName);
         setRotation(orientation);
+        setScale(scaleIn);
+    }
+
+    public void setScale(double scale)
+    {
+        for (int i = 0; i < triangles.size(); i++)
+        {
+            triangles.get(i).point1 = Vector3.multiply(triangles.get(i).point1, scale);
+            triangles.get(i).point2 = Vector3.multiply(triangles.get(i).point2, scale);
+            triangles.get(i).point3 = Vector3.multiply(triangles.get(i).point3, scale);
+        }
     }
 
     public void rotate(EulerAngle angle)
@@ -86,16 +99,17 @@ public class GameObject
                     int[] indexArr = new int[lineArr.length-1];
                     for (int i = 1; i < lineArr.length; i ++)
                     {
-                        indexArr[i-1] = Integer.parseInt(lineArr[i].substring(0, lineArr[i].indexOf("/")))-1;
+                        if (lineArr[i].contains("/"))
+                            indexArr[i-1] = Integer.parseInt(lineArr[i].substring(0, lineArr[i].indexOf("/")))-1;
                     }
                     if (indexArr.length <= 3 || wireframe == true)
                     {
-                        triangles.add(new Triangle(vertices.get(indexArr[0]), vertices.get(indexArr[1]), vertices.get(indexArr[2])));
+                        triangles.add(new Triangle(vertices.get(indexArr[0]), vertices.get(indexArr[1]), vertices.get(indexArr[2]), color, !wireframe));
                     }
                     else
                     {
-                        triangles.add(new Triangle(vertices.get(indexArr[0]), vertices.get(indexArr[1]), vertices.get(indexArr[2])));
-                        triangles.add(new Triangle(vertices.get(indexArr[1]), vertices.get(indexArr[2]), vertices.get(indexArr[3])));
+                        triangles.add(new Triangle(vertices.get(indexArr[0]), vertices.get(indexArr[1]), vertices.get(indexArr[2]), color, !wireframe));
+                        triangles.add(new Triangle(vertices.get(indexArr[0]), vertices.get(indexArr[2]), vertices.get(indexArr[3]), color, !wireframe));
                     }
                 }
             }
