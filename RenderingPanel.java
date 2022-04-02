@@ -10,20 +10,23 @@ public class RenderingPanel extends JPanel implements ActionListener
     private Plane renderPlane;
     private Plane farClippingPlane;
 
-    public Vector3 lightDirectionVector;
-    public double lightingIntensity; 
+    public Lighting mainLight; 
 
     public RenderingPanel(int fpsIn)
     {
         backgroundColor = Color.WHITE;
         setBackground(backgroundColor);
 
-        lightDirectionVector = new Vector3(0, -1, 0);
-        lightingIntensity = 5;
+        Camera.mainCamera = new Camera();
+        Camera.mainCamera.timer.start();
+
+        mainLight = new Lighting(new Vector3(0, -1, 0), 500, 50);
 
         farClippingPlane = Camera.mainCamera.getNearClippingPlane();
         renderPlane = Camera.mainCamera.getRenderPlane();
 
+        
+        
         timer = new Timer(1000/fpsIn + 1, this);
         timer.start();
     }
@@ -35,6 +38,26 @@ public class RenderingPanel extends JPanel implements ActionListener
         drawTriangles(g);
     }
 
+    class Lighting
+    {
+        public Vector3 direction;
+        public double intensity; 
+        public double shadowIntensity;
+        public double shadingHardness;
+
+        public Lighting(Vector3 lightDirectionIn, double lightIntensityIn, double shadowIntensityIn)
+        {
+            long start = System.nanoTime();
+            direction = lightDirectionIn;
+            intensity = lightIntensityIn;
+            shadowIntensity = shadowIntensityIn;   
+            System.out.print("\tlighting... ");
+            for (int i = 0; i < Main.ObjectManager.gameObjects.size(); i++)
+                Main.ObjectManager.gameObjects.get(i).recalculateLighting(this);
+            System.out.println("finished in " + (System.nanoTime()-start)/1000000 + "ms");     
+        }
+    }
+
     private void drawTriangles(Graphics g)
     {
         Graphics2D g2d = (Graphics2D)g;
@@ -42,7 +65,6 @@ public class RenderingPanel extends JPanel implements ActionListener
             RenderingHints.KEY_ANTIALIASING,
             RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHints(rh);
-
         renderPlane = Camera.mainCamera.getRenderPlane();
         farClippingPlane = Camera.mainCamera.getFarClippingPlane();
 
@@ -56,6 +78,7 @@ public class RenderingPanel extends JPanel implements ActionListener
 
     private void orderTriangles()
     {
+
         boolean changed = false;
         while (!changed)
         {
@@ -121,29 +144,14 @@ public class RenderingPanel extends JPanel implements ActionListener
 
         if (shouldDrawTriangle)
         {
-            int brightness = (int)(Math.abs((Math.PI/Vector3.getAngleBetween(lightDirectionVector, Vector3.crossProduct(Vector3.subtract(triangle.point1, triangle.point2), Vector3.subtract(triangle.point2, triangle.point3))))/(lightingIntensity/100)));
-            int red = triangle.color.getRed() - brightness;
-            int green = triangle.color.getGreen() - brightness;
-            int blue = triangle.color.getBlue() - brightness;
-
-            if (red > 255)
-                red = 255;
-            if (red < 0)
-                red = 0;
-            if (green > 255)
-                green = 255;
-            if (green < 0)
-                green = 0;
-            if (blue > 255)
-                blue = 255;
-            if (blue < 0)
-                blue = 0;
-            
-            Color triangleColor = new Color(red, green, blue);
-
             Polygon screenTriangle = new Polygon(new int[]{p1ScreenCoords.x, p2ScreenCoords.x, p3ScreenCoords.x}, new int[]{p1ScreenCoords.y, p2ScreenCoords.y, p3ScreenCoords.y}, 3);
+            if (triangle.parentGameObject != null && triangle.parentGameObject.shading && !triangle.parentGameObject.wireframe)
+                g2d.setColor(triangle.getColorWithLighting());
+            else if (triangle.parentGameObject == null && triangle.fill)
+                g2d.setColor(triangle.getColorWithLighting());
+            else 
+                g2d.setColor(triangle.color);
 
-            g2d.setColor(triangleColor);
             if (triangle.fill)
                 g2d.fillPolygon(screenTriangle);
             else
@@ -159,7 +167,7 @@ public class RenderingPanel extends JPanel implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e) 
     {
-        repaint();
+        this.repaint();
     }
 }
 

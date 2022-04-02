@@ -7,8 +7,11 @@ public class Triangle
     public Color color = Color.BLACK; 
     public boolean fill;
     public int lineThickness; 
+    public GameObject parentGameObject;
 
-    public Triangle(Vector3 p1, Vector3 p2, Vector3 p3)
+    private Color colorWithLighting;
+
+    public Triangle(GameObject parentGameObjectIn, Vector3 p1, Vector3 p2, Vector3 p3)
     {
         Main.ObjectManager.triangles.add(this);
         point1 = p1;
@@ -17,9 +20,10 @@ public class Triangle
         fill = true;
         color = Color.BLACK;
         lineThickness = 1;
+        parentGameObject = parentGameObjectIn;
     }
 
-    public Triangle(Vector3 p1, Vector3 p2, Vector3 p3, Color colorIn)
+    public Triangle(GameObject parentGameObjectIn, Vector3 p1, Vector3 p2, Vector3 p3, Color colorIn)
     {
         Main.ObjectManager.triangles.add(this);
         point1 = p1;
@@ -28,9 +32,10 @@ public class Triangle
         fill = true;
         color = colorIn;
         lineThickness = 1;
+        parentGameObject = parentGameObjectIn;
     }
 
-    public Triangle(Vector3 p1, Vector3 p2, Vector3 p3, Color colorIn, int lineThicknessIn)
+    public Triangle(GameObject parentGameObjectIn, Vector3 p1, Vector3 p2, Vector3 p3, Color colorIn, int lineThicknessIn)
     {
         Main.ObjectManager.triangles.add(this);
         point1 = p1;
@@ -39,9 +44,10 @@ public class Triangle
         color = colorIn;
         fill = false;
         lineThickness = lineThicknessIn;
+        parentGameObject = parentGameObjectIn;
     }
 
-    public Triangle(Vector3 p1, Vector3 p2, Vector3 p3, boolean fillIn)
+    public Triangle(GameObject parentGameObjectIn, Vector3 p1, Vector3 p2, Vector3 p3, boolean fillIn)
     {
         Main.ObjectManager.triangles.add(this);
         point1 = p1;
@@ -49,9 +55,10 @@ public class Triangle
         point3 = p3;
         fill = fillIn;
         lineThickness = 1;
+        parentGameObject = parentGameObjectIn;
     }
 
-    public Triangle(Vector3 p1, Vector3 p2, Vector3 p3, Color colorIn, boolean fillIn)
+    public Triangle(GameObject parentGameObjectIn, Vector3 p1, Vector3 p2, Vector3 p3, Color colorIn, boolean fillIn)
     {
         Main.ObjectManager.triangles.add(this);
         point1 = p1;
@@ -60,7 +67,44 @@ public class Triangle
         fill = fillIn;
         color = colorIn;
         lineThickness = 1;
+        parentGameObject = parentGameObjectIn;
     }
 
-    
+    public void calculateLightingColor(RenderingPanel.Lighting lighting)
+    {
+        int brightness = 0;
+        int darkness = 0;
+        double angle = Vector3.getAngleBetween(lighting.direction, Vector3.crossProduct(Vector3.subtract(point1, point2), Vector3.subtract(point2, point3)));
+        if (angle > Math.PI/2)
+            brightness = (int)(Math.abs(angle/(Math.PI)-0.5)*(lighting.intensity/100)*255);
+        
+        if (angle < Math.PI/2)
+            darkness = (int)(Math.abs(angle/(Math.PI)-0.5)*(lighting.shadowIntensity/100)*255);
+        
+        //System.out.println("bright: " + brightness + "     dark: " + darkness);
+        
+        int red = color.getRed() + brightness - darkness;
+        int green = color.getGreen() + brightness - darkness;
+        int blue = color.getBlue() + brightness - darkness;
+
+        if (red > 255)
+            red = 255;
+        if (red < 0)
+            red = 0;
+        if (green > 255)
+            green = 255;
+        if (green < 0)
+            green = 0;
+        if (blue > 255)
+            blue = 255;
+        if (blue < 0)
+            blue = 0;
+        
+        colorWithLighting = new Color(red, green, blue);
+    }
+
+    public Color getColorWithLighting()
+    {
+        return colorWithLighting;
+    }
 }

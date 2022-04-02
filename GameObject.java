@@ -1,6 +1,7 @@
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Scanner;
+
 import java.awt.Color;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -11,18 +12,59 @@ public class GameObject
     public Vector3 centerOfRotation;
     private EulerAngle orientation;
     public Color color;
+    public boolean shading = true;
 
     public boolean wireframe;
 
-    public GameObject(String objName, Color colorIn, EulerAngle orientationIn, double scaleIn, boolean wireframeIn)
+    public GameObject(Vector3 positionIn, String modelFileName, Color colorIn, EulerAngle orientationIn, double scaleIn, boolean wireframeIn)
     {
+        System.out.print("Creating gameObject: " + modelFileName + "... ");
+        long start = System.nanoTime();
+        Main.ObjectManager.gameObjects.add(this);
         triangles = new ArrayList<Triangle>();
         orientation = orientationIn;
         wireframe = wireframeIn;
         color = colorIn;
-        readObjFile(objName);
+        position = new Vector3();
+        readObjFile(modelFileName);
         setRotation(orientation);
         setScale(scaleIn);
+        setPosition(positionIn);
+        System.out.println("finished in " + (System.nanoTime() - start)/1000000 + "ms");
+
+    }
+
+    public void recalculateLighting(RenderingPanel.Lighting lighting)
+    {
+        if (!wireframe && shading)
+        {
+            for (int i = 0; i < triangles.size(); i++)
+            {
+                triangles.get(i).calculateLightingColor(lighting);
+            }
+        }
+    }
+
+    public void setPosition(Vector3 positionIn)
+    {
+        for (int i = 0; i < triangles.size(); i++)
+        {
+            triangles.get(i).point1 = Vector3.add(triangles.get(i).point1, Vector3.subtract(positionIn, position));
+            triangles.get(i).point2 = Vector3.add(triangles.get(i).point2, Vector3.subtract(positionIn, position));
+            triangles.get(i).point3 = Vector3.add(triangles.get(i).point3, Vector3.subtract(positionIn, position));
+        }
+        position = positionIn;
+    }
+
+    public void move(Vector3 amount)
+    {
+        for (int i = 0; i < triangles.size(); i++)
+        {
+            triangles.get(i).point1 = Vector3.add(triangles.get(i).point1, amount);
+            triangles.get(i).point2 = Vector3.add(triangles.get(i).point2, amount);
+            triangles.get(i).point3 = Vector3.add(triangles.get(i).point3, amount);
+        }
+        position = Vector3.add(position, amount);
     }
 
     public void setScale(double scale)
@@ -104,12 +146,12 @@ public class GameObject
                     }
                     if (indexArr.length <= 3 || wireframe == true)
                     {
-                        triangles.add(new Triangle(vertices.get(indexArr[0]), vertices.get(indexArr[1]), vertices.get(indexArr[2]), color, !wireframe));
+                        triangles.add(new Triangle(this, vertices.get(indexArr[0]), vertices.get(indexArr[1]), vertices.get(indexArr[2]), color, !wireframe));
                     }
                     else
                     {
-                        triangles.add(new Triangle(vertices.get(indexArr[0]), vertices.get(indexArr[1]), vertices.get(indexArr[2]), color, !wireframe));
-                        triangles.add(new Triangle(vertices.get(indexArr[0]), vertices.get(indexArr[2]), vertices.get(indexArr[3]), color, !wireframe));
+                        triangles.add(new Triangle(this, vertices.get(indexArr[0]), vertices.get(indexArr[1]), vertices.get(indexArr[2]), color, !wireframe));
+                        triangles.add(new Triangle(this, vertices.get(indexArr[0]), vertices.get(indexArr[2]), vertices.get(indexArr[3]), color, !wireframe));
                     }
                 }
             }

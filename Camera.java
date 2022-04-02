@@ -5,19 +5,38 @@ public class Camera
     public static Camera mainCamera;
 
     public final int TICK_SPEED = 500;
-    public int movementSpeed = 10000;
-    public int sensitivity = 15;
+    public int movementSpeed;
+    public int sensitivity;
 
-    public double fov = 60; //strictly reffers to the horizontal fov as vertical fov is based off screen height 
-    public Vector3 position = new Vector3(0, 0, -100);
-    public double h_orientation = 0;
-    public double v_orientation = 0;
+    public double fov; //strictly reffers to the horizontal fov as vertical fov is based off screen height 
+    public Vector3 position;
+    public double h_orientation;
+    public double v_orientation;
 
-    public double nearClippingPlaneDistance = 5; 
-    public double renderPlaneDistance = 10;
-    public double farClippingPlaneDistance = 1000;
+    public double nearClippingPlaneDistance; 
+    public double renderPlaneDistance;
+    public double farClippingPlaneDistance;
 
-    public double renderPlaneWidth = getRenderPlaneWidth();
+    public double renderPlaneWidth;
+
+    public Camera()
+    {
+        System.out.print("\tcamera... ");
+        long start = System.nanoTime();
+        movementSpeed = 1000;
+        sensitivity = 15;
+
+        fov = 60; //strictly reffers to the horizontal fov as vertical fov is based off screen height 
+        position = new Vector3(0, 0, -100);
+        h_orientation = 0;
+        v_orientation = 0;
+
+        nearClippingPlaneDistance = 5; 
+        renderPlaneDistance = 10;
+        farClippingPlaneDistance = 1000;
+        renderPlaneWidth = getRenderPlaneWidth();
+        System.out.println("finished in " + (System.nanoTime()-start)/1000000.0 + "ms");
+    }
 
     public Timer timer = new Timer(1000/TICK_SPEED + 1, new ActionListener()
     {
