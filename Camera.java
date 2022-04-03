@@ -4,7 +4,7 @@ public class Camera
 {
     public static Camera mainCamera;
 
-    public final int TICK_SPEED = 500;
+    public final int TICK_SPEED = 1000;
     public int movementSpeed;
     public int sensitivity;
 
@@ -47,6 +47,8 @@ public class Camera
         @Override
         public void actionPerformed(ActionEvent e) 
         {
+            // GraphicsManager.renderingPanel.mainLight.direction = getDirectionVector();
+            // GraphicsManager.renderingPanel.mainLight.updateAllLighting();
             if (Main.inputManager.forward)
                 moveForward(movementSpeed/100.0);
             if (Main.inputManager.backward)

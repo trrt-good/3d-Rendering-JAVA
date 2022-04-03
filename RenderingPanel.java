@@ -1,5 +1,4 @@
 import javax.swing.*;
-
 import java.awt.*;
 import java.awt.event.*;
 public class RenderingPanel extends JPanel implements ActionListener
@@ -10,10 +9,14 @@ public class RenderingPanel extends JPanel implements ActionListener
     private Plane renderPlane;
     private Plane farClippingPlane;
     private boolean antiAliasing;
+    private long nsPerFrame;
+    private Font font = new Font("Times", Font.BOLD, 20);
+    private boolean startedRendering = false;
 
     public Lighting mainLight; 
+    
 
-    public RenderingPanel(int fpsIn, boolean antiAliasingIn)
+    public RenderingPanel(boolean antiAliasingIn)
     {
         backgroundColor = new Color(200, 220, 255);
         setBackground(backgroundColor);
@@ -22,20 +25,25 @@ public class RenderingPanel extends JPanel implements ActionListener
         Camera.mainCamera = new Camera();
         Camera.mainCamera.timer.start();
 
-        mainLight = new Lighting(new Vector3(0, 1, 0), 60, 60);
+        mainLight = new Lighting(new Vector3(0, -1, 0).getNormalized(), 200, 200);
 
         farClippingPlane = Camera.mainCamera.getNearClippingPlane();
         renderPlane = Camera.mainCamera.getRenderPlane();
 
-        timer = new Timer(1000/fpsIn + 1, this);
+        timer = new Timer(1, this);
         timer.start();
+        startedRendering = true;
     }
 
     public void paintComponent(Graphics g) 
     {
+        long startOfFrame = System.nanoTime();
         requestFocusInWindow();
         super.paintComponent(g);
-        drawTriangles(g);
+        g.setFont(font);
+        if (startedRendering)
+            drawTriangles(g);
+        nsPerFrame = System.nanoTime()-startOfFrame;
     }
 
     class Lighting
@@ -52,7 +60,7 @@ public class RenderingPanel extends JPanel implements ActionListener
             shadowIntensity = shadowIntensityIn;
         }
 
-        public void updateLighting()
+        public void updateAllLighting()
         {
             long start = System.nanoTime();
             System.out.print("\tlighting... ");
@@ -85,18 +93,22 @@ public class RenderingPanel extends JPanel implements ActionListener
 
     private void orderTriangles()
     {
-
-        boolean changed = false;
-        while (!changed)
+        
+        boolean changed = true;
+        while (changed == true)
         {
+            changed = false;
             for (int i = 0; i < Main.ObjectManager.triangles.size()-1; i++)
             {
-                if (Vector3.subtract(Camera.mainCamera.position, Vector3.centerOfTriangle(Main.ObjectManager.triangles.get(i))).getMagnitude() < Vector3.subtract(Camera.mainCamera.position, Vector3.centerOfTriangle(Main.ObjectManager.triangles.get(i+1))).getMagnitude())
+                if (Main.ObjectManager.triangles.get(i).parentGameObject.shading)
                 {
-                    Triangle closerTriangle = Main.ObjectManager.triangles.get(i);
-                    Main.ObjectManager.triangles.set(i, Main.ObjectManager.triangles.get(i+1));
-                    Main.ObjectManager.triangles.set(i + 1, closerTriangle);
-                    changed = true;
+                    if (Vector3.subtract(Camera.mainCamera.position, Vector3.centerOfTriangle(Main.ObjectManager.triangles.get(i))).getMagnitude() < Vector3.subtract(Camera.mainCamera.position, Vector3.centerOfTriangle(Main.ObjectManager.triangles.get(i+1))).getMagnitude())
+                    {
+                        Triangle closerTriangle = Main.ObjectManager.triangles.get(i);
+                        Main.ObjectManager.triangles.set(i, Main.ObjectManager.triangles.get(i+1));
+                        Main.ObjectManager.triangles.set(i + 1, closerTriangle);
+                        changed = true;
+                    }
                 }
             }
         }
@@ -174,7 +186,7 @@ public class RenderingPanel extends JPanel implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e) 
     {
-        this.repaint();
+        repaint();
     }
 }
 

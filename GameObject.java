@@ -30,7 +30,7 @@ public class GameObject
         setRotation(orientation);
         setScale(scaleIn);
         setPosition(positionIn);
-        System.out.println("finished in " + (System.nanoTime() - start)/1000000 + "ms");
+        System.out.println("finished in all " + triangles.size() + " triangles in " + (System.nanoTime() - start)/1000000 + "ms");
 
     }
 
