@@ -153,7 +153,7 @@ public class Vector3 //An object which represents 3d points or vectors
     {
         double cos = Math.cos(angle);
         double sin = Math.sin(angle);
-        return new Vector3(Vector3.dotProduct(new Vector3(cos, -sin, 0), point), Vector3.dotProduct(new Vector3(-sin, cos, 0), point), Vector3.dotProduct(new Vector3(0, 0, 1), point));
+        return new Vector3(Vector3.dotProduct(new Vector3(cos, -sin, 0), point), Vector3.dotProduct(new Vector3(sin, cos, 0), point), Vector3.dotProduct(new Vector3(0, 0, 1), point));
     }
 
     public static Vector3 centerOfTriangle(Triangle triangle)

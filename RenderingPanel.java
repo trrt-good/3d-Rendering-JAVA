@@ -1,5 +1,6 @@
 import javax.swing.*;
-
+import java.util.List;
+import java.util.ArrayList;
 import java.awt.*;
 import java.awt.event.*;
 public class RenderingPanel extends JPanel implements ActionListener
@@ -12,8 +13,10 @@ public class RenderingPanel extends JPanel implements ActionListener
     private long nsPerFrame;
     private Font font = new Font("Times", Font.BOLD, 20);
     private boolean startedRendering = false;
+    private List<GameObject> gameObjects = new ArrayList<GameObject>();
+    private List<Triangle> triangles = new ArrayList<Triangle>();
 
-    public Lighting mainLight; 
+    public Lighting lightingObject; 
     
 
     public RenderingPanel(boolean antiAliasingIn)
@@ -25,10 +28,6 @@ public class RenderingPanel extends JPanel implements ActionListener
         Camera.mainCamera = new Camera();
         Camera.mainCamera.timer.start();
         renderPlane = Camera.mainCamera.getRenderPlane();
-
-        mainLight = new Lighting(new Vector3(0, -1, 0).getNormalized(), 200, 0);
-
-        
 
         timer = new Timer(1, this);
         timer.start();
@@ -46,30 +45,22 @@ public class RenderingPanel extends JPanel implements ActionListener
         nsPerFrame = System.nanoTime()-startOfFrame;
     }
 
-    class Lighting
+    public void addLighting(Lighting lighting)
     {
-        public Vector3 direction;
-        public double intensity; 
-        public double shadowIntensity;
-        public double shadingHardness;
-
-        public Lighting(Vector3 lightDirectionIn, double lightIntensityIn, double shadowIntensityIn)
-        {
-            direction = lightDirectionIn;
-            intensity = lightIntensityIn;
-            shadowIntensity = shadowIntensityIn;
-        }
-
-        public void updateAllLighting()
-        {
-            long start = System.nanoTime();
-            System.out.print("\tlighting... ");
-                for (int i = 0; i < Main.ObjectManager.gameObjects.size(); i++)
-                    Main.ObjectManager.gameObjects.get(i).recalculateLighting(mainLight);
-            System.out.println("finished in " + (System.nanoTime()-start)/1000000 + "ms");
-        }
+        long lightingStart = System.nanoTime();
+        System.out.print("\tlighting... ");
+        lightingObject = lighting;
+        lightingObject.update(gameObjects);
+        System.out.println("finished in " + (System.nanoTime()-lightingStart)/1000000 + "ms");
     }
 
+    public void addGameObject(GameObject gameObject)
+    {
+        gameObjects.add(gameObject);
+        lightingObject.update(gameObjects);
+        triangles.addAll(gameObject.triangles);
+    }
+    
     private void drawTriangles(Graphics g)
     {
         Graphics2D g2d = (Graphics2D)g;
@@ -84,9 +75,9 @@ public class RenderingPanel extends JPanel implements ActionListener
 
         orderTriangles();    
 
-        for (int i = 0; i < Main.ObjectManager.triangles.size(); i ++)
+        for (int i = 0; i < triangles.size(); i ++)
         {
-            renderTriangle(g2d, Main.ObjectManager.triangles.get(i));
+            renderTriangle(g2d, triangles.get(i));
         }
     }
 
@@ -96,15 +87,15 @@ public class RenderingPanel extends JPanel implements ActionListener
         while (changed == true)
         {
             changed = false;
-            for (int i = 0; i < Main.ObjectManager.triangles.size()-1; i++)
+            for (int i = 0; i < triangles.size()-1; i++)
             {
-                if (Main.ObjectManager.triangles.get(i).parentGameObject.shading)
+                if (triangles.get(i).parentGameObject.shading)
                 {
-                    if (Vector3.subtract(Camera.mainCamera.position, Vector3.centerOfTriangle(Main.ObjectManager.triangles.get(i))).getMagnitude() < Vector3.subtract(Camera.mainCamera.position, Vector3.centerOfTriangle(Main.ObjectManager.triangles.get(i+1))).getMagnitude())
+                    if (Vector3.subtract(Camera.mainCamera.position, Vector3.centerOfTriangle(triangles.get(i))).getMagnitude() < Vector3.subtract(Camera.mainCamera.position, Vector3.centerOfTriangle(triangles.get(i+1))).getMagnitude())
                     {
-                        Triangle closerTriangle = Main.ObjectManager.triangles.get(i);
-                        Main.ObjectManager.triangles.set(i, Main.ObjectManager.triangles.get(i+1));
-                        Main.ObjectManager.triangles.set(i + 1, closerTriangle);
+                        Triangle closerTriangle = triangles.get(i);
+                        triangles.set(i, triangles.get(i+1));
+                        triangles.set(i + 1, closerTriangle);
                         changed = true;
                     }
                 }

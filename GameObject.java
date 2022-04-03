@@ -13,6 +13,7 @@ public class GameObject
     private EulerAngle orientation;
     public Color color;
     public boolean shading = true;
+    public String name;
 
     public boolean wireframe;
 
@@ -20,11 +21,11 @@ public class GameObject
     {
         System.out.print("Creating gameObject: " + modelFileName + "... ");
         long start = System.nanoTime();
-        Main.ObjectManager.gameObjects.add(this);
         triangles = new ArrayList<Triangle>();
         orientation = orientationIn;
         wireframe = wireframeIn;
         color = colorIn;
+        name = modelFileName.substring(0, modelFileName.indexOf("."));
         position = new Vector3();
         readObjFile(modelFileName);
         setRotation(orientation);
@@ -34,7 +35,7 @@ public class GameObject
 
     }
 
-    public void recalculateLighting(RenderingPanel.Lighting lighting)
+    public void recalculateLighting(Lighting lighting)
     {
         if (!wireframe && shading)
         {
@@ -144,7 +145,7 @@ public class GameObject
                         if (lineArr[i].contains("/"))
                             indexArr[i-1] = Integer.parseInt(lineArr[i].substring(0, lineArr[i].indexOf("/")))-1;
                     }
-                    if (indexArr.length <= 3 || wireframe == true)
+                    if (indexArr.length <= 3)
                     {
                         triangles.add(new Triangle(this, vertices.get(indexArr[0]), vertices.get(indexArr[1]), vertices.get(indexArr[2]), color, !wireframe));
                     }

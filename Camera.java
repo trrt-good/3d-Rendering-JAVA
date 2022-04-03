@@ -13,9 +13,8 @@ public class Camera
     public double h_orientation;
     public double v_orientation;
 
-    public double nearClippingPlaneDistance; 
     public double renderPlaneDistance;
-    public double farClippingPlaneDistance;
+    public double viewDistance;
 
     public double renderPlaneWidth;
 
@@ -26,14 +25,13 @@ public class Camera
         movementSpeed = 1000;
         sensitivity = 15;
 
-        fov = 60; //strictly reffers to the horizontal fov as vertical fov is based off screen height 
+        fov = 90; //strictly reffers to the horizontal fov as vertical fov is based off screen height 
         position = new Vector3(0, 0, -100);
         h_orientation = 0;
         v_orientation = 0;
 
-        nearClippingPlaneDistance = 5; 
         renderPlaneDistance = 10;
-        farClippingPlaneDistance = 1000;
+        viewDistance = 1000;
         renderPlaneWidth = getRenderPlaneWidth();
         System.out.println("finished in " + (System.nanoTime()-start)/1000000.0 + "ms");
     }
@@ -48,7 +46,6 @@ public class Camera
         public void actionPerformed(ActionEvent e) 
         {
             // GraphicsManager.renderingPanel.mainLight.direction = getDirectionVector();
-            // GraphicsManager.renderingPanel.mainLight.updateAllLighting();
             if (Main.inputManager.forward)
                 moveForward(movementSpeed/100.0);
             if (Main.inputManager.backward)
@@ -116,16 +113,10 @@ public class Camera
         return new Plane(Vector3.add(Vector3.multiply(directionVector, renderPlaneDistance), position), directionVector);
     }
 
-    public Plane getNearClippingPlane()
-    {
-        Vector3 directionVector = getDirectionVector();
-        return new Plane(Vector3.add(Vector3.multiply(directionVector, nearClippingPlaneDistance), position), directionVector);
-    }    
-
     public Plane getFarClippingPlane()
     {
         Vector3 directionVector = getDirectionVector();
-        return new Plane(Vector3.add(Vector3.multiply(directionVector, farClippingPlaneDistance), position), directionVector);
+        return new Plane(Vector3.add(Vector3.multiply(directionVector, viewDistance), position), directionVector);
     }    
 
     private double getRenderPlaneWidth()
