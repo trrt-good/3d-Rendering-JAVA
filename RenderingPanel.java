@@ -1,4 +1,6 @@
 import javax.swing.*;
+import javax.swing.text.AttributeSet.ColorAttribute;
+
 import java.awt.*;
 import java.awt.event.*;
 public class RenderingPanel extends JPanel implements ActionListener
@@ -25,7 +27,7 @@ public class RenderingPanel extends JPanel implements ActionListener
         Camera.mainCamera = new Camera();
         Camera.mainCamera.timer.start();
 
-        mainLight = new Lighting(new Vector3(0, -1, 0).getNormalized(), 200, 200);
+        mainLight = new Lighting(new Vector3(0, -1, 0).getNormalized(), 200, 0);
 
         farClippingPlane = Camera.mainCamera.getNearClippingPlane();
         renderPlane = Camera.mainCamera.getRenderPlane();
@@ -93,7 +95,6 @@ public class RenderingPanel extends JPanel implements ActionListener
 
     private void orderTriangles()
     {
-        
         boolean changed = true;
         while (changed == true)
         {
@@ -181,6 +182,9 @@ public class RenderingPanel extends JPanel implements ActionListener
                 g2d.drawLine(p3ScreenCoords.x, p3ScreenCoords.y, p1ScreenCoords.x, p1ScreenCoords.y);
             }
         }
+
+        g2d.setColor(Color.BLACK);
+        g2d.drawString("time per frame: " + nsPerFrame/1000000.0 + "ms", 10, 20);
     }
 
     @Override

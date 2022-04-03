@@ -47,8 +47,8 @@ public class Camera
         @Override
         public void actionPerformed(ActionEvent e) 
         {
-            // GraphicsManager.renderingPanel.mainLight.direction = getDirectionVector();
-            // GraphicsManager.renderingPanel.mainLight.updateAllLighting();
+            GraphicsManager.renderingPanel.mainLight.direction = getDirectionVector();
+            GraphicsManager.renderingPanel.mainLight.updateAllLighting();
             if (Main.inputManager.forward)
                 moveForward(movementSpeed/100.0);
             if (Main.inputManager.backward)
