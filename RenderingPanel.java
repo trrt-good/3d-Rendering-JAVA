@@ -1,5 +1,4 @@
 import javax.swing.*;
-import javax.swing.text.AttributeSet.ColorAttribute;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -9,7 +8,6 @@ public class RenderingPanel extends JPanel implements ActionListener
     private Color backgroundColor;
 
     private Plane renderPlane;
-    private Plane farClippingPlane;
     private boolean antiAliasing;
     private long nsPerFrame;
     private Font font = new Font("Times", Font.BOLD, 20);
@@ -26,11 +24,11 @@ public class RenderingPanel extends JPanel implements ActionListener
 
         Camera.mainCamera = new Camera();
         Camera.mainCamera.timer.start();
+        renderPlane = Camera.mainCamera.getRenderPlane();
 
         mainLight = new Lighting(new Vector3(0, -1, 0).getNormalized(), 200, 0);
 
-        farClippingPlane = Camera.mainCamera.getNearClippingPlane();
-        renderPlane = Camera.mainCamera.getRenderPlane();
+        
 
         timer = new Timer(1, this);
         timer.start();
@@ -83,7 +81,6 @@ public class RenderingPanel extends JPanel implements ActionListener
             g2d.setRenderingHints(rh);
         }
         renderPlane = Camera.mainCamera.getRenderPlane();
-        farClippingPlane = Camera.mainCamera.getFarClippingPlane();
 
         orderTriangles();    
 
