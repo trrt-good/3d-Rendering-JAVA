@@ -10,7 +10,7 @@ public class Main
 
     public static void main(String [] args)
     {
-        gameObject = new GameObject(new Vector3(0, 0, 0), "thing.obj", new Color(0, 0, 0), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 100, false);
+        gameObject = new GameObject(new Vector3(0, 0, 0), "cat.obj", new Color(0, 0, 0), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 1, false);
         gameObject.shading = true;
         GraphicsManager.startGraphics("3d");
         
