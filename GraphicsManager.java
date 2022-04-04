@@ -31,11 +31,12 @@ public class GraphicsManager
         renderingPanel.addMouseListener(Main.inputManager);
         renderingPanel.addMouseMotionListener(Main.inputManager);
         renderingPanel.setVisible(true);
-
-        renderingPanel.addLighting(new Lighting(new Vector3(1, -1, 1), 70, 150));
-
+        
+        renderingPanel.setCamera(new Camera());
+        renderingPanel.setLighting(new Lighting(new Vector3(1, -1, 1), 70, 150));
         renderingPanel.addGameObject(gameObject1);
         renderingPanel.addGameObject(gameObject2);
+        
         System.out.println("finished creating graphics in " + (System.nanoTime()-start)/1000000 + "ms");
     }
 }

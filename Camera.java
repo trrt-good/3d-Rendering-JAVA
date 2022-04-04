@@ -2,7 +2,6 @@ import javax.swing.*;
 import java.awt.event.*;
 public class Camera
 {
-    public static Camera mainCamera;
 
     public final int TICK_SPEED = 1000;
     public int movementSpeed;
@@ -20,20 +19,17 @@ public class Camera
 
     public Camera()
     {
-        System.out.print("\tcamera... ");
-        long start = System.nanoTime();
         movementSpeed = 1000;
         sensitivity = 15;
 
         fov = 90; //strictly reffers to the horizontal fov as vertical fov is based off screen height 
-        position = new Vector3(0, 0, -100);
+        position = new Vector3(0, 0, 0);
         h_orientation = 0;
         v_orientation = 0;
 
         renderPlaneDistance = 10;
-        viewDistance = 1000;
+        viewDistance = 10000;
         renderPlaneWidth = getRenderPlaneWidth();
-        System.out.println("finished in " + (System.nanoTime()-start)/1000000.0 + "ms");
     }
 
     public Timer timer = new Timer(1000/TICK_SPEED + 1, new ActionListener()
