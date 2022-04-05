@@ -69,9 +69,9 @@ public class Triangle
     {
         int brightness = 0;
         int darkness = 0;
-        double angle = Vector3.getAngleBetween(lighting.direction, Vector3.crossProduct(Vector3.subtract(point1, point2), Vector3.subtract(point2, point3)));
+        double angle = Vector3.getAngleBetween(lighting.lightDirection, Vector3.crossProduct(Vector3.subtract(point1, point2), Vector3.subtract(point2, point3)));
         if (angle > Math.PI/2)
-            brightness = (int)(Math.abs(angle/(Math.PI)-0.5)*(lighting.intensity/100)*255);
+            brightness = (int)(Math.abs(angle/(Math.PI)-0.5)*(lighting.lightIntensity/100)*255);
         
         if (angle < Math.PI/2)
             darkness = (int)(Math.abs(angle/(Math.PI)-0.5)*(lighting.shadowIntensity/100)*255);
