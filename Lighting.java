@@ -1,15 +1,14 @@
 import java.util.List;
 public class Lighting
 {
-    public Vector3 direction;
-    public double intensity; 
+    public Vector3 lightDirection;
+    public double lightIntensity; 
     public double shadowIntensity;
-    public double shadingHardness;
 
     public Lighting(Vector3 lightDirectionIn, double lightIntensityIn, double shadowIntensityIn)
     {
-        direction = lightDirectionIn;
-        intensity = lightIntensityIn;
+        lightDirection = lightDirectionIn;
+        lightIntensity = lightIntensityIn;
         shadowIntensity = shadowIntensityIn;
     }
 

@@ -5,18 +5,34 @@ import java.awt.*;
 import java.awt.event.*;
 public class RenderingPanel extends JPanel implements ActionListener
 {
-    private Timer timer;
-    private Color backgroundColor;
-
-    private Plane renderPlane;
-    private boolean antiAliasing;
-    private long nanosecondsPerFrame;
-    private Font font = new Font("Times", Font.BOLD, 20);
     private List<GameObject> gameObjects = new ArrayList<GameObject>();
     private List<Triangle> triangles = new ArrayList<Triangle>();
+
+    private Timer timer;
+
+    //for rendering:
+    private Color backgroundColor;
+    private Plane renderPlane;
+    private boolean antiAliasing;
+
+    //Camera:
     private Camera camera;
 
+    //lighting:
     private Lighting lightingObject; 
+    private Vector3 lightDirection;
+    private double lightIntensity; 
+    private double shadowIntensity;
+    private Color lightColor;
+    
+    //fog:
+    private double fogStartDistance;
+    private boolean fogEnabled = false;
+    private double fogColor;
+
+    //used for debug:
+    private long nanosecondsPerFrame;
+    private Font font = new Font("Times", Font.BOLD, 20);
     
 
     public RenderingPanel(boolean antiAliasingIn)
@@ -77,6 +93,11 @@ public class RenderingPanel extends JPanel implements ActionListener
             renderPlane = camera.getRenderPlane();
         }
         System.out.println("finished in " + (System.nanoTime()-camStartTime)/1000000.0 + "ms");
+    }
+
+    public void enableFog()
+    {
+
     }
     
     private void drawTriangles(Graphics g)
