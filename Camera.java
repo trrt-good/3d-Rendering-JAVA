@@ -22,13 +22,13 @@ public class Camera
         movementSpeed = 1000;
         sensitivity = 15;
 
-        fov = 90; //strictly reffers to the horizontal fov as vertical fov is based off screen height 
+        fov = 60; //strictly reffers to the horizontal fov as vertical fov is based off screen height 
         position = new Vector3(0, 0, 0);
         h_orientation = 0;
         v_orientation = 0;
 
         renderPlaneDistance = 10;
-        viewDistance = 10000;
+        viewDistance = 3300;
         renderPlaneWidth = getRenderPlaneWidth();
     }
 
