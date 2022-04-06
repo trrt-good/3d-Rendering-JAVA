@@ -1,4 +1,5 @@
 import javax.swing.*;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.awt.*;
@@ -20,15 +21,12 @@ public class RenderingPanel extends JPanel implements ActionListener
 
     //lighting:
     private Lighting lightingObject; 
-    private Vector3 lightDirection;
-    private double lightIntensity; 
-    private double shadowIntensity;
-    private Color lightColor;
     
     //fog:
     private double fogStartDistance;
+    private double fullFogDistance;
     private boolean fogEnabled = false;
-    private double fogColor;
+    private Color fogColor;
 
     //used for debug:
     private long nanosecondsPerFrame;
@@ -95,9 +93,22 @@ public class RenderingPanel extends JPanel implements ActionListener
         System.out.println("finished in " + (System.nanoTime()-camStartTime)/1000000.0 + "ms");
     }
 
+    public void setFog(double fogStartDistanceIn, double fullFogDistanceIn, Color fogColorIn)
+    {
+        fogStartDistance = fogStartDistanceIn;
+        fullFogDistance = fullFogDistanceIn;
+        fogColor = fogColorIn;
+        fogEnabled = true;
+    }
+
     public void enableFog()
     {
+        fogEnabled = true;
+    }
 
+    public void dissableFog()
+    {
+        fogEnabled = false;
     }
     
     private void drawTriangles(Graphics g)
@@ -153,63 +164,96 @@ public class RenderingPanel extends JPanel implements ActionListener
         Vector3 tempPoint2 = new Vector3(triangle.point2);
         Vector3 tempPoint3 = new Vector3(triangle.point3);
 
-        if (Vector3.dotProduct(renderPlane.normal, Vector3.subtract(tempPoint1, renderPlane.pointOnPlane)) > 0 && Vector3.dotProduct(renderPlane.normal, Vector3.subtract(tempPoint2, renderPlane.pointOnPlane)) > 0 && Vector3.dotProduct(renderPlane.normal, Vector3.subtract(tempPoint3, renderPlane.pointOnPlane)) > 0)
+        double distanceToTriangle = Vector3.subtract(Vector3.centerOfTriangle(triangle), camera.position).getMagnitude();  
+        if (distanceToTriangle < camera.viewDistance)
         {
-            tempPoint1 = Vector3.getIntersectionPoint(Vector3.subtract(tempPoint1, camera.position), camera.position, renderPlane);
-            double pixelsPerUnit = getWidth()/camera.renderPlaneWidth;
-            Vector3 camCenterPoint = Vector3.getIntersectionPoint(camera.getDirectionVector(), camera.position, renderPlane);
-            Vector3 rotatedPoint = Vector3.rotateAroundXaxis(Vector3.rotateAroundYaxis( //rotates the points to only be on the XY plane
-                Vector3.subtract(tempPoint1, camCenterPoint), //moves the point to be centered around 0,0,0
-                -camera.h_orientation*0.017453292519943295), //amount to be rotated by horizontally
-                camera.v_orientation*0.017453292519943295); //amount to  be rotated by vertically
-            if ((Math.abs(rotatedPoint.x) < camera.renderPlaneWidth/2*1.2 && Math.abs(rotatedPoint.y) < camera.renderPlaneWidth*((double)GraphicsManager.renderingPanel.getHeight()/(double)GraphicsManager.renderingPanel.getWidth())/2*1.2))
-                shouldDrawTriangle = true;
-            p1ScreenCoords.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
-            p1ScreenCoords.y = (int)(getHeight()/2 - rotatedPoint.y*pixelsPerUnit);
-    
-            tempPoint2 = Vector3.getIntersectionPoint(Vector3.subtract(tempPoint2, camera.position), camera.position, renderPlane);
-            rotatedPoint = Vector3.rotateAroundXaxis(Vector3.rotateAroundYaxis( //rotates the points to only be on the XY plane
-                Vector3.subtract(tempPoint2, camCenterPoint), //moves the point to be centered around 0,0,0
-                -camera.h_orientation*0.017453292519943295), //amount to be rotated by horizontally
-                camera.v_orientation*0.017453292519943295); //amount to  be rotated by vertically
-            if ((Math.abs(rotatedPoint.x) < camera.renderPlaneWidth/2*1.2 && Math.abs(rotatedPoint.y) < camera.renderPlaneWidth*((double)GraphicsManager.renderingPanel.getHeight()/GraphicsManager.renderingPanel.getWidth())/2*1.2))
-                shouldDrawTriangle = true;
-            p2ScreenCoords.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
-            p2ScreenCoords.y = (int)(getHeight()/2 - rotatedPoint.y*pixelsPerUnit);
-    
-            tempPoint3 = new Vector3(triangle.point3);
-            tempPoint3 = Vector3.getIntersectionPoint(Vector3.subtract(tempPoint3, camera.position), camera.position, renderPlane);
-            rotatedPoint = Vector3.rotateAroundXaxis(Vector3.rotateAroundYaxis( //rotates the points to only be on the XY plane
-                Vector3.subtract(tempPoint3, camCenterPoint), //moves the point to be centered around 0,0,0
-                -camera.h_orientation*0.017453292519943295), //amount to be rotated by horizontally
-                camera.v_orientation*0.017453292519943295); //amount to  be rotated by vertically
-            if ((Math.abs(rotatedPoint.x) < camera.renderPlaneWidth/2*1.2 && Math.abs(rotatedPoint.y) < camera.renderPlaneWidth*((double)GraphicsManager.renderingPanel.getHeight()/GraphicsManager.renderingPanel.getWidth())/2*1.2))
-                shouldDrawTriangle = true;
-            p3ScreenCoords.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
-            p3ScreenCoords.y = (int)(getHeight()/2 - rotatedPoint.y*pixelsPerUnit);
-        }
-
-        if (shouldDrawTriangle)
-        {
-            Polygon screenTriangle = new Polygon(new int[]{p1ScreenCoords.x, p2ScreenCoords.x, p3ScreenCoords.x}, new int[]{p1ScreenCoords.y, p2ScreenCoords.y, p3ScreenCoords.y}, 3);
-            if (triangle.parentGameObject != null && triangle.parentGameObject.shading && !triangle.parentGameObject.wireframe)
-                g2d.setColor(triangle.getColorWithLighting());
-            else if (triangle.parentGameObject == null && triangle.fill)
-                g2d.setColor(triangle.getColorWithLighting());
-            else 
-                g2d.setColor(triangle.color);
-
-            if (triangle.fill)
-                g2d.fillPolygon(screenTriangle);
-            else
+            if (Vector3.dotProduct(renderPlane.normal, Vector3.subtract(tempPoint1, renderPlane.pointOnPlane)) > 0 && Vector3.dotProduct(renderPlane.normal, Vector3.subtract(tempPoint2, renderPlane.pointOnPlane)) > 0 && Vector3.dotProduct(renderPlane.normal, Vector3.subtract(tempPoint3, renderPlane.pointOnPlane)) > 0)
             {
-                g2d.setStroke(new BasicStroke(triangle.lineThickness));
-                g2d.drawLine(p1ScreenCoords.x, p1ScreenCoords.y, p2ScreenCoords.x, p2ScreenCoords.y);
-                g2d.drawLine(p2ScreenCoords.x, p2ScreenCoords.y, p3ScreenCoords.x, p3ScreenCoords.y);
-                g2d.drawLine(p3ScreenCoords.x, p3ScreenCoords.y, p1ScreenCoords.x, p1ScreenCoords.y);
+                tempPoint1 = Vector3.getIntersectionPoint(Vector3.subtract(tempPoint1, camera.position), camera.position, renderPlane);
+                double pixelsPerUnit = getWidth()/camera.renderPlaneWidth;
+                Vector3 camCenterPoint = Vector3.getIntersectionPoint(camera.getDirectionVector(), camera.position, renderPlane);
+                Vector3 rotatedPoint = Vector3.rotateAroundXaxis(Vector3.rotateAroundYaxis( //rotates the points to only be on the XY plane
+                    Vector3.subtract(tempPoint1, camCenterPoint), //moves the point to be centered around 0,0,0
+                    -camera.h_orientation*0.017453292519943295), //amount to be rotated by horizontally
+                    camera.v_orientation*0.017453292519943295); //amount to  be rotated by vertically
+                if ((Math.abs(rotatedPoint.x) < camera.renderPlaneWidth/2*1.2 && Math.abs(rotatedPoint.y) < camera.renderPlaneWidth*((double)GraphicsManager.renderingPanel.getHeight()/(double)GraphicsManager.renderingPanel.getWidth())/2*1.2))
+                    shouldDrawTriangle = true;
+                p1ScreenCoords.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
+                p1ScreenCoords.y = (int)(getHeight()/2 - rotatedPoint.y*pixelsPerUnit);
+        
+                tempPoint2 = Vector3.getIntersectionPoint(Vector3.subtract(tempPoint2, camera.position), camera.position, renderPlane);
+                rotatedPoint = Vector3.rotateAroundXaxis(Vector3.rotateAroundYaxis( //rotates the points to only be on the XY plane
+                    Vector3.subtract(tempPoint2, camCenterPoint), //moves the point to be centered around 0,0,0
+                    -camera.h_orientation*0.017453292519943295), //amount to be rotated by horizontally
+                    camera.v_orientation*0.017453292519943295); //amount to  be rotated by vertically
+                if ((Math.abs(rotatedPoint.x) < camera.renderPlaneWidth/2*1.2 && Math.abs(rotatedPoint.y) < camera.renderPlaneWidth*((double)GraphicsManager.renderingPanel.getHeight()/GraphicsManager.renderingPanel.getWidth())/2*1.2))
+                    shouldDrawTriangle = true;
+                p2ScreenCoords.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
+                p2ScreenCoords.y = (int)(getHeight()/2 - rotatedPoint.y*pixelsPerUnit);
+        
+                tempPoint3 = new Vector3(triangle.point3);
+                tempPoint3 = Vector3.getIntersectionPoint(Vector3.subtract(tempPoint3, camera.position), camera.position, renderPlane);
+                rotatedPoint = Vector3.rotateAroundXaxis(Vector3.rotateAroundYaxis( //rotates the points to only be on the XY plane
+                    Vector3.subtract(tempPoint3, camCenterPoint), //moves the point to be centered around 0,0,0
+                    -camera.h_orientation*0.017453292519943295), //amount to be rotated by horizontally
+                    camera.v_orientation*0.017453292519943295); //amount to  be rotated by vertically
+                if ((Math.abs(rotatedPoint.x) < camera.renderPlaneWidth/2*1.2 && Math.abs(rotatedPoint.y) < camera.renderPlaneWidth*((double)GraphicsManager.renderingPanel.getHeight()/GraphicsManager.renderingPanel.getWidth())/2*1.2))
+                    shouldDrawTriangle = true;
+                p3ScreenCoords.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
+                p3ScreenCoords.y = (int)(getHeight()/2 - rotatedPoint.y*pixelsPerUnit);
+            }
+
+            if (shouldDrawTriangle)
+            {
+                Polygon screenTriangle = new Polygon(new int[]{p1ScreenCoords.x, p2ScreenCoords.x, p3ScreenCoords.x}, new int[]{p1ScreenCoords.y, p2ScreenCoords.y, p3ScreenCoords.y}, 3);
+                if (triangle.parentGameObject != null && triangle.parentGameObject.shading && !triangle.parentGameObject.wireframe)
+                {
+                    Color litColor = triangle.getColorWithLighting();
+                    if (fogEnabled && distanceToTriangle > fogStartDistance)
+                    {
+                        Color triangleColor;
+                        if (distanceToTriangle > fullFogDistance)
+                            triangleColor = fogColor;
+                        else
+                        {
+                            double fogAmt = (distanceToTriangle-fogStartDistance)/(fullFogDistance-fogStartDistance);
+                            int red = litColor.getRed() + (int)((fogColor.getRed()-litColor.getRed())*fogAmt*fogAmt);
+                            int green = litColor.getGreen() + (int)((fogColor.getGreen()-litColor.getGreen())*fogAmt*fogAmt);
+                            int blue = litColor.getBlue() + (int)((fogColor.getBlue()-litColor.getBlue())*fogAmt*fogAmt);
+                            if (red > 255)
+                                red = 255;
+                            if (red < 0)
+                                red = 0;
+                            if (green > 255)
+                                green = 255;
+                            if (green < 0)
+                                green = 0;
+                            if (blue > 255)
+                                blue = 255;
+                            if (blue < 0)
+                                blue = 0;
+                            triangleColor = new Color(red, green, blue);
+                        }
+                        g2d.setColor(triangleColor);
+                    }
+                    else 
+                        g2d.setColor(litColor);
+                }   
+                else 
+                    g2d.setColor(triangle.color);
+
+                if (triangle.fill)
+                    g2d.fillPolygon(screenTriangle);
+                else
+                {
+                    g2d.setStroke(new BasicStroke(triangle.lineThickness));
+                    g2d.drawLine(p1ScreenCoords.x, p1ScreenCoords.y, p2ScreenCoords.x, p2ScreenCoords.y);
+                    g2d.drawLine(p2ScreenCoords.x, p2ScreenCoords.y, p3ScreenCoords.x, p3ScreenCoords.y);
+                    g2d.drawLine(p3ScreenCoords.x, p3ScreenCoords.y, p1ScreenCoords.x, p1ScreenCoords.y);
+                }
             }
         }
-
+        
         g2d.setColor(Color.BLACK);
         g2d.drawString("time per frame: " + nanosecondsPerFrame/1000000.0 + "ms", 10, 20);
     }
