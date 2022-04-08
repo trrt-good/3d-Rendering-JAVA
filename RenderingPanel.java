@@ -37,7 +37,7 @@ public class RenderingPanel extends JPanel implements ActionListener
 
     public RenderingPanel(boolean antiAliasingIn)
     {
-        renderImage = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_3BYTE_BGR);
+        renderImage = new BufferedImage(1920, 1080, BufferedImage.TYPE_3BYTE_BGR);
         backgroundColor = new Color(200, 220, 255);
         setBackground(backgroundColor);
         antiAliasing = antiAliasingIn;
@@ -48,10 +48,11 @@ public class RenderingPanel extends JPanel implements ActionListener
 
     public void paintComponent(Graphics g) 
     {
+        super.paintComponent(g);
+
         long startOfFrame = System.nanoTime();
         requestFocusInWindow();
         g.drawImage(renderImage, 0, 0, this);
-        super.paintComponent(g);
         g.setFont(font);
         if (gameObjects.size() > 0 && camera != null)
             drawTriangles(g);
@@ -249,8 +250,9 @@ public class RenderingPanel extends JPanel implements ActionListener
 
                 if (triangle.fill)
                 {
-                    g2d.fillPolygon(screenTriangle);
+                    //g2d.fillPolygon(screenTriangle);
                     paintTriangle(p1ScreenCoords, p2ScreenCoords, p3ScreenCoords, colorUsed);
+                    
                 }
                     
                 else
@@ -263,14 +265,15 @@ public class RenderingPanel extends JPanel implements ActionListener
             }
         }
         
-        g2d.setColor(Color.BLACK);
-        g2d.drawString("time per frame: " + nanosecondsPerFrame/1000000.0 + "ms", 10, 20);
+        // g2d.setColor(Color.BLACK);
+        // g2d.drawString("time per frame: " + nanosecondsPerFrame/1000000.0 + "ms", 10, 20);
     }
 
     private void paintTriangle(Point p1, Point p2, Point p3, Color triangleColor)
     {
         Point tempPoint = new Point();
         int rgb = triangleColor.getRGB();
+        System.out.println(rgb);
         if (p1.getY() < p2.getY())
         {
             tempPoint = p1;
@@ -303,10 +306,10 @@ public class RenderingPanel extends JPanel implements ActionListener
             int leftCollide;
             leftCollide = (int)((yLevel-p2.y)/((double)(p3.y-p2.y)/(p3.x-p2.x))+p2.x);
             int rightCollide; 
-            
+            rightCollide = (int)((yLevel-p1.y)/((double)(p3.y-p1.y)/(p3.x-p1.x))+p1.x);
             for (int j  = 0; j < rightCollide-leftCollide; j++)
             {
-
+                renderImage.setRGB(leftCollide + j, yLevel, rgb);
             }
         }
         
@@ -315,7 +318,7 @@ public class RenderingPanel extends JPanel implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e) 
     {
-        repaint();
+        this.repaint();
     }
 }
 

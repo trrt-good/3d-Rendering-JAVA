@@ -6,15 +6,15 @@ public class GraphicsManager
     public static RenderingPanel renderingPanel;
     public static JFrame mainFrame;
 
-    public static int defaultWidth = 1600;
-    public static int defaultHeight = 900;
+    public static int defaultWidth = 1920;
+    public static int defaultHeight = 1080;
 
     public static GameObject gameObject1;
     public static GameObject gameObject2;
 
     public static void startGraphics(String name)
     {
-        gameObject1 = new GameObject(new Vector3(0, 0, 0), "cat.obj", new Color(50, 50, 50), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 1, true);
+        gameObject1 = new GameObject(new Vector3(0, 0, 0), "cat.obj", new Color(50, 50, 50), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 1, false);
         gameObject1.shading = true;
         // gameObject2 = new GameObject(new Vector3(0, 0, 0), "cat.obj", new Color(200, 200, 200), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 1, true);
         // gameObject2.shading = true;
