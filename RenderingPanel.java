@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 public class RenderingPanel extends JPanel implements ActionListener
 {
     private List<GameObject> gameObjects = new ArrayList<GameObject>();
@@ -12,6 +13,7 @@ public class RenderingPanel extends JPanel implements ActionListener
     private Timer timer;
 
     //for rendering:
+    private BufferedImage renderImage;
     private Color backgroundColor;
     private Plane renderPlane;
     private boolean antiAliasing;
@@ -35,6 +37,7 @@ public class RenderingPanel extends JPanel implements ActionListener
 
     public RenderingPanel(boolean antiAliasingIn)
     {
+        renderImage = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_3BYTE_BGR);
         backgroundColor = new Color(200, 220, 255);
         setBackground(backgroundColor);
         antiAliasing = antiAliasingIn;
@@ -47,6 +50,7 @@ public class RenderingPanel extends JPanel implements ActionListener
     {
         long startOfFrame = System.nanoTime();
         requestFocusInWindow();
+        g.drawImage(renderImage, 0, 0, this);
         super.paintComponent(g);
         g.setFont(font);
         if (gameObjects.size() > 0 && camera != null)
@@ -206,6 +210,7 @@ public class RenderingPanel extends JPanel implements ActionListener
             if (shouldDrawTriangle)
             {
                 Polygon screenTriangle = new Polygon(new int[]{p1ScreenCoords.x, p2ScreenCoords.x, p3ScreenCoords.x}, new int[]{p1ScreenCoords.y, p2ScreenCoords.y, p3ScreenCoords.y}, 3);
+                Color colorUsed;
                 if (triangle.parentGameObject != null && triangle.parentGameObject.shading && !triangle.parentGameObject.wireframe)
                 {
                     Color litColor = triangle.getColorWithLighting();
@@ -234,16 +239,20 @@ public class RenderingPanel extends JPanel implements ActionListener
                                 blue = 0;
                             triangleColor = new Color(red, green, blue);
                         }
-                        g2d.setColor(triangleColor);
+                        colorUsed = triangleColor;
                     }
                     else 
-                        g2d.setColor(litColor);
+                        colorUsed = litColor;
                 }   
                 else 
-                    g2d.setColor(triangle.color);
+                    colorUsed = triangle.color;
 
                 if (triangle.fill)
+                {
                     g2d.fillPolygon(screenTriangle);
+                    paintTriangle(p1ScreenCoords, p2ScreenCoords, p3ScreenCoords, colorUsed);
+                }
+                    
                 else
                 {
                     g2d.setStroke(new BasicStroke(triangle.lineThickness));
@@ -256,6 +265,51 @@ public class RenderingPanel extends JPanel implements ActionListener
         
         g2d.setColor(Color.BLACK);
         g2d.drawString("time per frame: " + nanosecondsPerFrame/1000000.0 + "ms", 10, 20);
+    }
+
+    private void paintTriangle(Point p1, Point p2, Point p3, Color triangleColor)
+    {
+        Point tempPoint = new Point();
+        int rgb = triangleColor.getRGB();
+        if (p1.getY() < p2.getY())
+        {
+            tempPoint = p1;
+            p1 = p2;
+            p2 = tempPoint;
+        }
+        if (p2.getY() < p3.getY())
+        {
+            tempPoint = p2;
+            p2 = p3;
+            p3 = tempPoint;
+        }
+        if (p1.getY() < p2.getY())
+        {
+            tempPoint = p1;
+            p1 = p2;
+            p2 = tempPoint;
+        }
+        if (p2.getY() < p3.getY())
+        {
+            tempPoint = p2;
+            p2 = p3;
+            p3 = tempPoint;
+        } 
+
+        renderImage.setRGB(p3.x, p3.y, rgb);
+        for (int i = 0; i < p2.getY() - p3.getY(); i ++)
+        {
+            int yLevel = p3.y + i;
+            int leftCollide;
+            leftCollide = (int)((yLevel-p2.y)/((double)(p3.y-p2.y)/(p3.x-p2.x))+p2.x);
+            int rightCollide; 
+            
+            for (int j  = 0; j < rightCollide-leftCollide; j++)
+            {
+
+            }
+        }
+        
     }
 
     @Override
