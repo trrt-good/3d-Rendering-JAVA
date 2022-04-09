@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.lang.ProcessBuilder.Redirect;
 public class RenderingPanel extends JPanel implements ActionListener
 {
     private List<GameObject> gameObjects = new ArrayList<GameObject>();
@@ -17,6 +18,7 @@ public class RenderingPanel extends JPanel implements ActionListener
     private Color backgroundColor;
     private Plane renderPlane;
     private boolean antiAliasing;
+    private Graphics2D rasteringGraphics;
 
     //Camera:
     private Camera camera;
@@ -37,7 +39,9 @@ public class RenderingPanel extends JPanel implements ActionListener
 
     public RenderingPanel(boolean antiAliasingIn)
     {
-        renderImage = new BufferedImage(1920, 1080, BufferedImage.TYPE_3BYTE_BGR);
+        renderImage = new BufferedImage(1600, 900, BufferedImage.TYPE_3BYTE_BGR);
+        rasteringGraphics = renderImage.createGraphics();
+        
         backgroundColor = new Color(200, 220, 255);
         setBackground(backgroundColor);
         antiAliasing = antiAliasingIn;
@@ -53,6 +57,7 @@ public class RenderingPanel extends JPanel implements ActionListener
         long startOfFrame = System.nanoTime();
         requestFocusInWindow();
         g.drawImage(renderImage, 0, 0, this);
+        
         g.setFont(font);
         if (gameObjects.size() > 0 && camera != null)
             drawTriangles(g);
@@ -252,7 +257,6 @@ public class RenderingPanel extends JPanel implements ActionListener
                 {
                     //g2d.fillPolygon(screenTriangle);
                     paintTriangle(p1ScreenCoords, p2ScreenCoords, p3ScreenCoords, colorUsed);
-                    
                 }
                     
                 else
@@ -273,7 +277,6 @@ public class RenderingPanel extends JPanel implements ActionListener
     {
         Point tempPoint = new Point();
         int rgb = triangleColor.getRGB();
-        System.out.println(rgb);
         if (p1.getY() < p2.getY())
         {
             tempPoint = p1;
@@ -298,8 +301,8 @@ public class RenderingPanel extends JPanel implements ActionListener
             p2 = p3;
             p3 = tempPoint;
         } 
-
-        renderImage.setRGB(p3.x, p3.y, rgb);
+        
+        //renderImage.setRGB(p3.x, p3.y, rgb);
         for (int i = 0; i < p2.getY() - p3.getY(); i ++)
         {
             int yLevel = p3.y + i;
@@ -309,10 +312,24 @@ public class RenderingPanel extends JPanel implements ActionListener
             rightCollide = (int)((yLevel-p1.y)/((double)(p3.y-p1.y)/(p3.x-p1.x))+p1.x);
             for (int j  = 0; j < rightCollide-leftCollide; j++)
             {
-                renderImage.setRGB(leftCollide + j, yLevel, rgb);
+                if (leftCollide + j < renderImage.getWidth() && leftCollide + j > 0 && yLevel < renderImage.getHeight() && yLevel > 0)
+                    renderImage.setRGB(leftCollide + j, yLevel, rgb);
             }
         }
-        
+
+        for (int i = 0; i < p1.getY() - p2.getY(); i ++)
+        {
+            int yLevel = p2.y + i;
+            int leftCollide;
+            leftCollide = (int)((yLevel-p2.y)/((double)(p1.y-p2.y)/(p1.x-p2.x))+p2.x);
+            int rightCollide; 
+            rightCollide = (int)((yLevel-p1.y)/((double)(p3.y-p1.y)/(p3.x-p1.x))+p1.x);
+            for (int j  = 0; j < Math.abs(rightCollide-leftCollide); j++)
+            {
+                if (leftCollide + Integer.signum(rightCollide-leftCollide)*j < renderImage.getWidth() && leftCollide + Integer.signum(rightCollide-leftCollide)*j > 0 && yLevel < renderImage.getHeight() && yLevel > 0)
+                    renderImage.setRGB(leftCollide + Integer.signum(rightCollide-leftCollide)*j, yLevel, rgb);
+            }
+        }
     }
 
     @Override

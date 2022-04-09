@@ -6,8 +6,8 @@ public class GraphicsManager
     public static RenderingPanel renderingPanel;
     public static JFrame mainFrame;
 
-    public static int defaultWidth = 1920;
-    public static int defaultHeight = 1080;
+    public static int defaultWidth = 1600;
+    public static int defaultHeight = 900;
 
     public static GameObject gameObject1;
     public static GameObject gameObject2;
