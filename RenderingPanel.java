@@ -1,6 +1,4 @@
 import javax.swing.*;
-import javax.xml.crypto.Data;
-
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,9 +31,11 @@ public class RenderingPanel extends JPanel implements ActionListener
     private Color fogColor;
 
     //used for debug:
-    private long nanosecondsPerFrame;
-    private Font font = new Font("Times", Font.BOLD, 20);
-    
+    private TimingHelper totalFrameTime = new TimingHelper("totalFrameTime");
+    private TimingHelper trianglesOrderTime = new TimingHelper("triangleOrderTime");
+    private TimingHelper trianglesDrawTime = new TimingHelper("trianglesDrawTime");
+    private TimingHelper paintTriangleTime = new TimingHelper("paintTriangleTime");
+    private TimingHelper triangleCalculateTime = new TimingHelper("triangleCalculateTime");
 
     public RenderingPanel(int width, int height)
     {
@@ -52,14 +52,11 @@ public class RenderingPanel extends JPanel implements ActionListener
 
     public void paintComponent(Graphics g) 
     {
-        long startOfFrame = System.nanoTime();
         super.paintComponent(g);
-        
-        g.setFont(font);
+    
         g.drawImage(renderImage, 0, 0, this);
         if (gameObjects.size() > 0 && camera != null)
             drawTriangles(g);
-        nanosecondsPerFrame = System.nanoTime()-startOfFrame;
     }
 
     public void setLighting(Lighting lighting)
@@ -121,17 +118,22 @@ public class RenderingPanel extends JPanel implements ActionListener
     
     private void drawTriangles(Graphics g)
     {
-        
+        totalFrameTime.startTimer();
         renderImage.getRaster().setDataElements(0, 0, renderImage.getWidth(), renderImage.getHeight(), emptyImagePixelColorData);
         renderPlane = camera.getRenderPlane();
 
+        trianglesOrderTime.startTimer();
         orderTriangles();    
+        trianglesOrderTime.stopTimer();
 
+        trianglesDrawTime.startTimer();
         for (int i = 0; i < triangles.size(); i ++)
         {
             renderTriangle(g, triangles.get(i));
         }
-        
+        trianglesDrawTime.stopTimer();
+
+        totalFrameTime.stopTimer();
     }
 
     private void orderTriangles()
@@ -140,16 +142,22 @@ public class RenderingPanel extends JPanel implements ActionListener
         while (changed == true)
         {
             changed = false;
-            for (int i = 0; i < triangles.size()-1; i++)
+            for (int i = 0; i < gameObjects.size(); i++)
             {
-                if (triangles.get(i).parentGameObject.shading)
+                if (gameObjects.get(i).shading && !gameObjects.get(i).wireframe)
                 {
-                    if (Vector3.subtract(camera.position, Vector3.centerOfTriangle(triangles.get(i))).getMagnitude() < Vector3.subtract(camera.position, Vector3.centerOfTriangle(triangles.get(i+1))).getMagnitude())
+                    for (int j = 0; j < gameObjects.get(i).triangles.size()-1; j++)
                     {
-                        Triangle closerTriangle = triangles.get(i);
-                        triangles.set(i, triangles.get(i+1));
-                        triangles.set(i + 1, closerTriangle);
-                        changed = true;
+                        if (triangles.get(j).parentGameObject.shading)
+                        {
+                            if (Vector3.subtract(camera.position, Vector3.centerOfTriangle(triangles.get(j))).getMagnitude() < Vector3.subtract(camera.position, Vector3.centerOfTriangle(triangles.get(j+1))).getMagnitude())
+                            {
+                                Triangle closerTriangle = triangles.get(j);
+                                triangles.set(j, triangles.get(j+1));
+                                triangles.set(j + 1, closerTriangle);
+                                changed = true;
+                            }
+                        }
                     }
                 }
             }
@@ -170,6 +178,7 @@ public class RenderingPanel extends JPanel implements ActionListener
         double distanceToTriangle = Vector3.subtract(Vector3.centerOfTriangle(triangle), camera.position).getMagnitude();  
         if (distanceToTriangle < camera.viewDistance)
         {
+            triangleCalculateTime.startTimer();
             if (Vector3.dotProduct(renderPlane.normal, Vector3.subtract(tempPoint1, renderPlane.pointOnPlane)) > 0 && Vector3.dotProduct(renderPlane.normal, Vector3.subtract(tempPoint2, renderPlane.pointOnPlane)) > 0 && Vector3.dotProduct(renderPlane.normal, Vector3.subtract(tempPoint3, renderPlane.pointOnPlane)) > 0)
             {
                 tempPoint1 = Vector3.getIntersectionPoint(Vector3.subtract(tempPoint1, camera.position), camera.position, renderPlane);
@@ -205,10 +214,10 @@ public class RenderingPanel extends JPanel implements ActionListener
                 p3ScreenCoords.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
                 p3ScreenCoords.y = (int)(getHeight()/2 - rotatedPoint.y*pixelsPerUnit);
             }
+            triangleCalculateTime.stopTimer();
 
             if (shouldDrawTriangle)
             {
-                Polygon screenTriangle = new Polygon(new int[]{p1ScreenCoords.x, p2ScreenCoords.x, p3ScreenCoords.x}, new int[]{p1ScreenCoords.y, p2ScreenCoords.y, p3ScreenCoords.y}, 3);
                 Color colorUsed;
                 if (triangle.parentGameObject != null && triangle.parentGameObject.shading && !triangle.parentGameObject.wireframe)
                 {
@@ -224,18 +233,9 @@ public class RenderingPanel extends JPanel implements ActionListener
                             int red = litColor.getRed() + (int)((fogColor.getRed()-litColor.getRed())*fogAmt*fogAmt);
                             int green = litColor.getGreen() + (int)((fogColor.getGreen()-litColor.getGreen())*fogAmt*fogAmt);
                             int blue = litColor.getBlue() + (int)((fogColor.getBlue()-litColor.getBlue())*fogAmt*fogAmt);
-                            if (red > 255)
-                                red = 255;
-                            if (red < 0)
-                                red = 0;
-                            if (green > 255)
-                                green = 255;
-                            if (green < 0)
-                                green = 0;
-                            if (blue > 255)
-                                blue = 255;
-                            if (blue < 0)
-                                blue = 0;
+                            red = Math.max(0, Math.min(255, red));
+                            green = Math.max(0, Math.min(255, green));
+                            blue = Math.max(0, Math.min(255, blue));
                             triangleColor = new Color(red, green, blue);
                         }
                         colorUsed = triangleColor;
@@ -248,10 +248,10 @@ public class RenderingPanel extends JPanel implements ActionListener
 
                 if (triangle.fill)
                 {
-                    //g2d.fillPolygon(screenTriangle);
+                    paintTriangleTime.startTimer();
                     paintTriangle(p1ScreenCoords, p2ScreenCoords, p3ScreenCoords, colorUsed);
+                    paintTriangleTime.stopTimer();
                 }
-                    
                 else
                 {
                     g.drawLine(p1ScreenCoords.x, p1ScreenCoords.y, p2ScreenCoords.x, p2ScreenCoords.y);
@@ -260,9 +260,6 @@ public class RenderingPanel extends JPanel implements ActionListener
                 }
             }
         }
-        
-        // g2d.setColor(Color.BLACK);
-        // g2d.drawString("time per frame: " + nanosecondsPerFrame/1000000.0 + "ms", 10, 20);
     }
 
     private int convertToIntRGB(Color color)
