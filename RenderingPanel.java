@@ -1,11 +1,15 @@
 import javax.swing.*;
+import javax.xml.crypto.Data;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.lang.ProcessBuilder.Redirect;
+import java.lang.reflect.Array;
+import java.awt.image.DataBuffer;
 public class RenderingPanel extends JPanel implements ActionListener
 {
     private List<GameObject> gameObjects = new ArrayList<GameObject>();
@@ -18,7 +22,7 @@ public class RenderingPanel extends JPanel implements ActionListener
     private Color backgroundColor;
     private Plane renderPlane;
     private boolean antiAliasing;
-    private Graphics2D rasteringGraphics;
+        
 
     //Camera:
     private Camera camera;
@@ -39,10 +43,9 @@ public class RenderingPanel extends JPanel implements ActionListener
 
     public RenderingPanel(boolean antiAliasingIn)
     {
-        renderImage = new BufferedImage(1600, 900, BufferedImage.TYPE_3BYTE_BGR);
-        rasteringGraphics = renderImage.createGraphics();
-        
+        renderImage = new BufferedImage(1600, 900, BufferedImage.TYPE_INT_RGB);
         backgroundColor = new Color(200, 220, 255);
+        
         setBackground(backgroundColor);
         antiAliasing = antiAliasingIn;
 
@@ -52,15 +55,15 @@ public class RenderingPanel extends JPanel implements ActionListener
 
     public void paintComponent(Graphics g) 
     {
-        super.paintComponent(g);
-
         long startOfFrame = System.nanoTime();
+        super.paintComponent(g);
         requestFocusInWindow();
-        g.drawImage(renderImage, 0, 0, this);
-        
         g.setFont(font);
+        g.drawImage(renderImage, 0, 0, this);
         if (gameObjects.size() > 0 && camera != null)
             drawTriangles(g);
+
+        
         nanosecondsPerFrame = System.nanoTime()-startOfFrame;
     }
 
@@ -276,60 +279,69 @@ public class RenderingPanel extends JPanel implements ActionListener
     private void paintTriangle(Point p1, Point p2, Point p3, Color triangleColor)
     {
         Point tempPoint = new Point();
-        int rgb = triangleColor.getRGB();
-        if (p1.getY() < p2.getY())
+        int rgb = 65536 * triangleColor.getRed() + 256 * triangleColor.getGreen() + triangleColor.getBlue();
+        if (p1.getY() > p2.getY())
         {
             tempPoint = p1;
             p1 = p2;
             p2 = tempPoint;
         }
-        if (p2.getY() < p3.getY())
+        if (p2.getY() > p3.getY())
         {
             tempPoint = p2;
             p2 = p3;
             p3 = tempPoint;
         }
-        if (p1.getY() < p2.getY())
+        if (p1.getY() > p2.getY())
         {
             tempPoint = p1;
             p1 = p2;
             p2 = tempPoint;
         }
-        if (p2.getY() < p3.getY())
+        if (p2.getY() > p3.getY())
         {
             tempPoint = p2;
             p2 = p3;
             p3 = tempPoint;
         } 
-        
-        //renderImage.setRGB(p3.x, p3.y, rgb);
-        for (int i = 0; i < p2.getY() - p3.getY(); i ++)
+
+        int yScanLine;
+        //Top part of triangle: 
+        if (p1.y-p2.y != 0)
         {
-            int yLevel = p3.y + i;
-            int leftCollide;
-            leftCollide = (int)((yLevel-p2.y)/((double)(p3.y-p2.y)/(p3.x-p2.x))+p2.x);
-            int rightCollide; 
-            rightCollide = (int)((yLevel-p1.y)/((double)(p3.y-p1.y)/(p3.x-p1.x))+p1.x);
-            for (int j  = 0; j < rightCollide-leftCollide; j++)
+            for (yScanLine = p1.y; yScanLine < p2.y && yScanLine < renderImage.getHeight(); yScanLine ++)
             {
-                if (leftCollide + j < renderImage.getWidth() && leftCollide + j > 0 && yLevel < renderImage.getHeight() && yLevel > 0)
-                    renderImage.setRGB(leftCollide + j, yLevel, rgb);
+                int edge1, edge2;
+                if (yScanLine > 0)
+                {
+                    edge1 = Math.max(0, Math.min(renderImage.getWidth(), (yScanLine-p1.y)/((p2.y-p1.y)/(p2.x-p1.x)) + p1.x));
+                    edge2 = Math.max(0, Math.min(renderImage.getWidth(), (yScanLine-p1.y)/((p3.y-p1.y)/(p3.x-p1.x)) + p1.x));
+                    drawHorizontalLine(Math.min(edge1, edge2), Math.max(edge1, edge2), yScanLine, rgb);
+                }
             }
         }
 
-        for (int i = 0; i < p1.getY() - p2.getY(); i ++)
+        //bottom part of triangle: 
+        if (p2.y-p2.y != 0)
         {
-            int yLevel = p2.y + i;
-            int leftCollide;
-            leftCollide = (int)((yLevel-p2.y)/((double)(p1.y-p2.y)/(p1.x-p2.x))+p2.x);
-            int rightCollide; 
-            rightCollide = (int)((yLevel-p1.y)/((double)(p3.y-p1.y)/(p3.x-p1.x))+p1.x);
-            for (int j  = 0; j < Math.abs(rightCollide-leftCollide); j++)
+            for (yScanLine = p2.y; yScanLine < p3.y && yScanLine < renderImage.getHeight(); yScanLine ++)
             {
-                if (leftCollide + Integer.signum(rightCollide-leftCollide)*j < renderImage.getWidth() && leftCollide + Integer.signum(rightCollide-leftCollide)*j > 0 && yLevel < renderImage.getHeight() && yLevel > 0)
-                    renderImage.setRGB(leftCollide + Integer.signum(rightCollide-leftCollide)*j, yLevel, rgb);
+                if (yScanLine > 0)
+                {
+                    int edge1 = Math.max(0, Math.min(renderImage.getWidth(), (yScanLine-p3.y)/((p3.y-p2.y)/(p3.x-p2.x)) + p3.x));
+                    int edge2 = Math.max(0, Math.min(renderImage.getWidth(), (yScanLine-p3.y)/((p3.y-p1.y)/(p3.x-p1.x)) + p3.x));
+                    
+                    drawHorizontalLine(Math.min(edge1, edge2), Math.max(edge1, edge2), yScanLine, rgb);
+                }
             }
         }
+    }
+
+    private void drawHorizontalLine(int startOFLineX, int endOfLineX, int levelY, int rgb)
+    {
+        int[] pixelArray = new int[(Math.abs(endOfLineX-startOFLineX))];
+        Arrays.fill(pixelArray, rgb);
+        renderImage.getRaster().setDataElements(startOFLineX, levelY, Math.abs(endOfLineX-startOFLineX), 1, pixelArray);
     }
 
     @Override
