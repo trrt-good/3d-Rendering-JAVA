@@ -1,5 +1,5 @@
 import java.awt.event.*;
-public class InputManager implements KeyListener, MouseMotionListener, MouseListener
+public class InputManager implements KeyListener, MouseMotionListener, MouseListener, WindowListener
 {
     public static final class KEYBINDS
     {
@@ -132,6 +132,47 @@ public class InputManager implements KeyListener, MouseMotionListener, MouseList
 
     @Override
     public void keyTyped(KeyEvent e) {}
+
+	@Override
+	public void windowOpened(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowClosing(WindowEvent e) {
+		TimingHelper.printSummary();
+	}
+
+	@Override
+	public void windowClosed(WindowEvent e) {
+        
+		
+	}
+
+	@Override
+	public void windowIconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowDeiconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowActivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowDeactivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
 
 //#endregion
 }
