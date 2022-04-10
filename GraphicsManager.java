@@ -14,8 +14,8 @@ public class GraphicsManager
 
     public static void startGraphics(String name)
     {
-        gameObject1 = new GameObject(new Vector3(0, 0, 0), "cat.obj", new Color(50, 50, 50), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 1, false);
-        gameObject1.shading = true;
+        gameObject1 = new GameObject(new Vector3(0, 0, 0), "airplane1.obj", new Color(50, 50, 50), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 1, false);
+        gameObject1.shading = false;
         // gameObject2 = new GameObject(new Vector3(0, 0, 0), "cat.obj", new Color(200, 200, 200), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 1, true);
         // gameObject2.shading = true;
         System.out.println("Creating graphics... ");
@@ -26,7 +26,7 @@ public class GraphicsManager
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         mainFrame.setVisible(true);
 
-        renderingPanel = new RenderingPanel(false);
+        renderingPanel = new RenderingPanel(1600, 900);
         mainFrame.getContentPane().add(renderingPanel);
         renderingPanel.addKeyListener(Main.inputManager);
         renderingPanel.addMouseListener(Main.inputManager);

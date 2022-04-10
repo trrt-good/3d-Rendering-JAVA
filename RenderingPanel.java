@@ -7,9 +7,6 @@ import java.util.Arrays;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.lang.ProcessBuilder.Redirect;
-import java.lang.reflect.Array;
-import java.awt.image.DataBuffer;
 public class RenderingPanel extends JPanel implements ActionListener
 {
     private List<GameObject> gameObjects = new ArrayList<GameObject>();
@@ -20,9 +17,8 @@ public class RenderingPanel extends JPanel implements ActionListener
     //for rendering:
     private BufferedImage renderImage;
     private Color backgroundColor;
-    private Plane renderPlane;
-    private boolean antiAliasing;
-        
+    private Plane renderPlane;        
+    private int[] emptyImagePixelColorData;
 
     //Camera:
     private Camera camera;
@@ -41,13 +37,14 @@ public class RenderingPanel extends JPanel implements ActionListener
     private Font font = new Font("Times", Font.BOLD, 20);
     
 
-    public RenderingPanel(boolean antiAliasingIn)
+    public RenderingPanel(int width, int height)
     {
-        renderImage = new BufferedImage(1600, 900, BufferedImage.TYPE_INT_RGB);
+        renderImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        emptyImagePixelColorData = new int[width*height];
         backgroundColor = new Color(200, 220, 255);
+        Arrays.fill(emptyImagePixelColorData, convertToIntRGB(backgroundColor));
         
         setBackground(backgroundColor);
-        antiAliasing = antiAliasingIn;
 
         timer = new Timer(1, this);
         timer.start();
@@ -57,13 +54,11 @@ public class RenderingPanel extends JPanel implements ActionListener
     {
         long startOfFrame = System.nanoTime();
         super.paintComponent(g);
-        requestFocusInWindow();
+        
         g.setFont(font);
         g.drawImage(renderImage, 0, 0, this);
         if (gameObjects.size() > 0 && camera != null)
             drawTriangles(g);
-
-        
         nanosecondsPerFrame = System.nanoTime()-startOfFrame;
     }
 
@@ -126,22 +121,17 @@ public class RenderingPanel extends JPanel implements ActionListener
     
     private void drawTriangles(Graphics g)
     {
-        Graphics2D g2d = (Graphics2D)g;
-        if (antiAliasing)
-        {
-            RenderingHints rh = new RenderingHints(
-                RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
-            g2d.setRenderingHints(rh);
-        }
+        
+        renderImage.getRaster().setDataElements(0, 0, renderImage.getWidth(), renderImage.getHeight(), emptyImagePixelColorData);
         renderPlane = camera.getRenderPlane();
 
         orderTriangles();    
 
         for (int i = 0; i < triangles.size(); i ++)
         {
-            renderTriangle(g2d, triangles.get(i));
+            renderTriangle(g, triangles.get(i));
         }
+        
     }
 
     private void orderTriangles()
@@ -166,7 +156,7 @@ public class RenderingPanel extends JPanel implements ActionListener
         }
     }
 
-    private void renderTriangle(Graphics2D g2d, Triangle triangle)
+    private void renderTriangle(Graphics g, Triangle triangle)
     {
         Point p1ScreenCoords = new Point();
         Point p2ScreenCoords = new Point();
@@ -264,10 +254,9 @@ public class RenderingPanel extends JPanel implements ActionListener
                     
                 else
                 {
-                    g2d.setStroke(new BasicStroke(triangle.lineThickness));
-                    g2d.drawLine(p1ScreenCoords.x, p1ScreenCoords.y, p2ScreenCoords.x, p2ScreenCoords.y);
-                    g2d.drawLine(p2ScreenCoords.x, p2ScreenCoords.y, p3ScreenCoords.x, p3ScreenCoords.y);
-                    g2d.drawLine(p3ScreenCoords.x, p3ScreenCoords.y, p1ScreenCoords.x, p1ScreenCoords.y);
+                    g.drawLine(p1ScreenCoords.x, p1ScreenCoords.y, p2ScreenCoords.x, p2ScreenCoords.y);
+                    g.drawLine(p2ScreenCoords.x, p2ScreenCoords.y, p3ScreenCoords.x, p3ScreenCoords.y);
+                    g.drawLine(p3ScreenCoords.x, p3ScreenCoords.y, p1ScreenCoords.x, p1ScreenCoords.y);
                 }
             }
         }
@@ -276,10 +265,15 @@ public class RenderingPanel extends JPanel implements ActionListener
         // g2d.drawString("time per frame: " + nanosecondsPerFrame/1000000.0 + "ms", 10, 20);
     }
 
+    private int convertToIntRGB(Color color)
+    {
+        return 65536 * color.getRed() + 256 * color.getGreen() + color.getBlue();
+    }
+
     private void paintTriangle(Point p1, Point p2, Point p3, Color triangleColor)
     {
         Point tempPoint = new Point();
-        int rgb = 65536 * triangleColor.getRed() + 256 * triangleColor.getGreen() + triangleColor.getBlue();
+        int rgb = convertToIntRGB(triangleColor);
         if (p1.getY() > p2.getY())
         {
             tempPoint = p1;
@@ -306,32 +300,86 @@ public class RenderingPanel extends JPanel implements ActionListener
         } 
 
         int yScanLine;
+        int edge1, edge2;
         //Top part of triangle: 
-        if (p1.y-p2.y != 0)
+        if (p2.y-p1.y != 0 && p3.y-p1.y != 0)
         {
-            for (yScanLine = p1.y; yScanLine < p2.y && yScanLine < renderImage.getHeight(); yScanLine ++)
+            if (p2.x - p1.x == 0)
             {
-                int edge1, edge2;
-                if (yScanLine > 0)
+                edge1 = Math.max(0, Math.min(renderImage.getWidth(), p1.x));
+                for (yScanLine = p1.y; yScanLine < p2.y && yScanLine < renderImage.getHeight(); yScanLine ++)
                 {
-                    edge1 = Math.max(0, Math.min(renderImage.getWidth(), (yScanLine-p1.y)/((p2.y-p1.y)/(p2.x-p1.x)) + p1.x));
-                    edge2 = Math.max(0, Math.min(renderImage.getWidth(), (yScanLine-p1.y)/((p3.y-p1.y)/(p3.x-p1.x)) + p1.x));
-                    drawHorizontalLine(Math.min(edge1, edge2), Math.max(edge1, edge2), yScanLine, rgb);
+                    if (yScanLine > 0)
+                    {
+                        edge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-p1.y)/((double)(p3.y-p1.y)/(p3.x-p1.x)) + p1.x)));
+                        drawHorizontalLine(Math.min(edge1, edge2), Math.max(edge1, edge2), yScanLine, rgb);
+                    }
+                }
+            }
+            else if (p3.x-p1.x == 0)
+            {
+                edge2 = Math.max(0, Math.min(renderImage.getWidth(), p1.x));
+                for (yScanLine = p1.y; yScanLine < p2.y && yScanLine < renderImage.getHeight(); yScanLine ++)
+                {
+                    if (yScanLine > 0)
+                    {
+                        edge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-p1.y)/((double)(p2.y-p1.y)/(p2.x-p1.x)) + p1.x)));
+                        drawHorizontalLine(Math.min(edge1, edge2), Math.max(edge1, edge2), yScanLine, rgb);
+                    }
+                }
+            }
+            else
+            {
+                for (yScanLine = p1.y; yScanLine < p2.y && yScanLine < renderImage.getHeight(); yScanLine ++)
+                {
+                    if (yScanLine > 0)
+                    {
+                        edge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-p1.y)/((double)(p2.y-p1.y)/(p2.x-p1.x)) + p1.x)));
+                        edge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-p1.y)/((double)(p3.y-p1.y)/(p3.x-p1.x)) + p1.x)));
+                        drawHorizontalLine(Math.min(edge1, edge2), Math.max(edge1, edge2), yScanLine, rgb);
+                    }
                 }
             }
         }
+        
 
         //bottom part of triangle: 
-        if (p2.y-p2.y != 0)
+        if (p3.y-p2.y != 0 && p3.y-p1.y != 0)
         {
-            for (yScanLine = p2.y; yScanLine < p3.y && yScanLine < renderImage.getHeight(); yScanLine ++)
+            if (p3.x-p2.x == 0)
             {
-                if (yScanLine > 0)
+                edge1 = Math.max(0, Math.min(renderImage.getWidth(), p2.x));
+                for (yScanLine = p2.y; yScanLine < p3.y && yScanLine < renderImage.getHeight(); yScanLine ++)
                 {
-                    int edge1 = Math.max(0, Math.min(renderImage.getWidth(), (yScanLine-p3.y)/((p3.y-p2.y)/(p3.x-p2.x)) + p3.x));
-                    int edge2 = Math.max(0, Math.min(renderImage.getWidth(), (yScanLine-p3.y)/((p3.y-p1.y)/(p3.x-p1.x)) + p3.x));
-                    
-                    drawHorizontalLine(Math.min(edge1, edge2), Math.max(edge1, edge2), yScanLine, rgb);
+                    if (yScanLine > 0)
+                    {
+                        edge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-p3.y)/((double)(p3.y-p1.y)/(p3.x-p1.x)) + p3.x)));
+                        drawHorizontalLine(Math.min(edge1, edge2), Math.max(edge1, edge2), yScanLine, rgb);
+                    }
+                }
+            }
+            else if (p3.x - p1.x == 0)
+            {
+                edge2 = Math.max(0, Math.min(renderImage.getWidth(), p3.x));
+                for (yScanLine = p2.y; yScanLine < p3.y && yScanLine < renderImage.getHeight(); yScanLine ++)
+                {
+                    if (yScanLine > 0)
+                    {
+                        edge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-p3.y)/((double)(p3.y-p2.y)/(p3.x-p2.x)) + p3.x)));
+                        drawHorizontalLine(Math.min(edge1, edge2), Math.max(edge1, edge2), yScanLine, rgb);
+                    }
+                }
+            }
+            else
+            {
+                for (yScanLine = p2.y; yScanLine < p3.y && yScanLine < renderImage.getHeight(); yScanLine ++)
+                {
+                    if (yScanLine > 0)
+                    {
+                        edge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-p3.y)/((double)(p3.y-p2.y)/(p3.x-p2.x)) + p3.x)));
+                        edge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-p3.y)/((double)(p3.y-p1.y)/(p3.x-p1.x)) + p3.x)));
+                        drawHorizontalLine(Math.min(edge1, edge2), Math.max(edge1, edge2), yScanLine, rgb);
+                    }
                 }
             }
         }
@@ -348,6 +396,7 @@ public class RenderingPanel extends JPanel implements ActionListener
     public void actionPerformed(ActionEvent e) 
     {
         this.repaint();
+        requestFocusInWindow();
     }
 }
 
