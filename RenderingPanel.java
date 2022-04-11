@@ -10,7 +10,7 @@ public class RenderingPanel extends JPanel implements ActionListener
     private List<GameObject> gameObjects = new ArrayList<GameObject>();
     private List<Triangle> triangles = new ArrayList<Triangle>();
 
-    private Timer timer;
+    private Timer renderUpdater;
 
     //for rendering:
     private BufferedImage renderImage;
@@ -33,26 +33,33 @@ public class RenderingPanel extends JPanel implements ActionListener
     //used for debug:
     private TimingHelper totalFrameTime = new TimingHelper("totalFrameTime");
     private TimingHelper trianglesOrderTime = new TimingHelper("triangleOrderTime");
-    private TimingHelper trianglesDrawTime = new TimingHelper("trianglesDrawTime");
-    private TimingHelper paintTriangleTime = new TimingHelper("paintTriangleTime");
-    private TimingHelper triangleCalculateTime = new TimingHelper("triangleCalculateTime");
+    private TimingHelper trianglesCalculateTime = new TimingHelper("trianglesCalculateTime");
+    private TimingHelper frameDrawTime = new TimingHelper("frameDrawTime");
 
     public RenderingPanel(int width, int height)
     {
-        timer = new Timer(1, this);
+        renderUpdater = new Timer(1, this);
         setPreferredSize(new Dimension(width, height));
         renderImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         emptyImagePixelColorData = new int[width*height];
         backgroundColor = new Color(200, 220, 255);
         Arrays.fill(emptyImagePixelColorData, convertToIntRGB(backgroundColor));
+    }
 
+    public void startRenderUpdates()
+    {
+        validate();
         totalFrameTime.startTimer();
-        timer.start();
+        renderUpdater.start();
     }
 
     public void paintComponent(Graphics g) 
     {
+        frameDrawTime.startTimer();
         g.drawImage(renderImage, 0, 0, this);
+        frameDrawTime.stopTimer();
+
+        
         if (gameObjects.size() > 0 && camera != null)
             drawTriangles(g);
     }
@@ -124,12 +131,12 @@ public class RenderingPanel extends JPanel implements ActionListener
             orderTriangles();    
         trianglesOrderTime.stopTimer();
 
-        trianglesDrawTime.startTimer();
+        trianglesCalculateTime.startTimer();
         for (int i = 0; i < triangles.size(); i ++)
         {
             renderTriangle(g, triangles.get(i));
         }
-        trianglesDrawTime.stopTimer();
+        trianglesCalculateTime.stopTimer();
     }
 
     private void orderTriangles()
@@ -168,7 +175,6 @@ public class RenderingPanel extends JPanel implements ActionListener
         double distanceToTriangle = Vector3.subtract(Vector3.centerOfTriangle(triangle), camera.position).getMagnitude();  
         if (distanceToTriangle < camera.viewDistance)
         {
-            triangleCalculateTime.startTimer();
             if (Vector3.dotProduct(renderPlane.normal, Vector3.subtract(tempPoint1, renderPlane.pointOnPlane)) > 0 && Vector3.dotProduct(renderPlane.normal, Vector3.subtract(tempPoint2, renderPlane.pointOnPlane)) > 0 && Vector3.dotProduct(renderPlane.normal, Vector3.subtract(tempPoint3, renderPlane.pointOnPlane)) > 0)
             {
                 tempPoint1 = Vector3.getIntersectionPoint(Vector3.subtract(tempPoint1, camera.position), camera.position, renderPlane);
@@ -204,7 +210,6 @@ public class RenderingPanel extends JPanel implements ActionListener
                 p3ScreenCoords.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
                 p3ScreenCoords.y = (int)(getHeight()/2 - rotatedPoint.y*pixelsPerUnit);
             }
-            triangleCalculateTime.stopTimer();
 
             if (shouldDrawTriangle)
             {
@@ -238,9 +243,7 @@ public class RenderingPanel extends JPanel implements ActionListener
 
                 if (triangle.fill)
                 {
-                    paintTriangleTime.startTimer();
                     paintTriangle(p1ScreenCoords, p2ScreenCoords, p3ScreenCoords, colorUsed);
-                    paintTriangleTime.stopTimer();
                 }
                 else
                 {
