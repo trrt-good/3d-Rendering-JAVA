@@ -306,7 +306,7 @@ public class RenderingPanel extends JPanel implements ActionListener
                 edge1 = Math.max(0, Math.min(renderImage.getWidth(), p1.x));
                 for (yScanLine = p1.y; yScanLine < p2.y && yScanLine < renderImage.getHeight(); yScanLine ++)
                 {
-                    if (yScanLine > 0)
+                    if (yScanLine >= 0)
                     {
                         edge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-p1.y)/((double)(p3.y-p1.y)/(p3.x-p1.x)) + p1.x)));
                         drawHorizontalLine(Math.min(edge1, edge2), Math.max(edge1, edge2), yScanLine, rgb);
@@ -318,7 +318,7 @@ public class RenderingPanel extends JPanel implements ActionListener
                 edge2 = Math.max(0, Math.min(renderImage.getWidth(), p1.x));
                 for (yScanLine = p1.y; yScanLine < p2.y && yScanLine < renderImage.getHeight(); yScanLine ++)
                 {
-                    if (yScanLine > 0)
+                    if (yScanLine >= 0)
                     {
                         edge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-p1.y)/((double)(p2.y-p1.y)/(p2.x-p1.x)) + p1.x)));
                         drawHorizontalLine(Math.min(edge1, edge2), Math.max(edge1, edge2), yScanLine, rgb);
@@ -329,7 +329,7 @@ public class RenderingPanel extends JPanel implements ActionListener
             {
                 for (yScanLine = p1.y; yScanLine < p2.y && yScanLine < renderImage.getHeight(); yScanLine ++)
                 {
-                    if (yScanLine > 0)
+                    if (yScanLine >= 0)
                     {
                         edge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-p1.y)/((double)(p2.y-p1.y)/(p2.x-p1.x)) + p1.x)));
                         edge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-p1.y)/((double)(p3.y-p1.y)/(p3.x-p1.x)) + p1.x)));
@@ -348,7 +348,7 @@ public class RenderingPanel extends JPanel implements ActionListener
                 edge1 = Math.max(0, Math.min(renderImage.getWidth(), p2.x));
                 for (yScanLine = p2.y; yScanLine < p3.y && yScanLine < renderImage.getHeight(); yScanLine ++)
                 {
-                    if (yScanLine > 0)
+                    if (yScanLine >= 0)
                     {
                         edge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-p3.y)/((double)(p3.y-p1.y)/(p3.x-p1.x)) + p3.x)));
                         drawHorizontalLine(Math.min(edge1, edge2), Math.max(edge1, edge2), yScanLine, rgb);
@@ -360,7 +360,7 @@ public class RenderingPanel extends JPanel implements ActionListener
                 edge2 = Math.max(0, Math.min(renderImage.getWidth(), p3.x));
                 for (yScanLine = p2.y; yScanLine < p3.y && yScanLine < renderImage.getHeight(); yScanLine ++)
                 {
-                    if (yScanLine > 0)
+                    if (yScanLine >= 0)
                     {
                         edge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-p3.y)/((double)(p3.y-p2.y)/(p3.x-p2.x)) + p3.x)));
                         drawHorizontalLine(Math.min(edge1, edge2), Math.max(edge1, edge2), yScanLine, rgb);
@@ -371,7 +371,7 @@ public class RenderingPanel extends JPanel implements ActionListener
             {
                 for (yScanLine = p2.y; yScanLine < p3.y && yScanLine < renderImage.getHeight(); yScanLine ++)
                 {
-                    if (yScanLine > 0)
+                    if (yScanLine >= 0)
                     {
                         edge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-p3.y)/((double)(p3.y-p2.y)/(p3.x-p2.x)) + p3.x)));
                         edge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-p3.y)/((double)(p3.y-p1.y)/(p3.x-p1.x)) + p3.x)));
