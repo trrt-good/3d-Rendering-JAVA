@@ -40,23 +40,18 @@ public class RenderingPanel extends JPanel implements ActionListener
     public RenderingPanel(int width, int height)
     {
         timer = new Timer(1, this);
+        setPreferredSize(new Dimension(width, height));
         renderImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         emptyImagePixelColorData = new int[width*height];
         backgroundColor = new Color(200, 220, 255);
         Arrays.fill(emptyImagePixelColorData, convertToIntRGB(backgroundColor));
-        
-        setBackground(backgroundColor);
-        
-        
+
         totalFrameTime.startTimer();
-        
         timer.start();
     }
 
     public void paintComponent(Graphics g) 
     {
-        super.paintComponent(g);
-    
         g.drawImage(renderImage, 0, 0, this);
         if (gameObjects.size() > 0 && camera != null)
             drawTriangles(g);
@@ -389,7 +384,7 @@ public class RenderingPanel extends JPanel implements ActionListener
     {
         totalFrameTime.stopTimer();
         totalFrameTime.startTimer();
-        this.repaint();
+        repaint();
         requestFocusInWindow();
     }
 }
