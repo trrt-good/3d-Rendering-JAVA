@@ -80,19 +80,10 @@ public class Triangle
         int green = color.getGreen() + brightness - darkness;
         int blue = color.getBlue() + brightness - darkness;
 
-        if (red > 255)
-            red = 255;
-        if (red < 0)
-            red = 0;
-        if (green > 255)
-            green = 255;
-        if (green < 0)
-            green = 0;
-        if (blue > 255)
-            blue = 255;
-        if (blue < 0)
-            blue = 0;
-        
+        red = Math.max(0, Math.min(red, 255));
+        green = Math.max(0, Math.min(green, 255));
+        blue = Math.max(0, Math.min(blue, 255));
+
         colorWithLighting = new Color(red, green, blue);
     }
 
