@@ -39,14 +39,17 @@ public class RenderingPanel extends JPanel implements ActionListener
 
     public RenderingPanel(int width, int height)
     {
+        timer = new Timer(1, this);
         renderImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         emptyImagePixelColorData = new int[width*height];
         backgroundColor = new Color(200, 220, 255);
         Arrays.fill(emptyImagePixelColorData, convertToIntRGB(backgroundColor));
         
         setBackground(backgroundColor);
-
-        timer = new Timer(1, this);
+        
+        
+        totalFrameTime.startTimer();
+        
         timer.start();
     }
 
@@ -118,12 +121,12 @@ public class RenderingPanel extends JPanel implements ActionListener
     
     private void drawTriangles(Graphics g)
     {
-        totalFrameTime.startTimer();
         renderImage.getRaster().setDataElements(0, 0, renderImage.getWidth(), renderImage.getHeight(), emptyImagePixelColorData);
         renderPlane = camera.getRenderPlane();
 
         trianglesOrderTime.startTimer();
-        orderTriangles();    
+        if (gameObjects.size() > 0 && triangles.size() > 0)
+            orderTriangles();    
         trianglesOrderTime.stopTimer();
 
         trianglesDrawTime.startTimer();
@@ -132,8 +135,6 @@ public class RenderingPanel extends JPanel implements ActionListener
             renderTriangle(g, triangles.get(i));
         }
         trianglesDrawTime.stopTimer();
-
-        totalFrameTime.stopTimer();
     }
 
     private void orderTriangles()
@@ -142,22 +143,16 @@ public class RenderingPanel extends JPanel implements ActionListener
         while (changed == true)
         {
             changed = false;
-            for (int i = 0; i < gameObjects.size(); i++)
+            for (int i = 0; i < triangles.size()-1; i++)
             {
-                if (gameObjects.get(i).shading && !gameObjects.get(i).wireframe)
+                if (triangles.get(i).fill && triangles.get(i).parentGameObject.shading)
                 {
-                    for (int j = 0; j < gameObjects.get(i).triangles.size()-1; j++)
+                    if (Vector3.subtract(camera.position, Vector3.centerOfTriangle(triangles.get(i))).getMagnitude() < Vector3.subtract(camera.position, Vector3.centerOfTriangle(triangles.get(i+1))).getMagnitude())
                     {
-                        if (triangles.get(j).parentGameObject.shading)
-                        {
-                            if (Vector3.subtract(camera.position, Vector3.centerOfTriangle(triangles.get(j))).getMagnitude() < Vector3.subtract(camera.position, Vector3.centerOfTriangle(triangles.get(j+1))).getMagnitude())
-                            {
-                                Triangle closerTriangle = triangles.get(j);
-                                triangles.set(j, triangles.get(j+1));
-                                triangles.set(j + 1, closerTriangle);
-                                changed = true;
-                            }
-                        }
+                        Triangle closerTriangle = triangles.get(i);
+                        triangles.set(i, triangles.get(i+1));
+                        triangles.set(i + 1, closerTriangle);
+                        changed = true;
                     }
                 }
             }
@@ -392,6 +387,8 @@ public class RenderingPanel extends JPanel implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e) 
     {
+        totalFrameTime.stopTimer();
+        totalFrameTime.startTimer();
         this.repaint();
         requestFocusInWindow();
     }

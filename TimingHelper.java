@@ -31,7 +31,7 @@ public class TimingHelper
         if (lastProcessTime == 0)
             averageProcessTime = mostRecentProcessTime;
         if (lastProcessTime != 0)
-            mostRecentProcessTime = (averageProcessTime + mostRecentProcessTime)/2;
+            averageProcessTime = (averageProcessTime + mostRecentProcessTime)/2;
     }
 
     public static void printSummary()
