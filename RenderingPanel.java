@@ -147,7 +147,7 @@ public class RenderingPanel extends JPanel implements ActionListener
             changed = false;
             for (int i = 0; i < triangles.size()-1; i++)
             {
-                if (triangles.get(i).fill && triangles.get(i).parentGameObject.shading)
+                if (triangles.get(i).parentGameObject.shading)
                 {
                     if (Vector3.subtract(camera.position, Vector3.centerOfTriangle(triangles.get(i))).getMagnitude() < Vector3.subtract(camera.position, Vector3.centerOfTriangle(triangles.get(i+1))).getMagnitude())
                     {
@@ -214,7 +214,7 @@ public class RenderingPanel extends JPanel implements ActionListener
             if (shouldDrawTriangle)
             {
                 Color colorUsed;
-                if (triangle.parentGameObject != null && triangle.parentGameObject.shading && !triangle.parentGameObject.wireframe)
+                if (triangle.parentGameObject != null && triangle.parentGameObject.shading)
                 {
                     Color litColor = triangle.getColorWithLighting();
                     if (fogEnabled && distanceToTriangle > fogStartDistance)
@@ -240,17 +240,7 @@ public class RenderingPanel extends JPanel implements ActionListener
                 }   
                 else 
                     colorUsed = triangle.color;
-
-                if (triangle.fill)
-                {
-                    paintTriangle(p1ScreenCoords, p2ScreenCoords, p3ScreenCoords, colorUsed);
-                }
-                else
-                {
-                    g.drawLine(p1ScreenCoords.x, p1ScreenCoords.y, p2ScreenCoords.x, p2ScreenCoords.y);
-                    g.drawLine(p2ScreenCoords.x, p2ScreenCoords.y, p3ScreenCoords.x, p3ScreenCoords.y);
-                    g.drawLine(p3ScreenCoords.x, p3ScreenCoords.y, p1ScreenCoords.x, p1ScreenCoords.y);
-                }
+                paintTriangle(p1ScreenCoords, p2ScreenCoords, p3ScreenCoords, colorUsed);
             }
         }
     }

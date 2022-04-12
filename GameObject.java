@@ -2,31 +2,28 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import javax.sound.midi.Track;
-
 import java.awt.Color;
-import java.beans.VetoableChangeListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 public class GameObject 
 {
     public List<Triangle> mesh;
-    private Vector3 globalPosition;
-    private Vector3 localCenter = new Vector3();
-    private EulerAngle orientation;
+    
     public Color color;
     public boolean shading = true;
     public String name;
 
-    public boolean wireframe;
+    private PlayerController playerController;
+    private Vector3 globalPosition;
+    private Vector3 localCenter = new Vector3();
+    private EulerAngle orientation;
 
-    public GameObject(Vector3 positionIn, String modelFileName, Color colorIn, EulerAngle orientationIn, double scaleIn, boolean wireframeIn)
+    public GameObject(Vector3 positionIn, String modelFileName, Color colorIn, EulerAngle orientationIn, double scaleIn)
     {
         System.out.print("Creating gameObject: " + modelFileName + "... ");
         long start = System.nanoTime();
         mesh = new ArrayList<Triangle>();
         orientation = orientationIn;
-        wireframe = wireframeIn;
         color = colorIn;
         name = modelFileName.substring(0, modelFileName.indexOf("."));
         globalPosition = new Vector3();
@@ -40,7 +37,7 @@ public class GameObject
 
     public void recalculateLighting(Lighting lighting)
     {
-        if (!wireframe && shading)
+        if (shading)
         {
             for (int i = 0; i < mesh.size(); i++)
             {
@@ -201,12 +198,12 @@ public class GameObject
                     }
                     if (indexArr.length <= 3)
                     {
-                        mesh.add(new Triangle(this, vertices.get(indexArr[0]), vertices.get(indexArr[1]), vertices.get(indexArr[2]), color, !wireframe));
+                        mesh.add(new Triangle(this, vertices.get(indexArr[0]), vertices.get(indexArr[1]), vertices.get(indexArr[2]), color));
                     }
                     else
                     {
-                        mesh.add(new Triangle(this, vertices.get(indexArr[0]), vertices.get(indexArr[1]), vertices.get(indexArr[2]), color, !wireframe));
-                        mesh.add(new Triangle(this, vertices.get(indexArr[0]), vertices.get(indexArr[2]), vertices.get(indexArr[3]), color, !wireframe));
+                        mesh.add(new Triangle(this, vertices.get(indexArr[0]), vertices.get(indexArr[1]), vertices.get(indexArr[2]), color));
+                        mesh.add(new Triangle(this, vertices.get(indexArr[0]), vertices.get(indexArr[2]), vertices.get(indexArr[3]), color));
                     }
                 }
             }
