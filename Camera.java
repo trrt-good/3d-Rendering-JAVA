@@ -41,8 +41,8 @@ public class Camera
         @Override
         public void actionPerformed(ActionEvent e) 
         {
-            GraphicsManager.gameObject1.localRotate(new EulerAngle(0, Math.toRadians(10), 0));
-            GraphicsManager.gameObject1.move(new Vector3(1, 0, 0));
+            //GraphicsManager.gameObject1.localRotate(new EulerAngle(0, Math.toRadians(10), 0));
+            //GraphicsManager.gameObject1.move(new Vector3(1, 0, 0));
             // GraphicsManager.renderingPanel.mainLight.direction = getDirectionVector();
             if (Main.inputManager.forward)
                 moveForward(movementSpeed/100.0);

@@ -48,9 +48,9 @@ public class RenderingPanel extends JPanel implements ActionListener
 
     public void startRenderUpdates()
     {
-        validate();
         totalFrameTime.startTimer();
         renderUpdater.start();
+        validate();
     }
 
     public void paintComponent(Graphics g) 
@@ -59,7 +59,7 @@ public class RenderingPanel extends JPanel implements ActionListener
         g.drawImage(renderImage, 0, 0, this);
         frameDrawTime.stopTimer();
 
-        
+
         if (gameObjects.size() > 0 && camera != null)
             drawTriangles(g);
     }
