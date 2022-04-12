@@ -13,6 +13,12 @@ public class Plane
         pointOnPlane = pointIn;
     }
 
+    public Plane(Vector3 point1, Vector3 point2, Vector3 point3)
+    {
+        normal = Vector3.crossProduct(Vector3.subtract(point1, point2), Vector3.subtract(point2, point3));
+        pointOnPlane = point1;
+    }
+
     public double getDValue()
     {
         return -normal.x*pointOnPlane.x - normal.y*pointOnPlane.y - normal.z*pointOnPlane.z;

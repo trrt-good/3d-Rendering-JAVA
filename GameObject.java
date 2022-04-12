@@ -2,14 +2,17 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import javax.sound.midi.Track;
+
 import java.awt.Color;
+import java.beans.VetoableChangeListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 public class GameObject 
 {
-    public List<Triangle> triangles;
-    private Vector3 position;
-    public Vector3 centerOfRotation;
+    public List<Triangle> mesh;
+    private Vector3 globalPosition;
+    private Vector3 localCenter = new Vector3();
     private EulerAngle orientation;
     public Color color;
     public boolean shading = true;
@@ -21,17 +24,17 @@ public class GameObject
     {
         System.out.print("Creating gameObject: " + modelFileName + "... ");
         long start = System.nanoTime();
-        triangles = new ArrayList<Triangle>();
+        mesh = new ArrayList<Triangle>();
         orientation = orientationIn;
         wireframe = wireframeIn;
         color = colorIn;
         name = modelFileName.substring(0, modelFileName.indexOf("."));
-        position = new Vector3();
+        globalPosition = new Vector3();
         readObjFile(modelFileName);
-        setRotation(orientation);
+        setGlobalRotation(orientation);
         setScale(scaleIn);
         setPosition(positionIn);
-        System.out.println("finished in all " + triangles.size() + " triangles in " + (System.nanoTime() - start)/1000000 + "ms");
+        System.out.println("finished in all " + mesh.size() + " triangles in " + (System.nanoTime() - start)/1000000 + "ms");
 
     }
 
@@ -39,74 +42,106 @@ public class GameObject
     {
         if (!wireframe && shading)
         {
-            for (int i = 0; i < triangles.size(); i++)
+            for (int i = 0; i < mesh.size(); i++)
             {
-                triangles.get(i).calculateLightingColor(lighting);
+                mesh.get(i).calculateLightingColor(lighting);
             }
         }
     }
 
     public void setPosition(Vector3 positionIn)
     {
-        for (int i = 0; i < triangles.size(); i++)
+        Triangle triangle;
+        for (int i = 0; i < mesh.size(); i++)
         {
-            triangles.get(i).point1 = Vector3.add(triangles.get(i).point1, Vector3.subtract(positionIn, position));
-            triangles.get(i).point2 = Vector3.add(triangles.get(i).point2, Vector3.subtract(positionIn, position));
-            triangles.get(i).point3 = Vector3.add(triangles.get(i).point3, Vector3.subtract(positionIn, position));
+            triangle = mesh.get(i);
+            triangle.point1 = Vector3.subtract(Vector3.add(triangle.point1, Vector3.subtract(positionIn, globalPosition)), localCenter);
+            triangle.point2 = Vector3.subtract(Vector3.add(triangle.point2, Vector3.subtract(positionIn, globalPosition)), localCenter);
+            triangle.point3 = Vector3.subtract(Vector3.add(triangle.point3, Vector3.subtract(positionIn, globalPosition)), localCenter);
         }
-        position = positionIn;
+        globalPosition = positionIn;
     }
 
     public void move(Vector3 amount)
     {
-        for (int i = 0; i < triangles.size(); i++)
+        Triangle triangle;
+        for (int i = 0; i < mesh.size(); i++)
         {
-            triangles.get(i).point1 = Vector3.add(triangles.get(i).point1, amount);
-            triangles.get(i).point2 = Vector3.add(triangles.get(i).point2, amount);
-            triangles.get(i).point3 = Vector3.add(triangles.get(i).point3, amount);
+            triangle = mesh.get(i);
+            triangle.point1 = Vector3.add(triangle.point1, amount);
+            triangle.point2 = Vector3.add(triangle.point2, amount);
+            triangle.point3 = Vector3.add(triangle.point3, amount);
         }
-        position = Vector3.add(position, amount);
+        globalPosition = Vector3.add(globalPosition, amount);
     }
 
     public void setScale(double scale)
     {
-        for (int i = 0; i < triangles.size(); i++)
+        Triangle triangle;
+        for (int i = 0; i < mesh.size(); i++)
         {
-            triangles.get(i).point1 = Vector3.multiply(triangles.get(i).point1, scale);
-            triangles.get(i).point2 = Vector3.multiply(triangles.get(i).point2, scale);
-            triangles.get(i).point3 = Vector3.multiply(triangles.get(i).point3, scale);
+            triangle = mesh.get(i);
+            triangle.point1 = Vector3.multiply(triangle.point1, scale);
+            triangle.point2 = Vector3.multiply(triangle.point2, scale);
+            triangle.point3 = Vector3.multiply(triangle.point3, scale);
+        }
+        localCenter = Vector3.multiply(localCenter, scale);
+    }
+
+    public void localRotate(EulerAngle angle)
+    {
+        Triangle triangle;
+        for (int i = 0; i < mesh.size(); i++)
+        {
+            triangle = mesh.get(i);
+            triangle.point1 = Vector3.rotateAroundXaxis(triangle.point1, angle.x);
+            triangle.point1 = Vector3.rotateAroundYaxis(triangle.point1, angle.y);
+            triangle.point1 = Vector3.rotateAroundZaxis(triangle.point1, angle.z);
+            triangle.point2 = Vector3.rotateAroundXaxis(triangle.point2, angle.x);
+            triangle.point2 = Vector3.rotateAroundYaxis(triangle.point2, angle.y);
+            triangle.point2 = Vector3.rotateAroundZaxis(triangle.point2, angle.z);
+            triangle.point3 = Vector3.rotateAroundXaxis(triangle.point3, angle.x);
+            triangle.point3 = Vector3.rotateAroundYaxis(triangle.point3, angle.y);
+            triangle.point3 = Vector3.rotateAroundZaxis(triangle.point3, angle.z);
+        }
+        orientation = orientation.add(angle);
+    }
+
+    public void setGlobalRotation(EulerAngle angle)
+    {
+        Triangle triangle;
+        for (int i = 0; i < mesh.size(); i++)
+        {
+            triangle = mesh.get(i);
+            triangle.point1 = Vector3.rotateAroundXaxis(triangle.point1, angle.x-orientation.x);
+            triangle.point1 = Vector3.rotateAroundYaxis(triangle.point1, angle.y-orientation.x);
+            triangle.point1 = Vector3.rotateAroundZaxis(triangle.point1, angle.z-orientation.x);
+            triangle.point2 = Vector3.rotateAroundXaxis(triangle.point2, angle.x-orientation.x);
+            triangle.point2 = Vector3.rotateAroundYaxis(triangle.point2, angle.y-orientation.x);
+            triangle.point2 = Vector3.rotateAroundZaxis(triangle.point2, angle.z-orientation.x);
+            triangle.point3 = Vector3.rotateAroundXaxis(triangle.point3, angle.x-orientation.x);
+            triangle.point3 = Vector3.rotateAroundYaxis(triangle.point3, angle.y-orientation.x);
+            triangle.point3 = Vector3.rotateAroundZaxis(triangle.point3, angle.z-orientation.x);
         }
     }
 
-    public void rotate(EulerAngle angle)
+    public void setLocalRotation(EulerAngle angle)
     {
-        for (int i = 0; i < triangles.size(); i++)
+        Triangle triangle;
+        for (int i = 0; i < mesh.size(); i++)
         {
-            triangles.get(i).point1 = Vector3.rotateAroundXaxis(triangles.get(i).point1, angle.x);
-            triangles.get(i).point1 = Vector3.rotateAroundYaxis(triangles.get(i).point1, angle.y);
-            triangles.get(i).point1 = Vector3.rotateAroundZaxis(triangles.get(i).point1, angle.z);
-            triangles.get(i).point2 = Vector3.rotateAroundXaxis(triangles.get(i).point2, angle.x);
-            triangles.get(i).point2 = Vector3.rotateAroundYaxis(triangles.get(i).point2, angle.y);
-            triangles.get(i).point2 = Vector3.rotateAroundZaxis(triangles.get(i).point2, angle.z);
-            triangles.get(i).point3 = Vector3.rotateAroundXaxis(triangles.get(i).point3, angle.x);
-            triangles.get(i).point3 = Vector3.rotateAroundYaxis(triangles.get(i).point3, angle.y);
-            triangles.get(i).point3 = Vector3.rotateAroundZaxis(triangles.get(i).point3, angle.z);
-        }
-    }
+            triangle = mesh.get(i);
+            triangle.point1 = Vector3.rotateAroundXaxis(triangle.point1, angle.x-orientation.x);
+            triangle.point1 = Vector3.rotateAroundYaxis(triangle.point1, angle.y-orientation.x);
+            triangle.point1 = Vector3.rotateAroundZaxis(triangle.point1, angle.z-orientation.x);
 
-    public void setRotation(EulerAngle angle)
-    {
-        for (int i = 0; i < triangles.size(); i++)
-        {
-            triangles.get(i).point1 = Vector3.rotateAroundXaxis(triangles.get(i).point1, angle.x-orientation.x);
-            triangles.get(i).point1 = Vector3.rotateAroundYaxis(triangles.get(i).point1, angle.y-orientation.x);
-            triangles.get(i).point1 = Vector3.rotateAroundZaxis(triangles.get(i).point1, angle.z-orientation.x);
-            triangles.get(i).point2 = Vector3.rotateAroundXaxis(triangles.get(i).point2, angle.x-orientation.x);
-            triangles.get(i).point2 = Vector3.rotateAroundYaxis(triangles.get(i).point2, angle.y-orientation.x);
-            triangles.get(i).point2 = Vector3.rotateAroundZaxis(triangles.get(i).point2, angle.z-orientation.x);
-            triangles.get(i).point3 = Vector3.rotateAroundXaxis(triangles.get(i).point3, angle.x-orientation.x);
-            triangles.get(i).point3 = Vector3.rotateAroundYaxis(triangles.get(i).point3, angle.y-orientation.x);
-            triangles.get(i).point3 = Vector3.rotateAroundZaxis(triangles.get(i).point3, angle.z-orientation.x);
+            triangle.point2 = Vector3.rotateAroundXaxis(triangle.point2, angle.x-orientation.x);
+            triangle.point2 = Vector3.rotateAroundYaxis(triangle.point2, angle.y-orientation.x);
+            triangle.point2 = Vector3.rotateAroundZaxis(triangle.point2, angle.z-orientation.x);
+
+            triangle.point3 = Vector3.rotateAroundXaxis(triangle.point3, angle.x-orientation.x);
+            triangle.point3 = Vector3.rotateAroundYaxis(triangle.point3, angle.y-orientation.x);
+            triangle.point3 = Vector3.rotateAroundZaxis(triangle.point3, angle.z-orientation.x);
         }
     }
 
@@ -134,7 +169,12 @@ public class GameObject
                 if (line.startsWith("v "))
                 {
                     String[] lineArr = line.substring(1).trim().split(" ");
-                    vertices.add(new Vector3(Double.parseDouble(lineArr[0]), Double.parseDouble(lineArr[1]), Double.parseDouble(lineArr[2])));
+                    Vector3 vertex = new Vector3(Double.parseDouble(lineArr[0]), Double.parseDouble(lineArr[1]), Double.parseDouble(lineArr[2]));
+                    if (localCenter.getSqrMagnitude() == 0)
+                        localCenter = new Vector3(vertex);
+                    else
+                        localCenter = Vector3.multiply(Vector3.add(localCenter, vertex), 0.5);
+                    vertices.add(vertex);
                 }
                 if (line.startsWith("f "))
                 {
@@ -147,12 +187,12 @@ public class GameObject
                     }
                     if (indexArr.length <= 3)
                     {
-                        triangles.add(new Triangle(this, vertices.get(indexArr[0]), vertices.get(indexArr[1]), vertices.get(indexArr[2]), color, !wireframe));
+                        mesh.add(new Triangle(this, vertices.get(indexArr[0]), vertices.get(indexArr[1]), vertices.get(indexArr[2]), color, !wireframe));
                     }
                     else
                     {
-                        triangles.add(new Triangle(this, vertices.get(indexArr[0]), vertices.get(indexArr[1]), vertices.get(indexArr[2]), color, !wireframe));
-                        triangles.add(new Triangle(this, vertices.get(indexArr[0]), vertices.get(indexArr[2]), vertices.get(indexArr[3]), color, !wireframe));
+                        mesh.add(new Triangle(this, vertices.get(indexArr[0]), vertices.get(indexArr[1]), vertices.get(indexArr[2]), color, !wireframe));
+                        mesh.add(new Triangle(this, vertices.get(indexArr[0]), vertices.get(indexArr[2]), vertices.get(indexArr[3]), color, !wireframe));
                     }
                 }
             }

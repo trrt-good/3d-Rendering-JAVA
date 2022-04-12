@@ -10,4 +10,9 @@ public class EulerAngle
         y = yIn;
         z = zIn;
     }
+
+    public EulerAngle add(EulerAngle angle)
+    {
+        return new EulerAngle(x + angle.x, y + angle.y, z + angle.z);
+    }
 }

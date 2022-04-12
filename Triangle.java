@@ -65,6 +65,11 @@ public class Triangle
         parentGameObject = parentGameObjectIn;
     }
 
+    public Plane getPlane()
+    {
+        return new Plane(point1, point2, point3);
+    }
+
     public void calculateLightingColor(Lighting lighting)
     {
         int brightness = 0;

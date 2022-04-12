@@ -79,7 +79,7 @@ public class RenderingPanel extends JPanel implements ActionListener
         System.out.print("\tadding gameObject " + gameObject.name + "... ");
         gameObjects.add(gameObject);
         lightingObject.update(gameObjects);
-        triangles.addAll(gameObject.triangles);
+        triangles.addAll(gameObject.mesh);
         System.out.println("finished in " + (System.nanoTime()-gameObjectStartTime)/1000000.0 + "ms");
     }
 
