@@ -13,12 +13,12 @@ public class GameObject
     public boolean shading = true;
     public String name;
 
-    private PlayerController playerController;
+    private PlayerController playerController = null;
     private Vector3 globalPosition;
     private Vector3 localCenter = new Vector3();
     private EulerAngle orientation;
 
-    public GameObject(Vector3 positionIn, String modelFileName, Color colorIn, EulerAngle orientationIn, double scaleIn)
+    public GameObject(Vector3 positionIn, EulerAngle orientationIn, double scaleIn, String modelFileName, Color colorIn)
     {
         System.out.print("Creating gameObject: " + modelFileName + "... ");
         long start = System.nanoTime();
@@ -32,7 +32,23 @@ public class GameObject
         setScale(scaleIn);
         setPosition(positionIn);
         System.out.println("finished in all " + mesh.size() + " triangles in " + (System.nanoTime() - start)/1000000 + "ms");
-        System.out.println(localCenter);
+    }
+
+    public GameObject(Vector3 positionIn, EulerAngle orientationIn, double scaleIn, String modelFileName, Color colorIn, PlayerController playerControllerIn)
+    {
+        System.out.print("Creating gameObject: " + modelFileName + "... ");
+        long start = System.nanoTime();
+        mesh = new ArrayList<Triangle>();
+        orientation = orientationIn;
+        color = colorIn;
+        name = modelFileName.substring(0, modelFileName.indexOf("."));
+        globalPosition = new Vector3();
+        readObjFile(modelFileName);
+        setGlobalRotation(orientation);
+        setScale(scaleIn);
+        setPosition(positionIn);
+        playerController = playerControllerIn;
+        System.out.println("finished in all " + mesh.size() + " triangles in " + (System.nanoTime() - start)/1000000 + "ms");
     }
 
     public void recalculateLighting(Lighting lighting)
@@ -44,6 +60,16 @@ public class GameObject
                 mesh.get(i).calculateLightingColor(lighting);
             }
         }
+    }
+
+    public boolean hasPlayerController()
+    {
+        return playerController != null;
+    }
+
+    public PlayerController getPlayerController()
+    {
+        return playerController;
     }
 
     public void setPosition(Vector3 positionIn)
