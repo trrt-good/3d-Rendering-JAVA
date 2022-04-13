@@ -2,6 +2,9 @@ import javax.swing.*;
 import java.awt.event.*;
 public class Camera
 {
+    public static final int ORBITCAM = 0;
+    public static final int FREECAM = 1;
+    public static final int FIXEDCAM = 2;
 
     public final int TICK_SPEED = 1000;
     public int movementSpeed;
@@ -17,7 +20,52 @@ public class Camera
 
     public double renderPlaneWidth;
 
-    public Camera()
+    public Camera(int cameraType, double viewDistanceIn, double fovIn)
+    {
+        switch (cameraType) {
+            case 0:
+                h_orientation = 0;
+                v_orientation = 0;
+                break;
+            case 1:
+                h_orientation = 0;
+                v_orientation = 0;
+                break;
+            case 2:
+                h_orientation = 0;
+                v_orientation = 0;
+                break;
+            
+        }
+        movementSpeed = 1000;
+        sensitivity = 15;
+
+        fov = fovIn;
+        position = new Vector3(0, 0, 0);
+        h_orientation = 0;
+        v_orientation = 0;
+
+        renderPlaneDistance = 10;
+        viewDistance = viewDistanceIn;
+        renderPlaneWidth = getRenderPlaneWidth();
+    }
+
+    public Camera(int cameraType, double sensitivityIn, double viewDistanceIn, double fovIn)
+    {
+        movementSpeed = 1000;
+        sensitivity = 15;
+
+        fov = 60; //strictly reffers to the horizontal fov as vertical fov is based off screen height 
+        position = new Vector3(0, 0, 0);
+        h_orientation = 0;
+        v_orientation = 0;
+
+        renderPlaneDistance = 10;
+        viewDistance = 3300;
+        renderPlaneWidth = getRenderPlaneWidth();
+    }
+
+    public Camera(int cameraType, Vector3 positionIn, int movementSpeed, double sensitivty, double viewDistanceIn, double fovIn)
     {
         movementSpeed = 1000;
         sensitivity = 15;
@@ -122,3 +170,4 @@ public class Camera
         return Math.tan(fov*0.017453292519943295/2)*renderPlaneDistance*2;
     }
 }
+
