@@ -62,6 +62,26 @@ public class GameObject
         }
     }
 
+    public void forwardControl()
+    {
+
+    }
+
+    public void backwardControl()
+    {
+
+    }
+
+    public void leftControl()
+    {
+
+    }
+
+    public void rightControl()
+    {
+        
+    }
+
     public boolean hasPlayerController()
     {
         return playerController != null;
