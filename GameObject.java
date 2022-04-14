@@ -62,6 +62,12 @@ public class GameObject
         }
     }
 
+    public Vector3 getCenter()
+    {
+        return localCenter;
+    }
+    
+
     public void forwardControl()
     {
 

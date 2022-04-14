@@ -22,7 +22,7 @@ public class GraphicsManager
         long start = System.nanoTime();
 
         mainFrame = new JFrame(name);
-        mainFrame.addWindowListener(Main.inputManager);
+        //mainFrame.addWindowListener(Main.inputManager);
         mainFrame.setSize(defaultWidth, defaultHeight);
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         mainFrame.setVisible(true);
@@ -30,11 +30,11 @@ public class GraphicsManager
         renderingPanel = new RenderingPanel(1600, 900);
         mainFrame.getContentPane().add(renderingPanel);
         renderingPanel.setVisible(true);
-        renderingPanel.addKeyListener(Main.inputManager);
-        renderingPanel.addMouseListener(Main.inputManager);
-        renderingPanel.addMouseMotionListener(Main.inputManager);
+        // renderingPanel.addKeyListener(Main.inputManager);
+        // renderingPanel.addMouseListener(Main.inputManager);
+        // renderingPanel.addMouseMotionListener(Main.inputManager);
 
-        renderingPanel.setCamera(new Camera());
+        //renderingPanel.setCamera(new Camera());
         renderingPanel.setLighting(new Lighting(new Vector3(1, -1, 1), 70, 50));
         renderingPanel.addGameObject(gameObject1);
         renderingPanel.setFog(1000, 3000, new Color(190, 210, 245));

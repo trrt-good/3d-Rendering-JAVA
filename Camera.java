@@ -1,44 +1,43 @@
 import javax.swing.*;
 import java.awt.event.*;
+import java.awt.Point;
 public class Camera
 {
     public static final int ORBITCAM = 0;
     public static final int FREECAM = 1;
     public static final int FIXEDCAM = 2;
 
-    public final int TICK_SPEED = 1000;
-    public int movementSpeed;
-    public int sensitivity;
+    private double fov; //strictly reffers to the horizontal fov as vertical fov is based off screen height 
+    private Vector3 position;
+    private double h_orientation;
+    private double v_orientation;
 
-    public double fov; //strictly reffers to the horizontal fov as vertical fov is based off screen height 
-    public Vector3 position;
-    public double h_orientation;
-    public double v_orientation;
+    private double renderPlaneDistance;
+    private double viewDistance;
 
-    public double renderPlaneDistance;
-    public double viewDistance;
+    private GameObject focusObject;
 
-    public double renderPlaneWidth;
+    private double renderPlaneWidth;
 
     public Camera(int cameraType, double viewDistanceIn, double fovIn)
     {
         switch (cameraType) {
-            case 0:
+            case ORBITCAM:
+                position = new Vector3();
                 h_orientation = 0;
                 v_orientation = 0;
                 break;
-            case 1:
+            case FREECAM:
+
                 h_orientation = 0;
                 v_orientation = 0;
                 break;
-            case 2:
+            case FIXEDCAM:
                 h_orientation = 0;
                 v_orientation = 0;
                 break;
             
         }
-        movementSpeed = 1000;
-        sensitivity = 15;
 
         fov = fovIn;
         position = new Vector3(0, 0, 0);
@@ -47,91 +46,67 @@ public class Camera
 
         renderPlaneDistance = 10;
         viewDistance = viewDistanceIn;
-        renderPlaneWidth = getRenderPlaneWidth();
+        renderPlaneWidth = calculateRenderPlaneWidth();
     }
 
-    public Camera(int cameraType, double sensitivityIn, double viewDistanceIn, double fovIn)
+    class OrbitController implements MouseMotionListener, MouseListener, MouseWheelListener
     {
-        movementSpeed = 1000;
-        sensitivity = 15;
-
-        fov = 60; //strictly reffers to the horizontal fov as vertical fov is based off screen height 
-        position = new Vector3(0, 0, 0);
-        h_orientation = 0;
-        v_orientation = 0;
-
-        renderPlaneDistance = 10;
-        viewDistance = 3300;
-        renderPlaneWidth = getRenderPlaneWidth();
-    }
-
-    public Camera(int cameraType, Vector3 positionIn, int movementSpeed, double sensitivty, double viewDistanceIn, double fovIn)
-    {
-        movementSpeed = 1000;
-        sensitivity = 15;
-
-        fov = 60; //strictly reffers to the horizontal fov as vertical fov is based off screen height 
-        position = new Vector3(0, 0, 0);
-        h_orientation = 0;
-        v_orientation = 0;
-
-        renderPlaneDistance = 10;
-        viewDistance = 3300;
-        renderPlaneWidth = getRenderPlaneWidth();
-    }
-
-    public Timer timer = new Timer(1000/TICK_SPEED + 1, new ActionListener()
-    {
-        boolean first = true;
-        double clickedHorientation = 0;
-        double clickedVorientation = 0;
+        private Point pressedPoint = new Point();
+        private double camDistance;
 
         @Override
-        public void actionPerformed(ActionEvent e) 
+        public void mouseDragged(MouseEvent e)
         {
-            //GraphicsManager.gameObject1.localRotate(new EulerAngle(0, Math.toRadians(10), 0));
-            //GraphicsManager.gameObject1.move(new Vector3(1, 0, 0));
-            // GraphicsManager.renderingPanel.mainLight.direction = getDirectionVector();
-            if (Main.inputManager.forward)
-                moveForward(movementSpeed/100.0);
-            if (Main.inputManager.backward)
-                moveForward(-movementSpeed/100.0);
-
-            if (Main.inputManager.left)
-                moveLeft(movementSpeed/100.0);
-            if (Main.inputManager.right)
-                moveLeft(-movementSpeed/100.0);
-
-            if (Main.inputManager.upward)
-                moveUp(movementSpeed/100.0);
-            if (Main.inputManager.downward)
-                moveUp(-movementSpeed/100.0);
-            
-            if (Main.inputManager.R_Down && first)
+            if (focusObject != null)
             {
-                first = false;
-                clickedHorientation = h_orientation;
-                clickedVorientation = v_orientation;
+
             }
-            if (Main.inputManager.R_Down)
-            {
-                if (sensitivity > 100)  
-                    sensitivity = 100;
-                if (sensitivity < 1)
-                    sensitivity = 1;
-                h_orientation = clickedHorientation + (double)(Main.inputManager.mouseX-Main.inputManager.R_mouseClickedX)/(200.0/sensitivity);
-                v_orientation = clickedVorientation + (double)(Main.inputManager.mouseY-Main.inputManager.R_mouseClickedY)/(-200.0/sensitivity);
-                h_orientation%=360;
-                if (v_orientation >= 90)
-                    v_orientation = 89;
-                if (v_orientation <= -90)
-                    v_orientation = -89;
-                v_orientation%=360;
-            }
-            if (Main.inputManager.R_Down == false && first == false)
-                first = true;
         }
-    });
+
+        @Override
+        public void mouseMoved(MouseEvent e) {}
+
+        @Override
+        public void mousePressed(MouseEvent e) 
+        {
+            pressedPoint = e.getPoint();
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent e) {}
+
+        @Override
+        public void mouseReleased(MouseEvent e) {}
+
+        @Override
+        public void mouseEntered(MouseEvent e) {}
+
+        @Override
+        public void mouseExited(MouseEvent e) {}
+
+        @Override
+        public void mouseWheelMoved(MouseWheelEvent e) 
+        {
+
+        }
+
+    }
+
+    public double getViewDistance()
+    {
+        return viewDistance;
+    }
+
+    public void setFov(double fovIn)
+    {
+        renderPlaneWidth = calculateRenderPlaneWidth();
+        fov = fovIn;
+    }
+
+    public void setFocus(GameObject gameObject)
+    {
+        focusObject = gameObject;
+    }
 
     private void moveForward(double distanceIn)
     {
@@ -157,17 +132,31 @@ public class Camera
     {
         Vector3 directionVector = getDirectionVector();
         return new Plane(Vector3.add(Vector3.multiply(directionVector, renderPlaneDistance), position), directionVector);
-    }
+    }  
 
-    public Plane getFarClippingPlane()
-    {
-        Vector3 directionVector = getDirectionVector();
-        return new Plane(Vector3.add(Vector3.multiply(directionVector, viewDistance), position), directionVector);
-    }    
-
-    private double getRenderPlaneWidth()
+    private double calculateRenderPlaneWidth()
     {
         return Math.tan(fov*0.017453292519943295/2)*renderPlaneDistance*2;
+    }
+
+    public double getHorientation()
+    {
+        return h_orientation;
+    }
+
+    public double getVorientation()
+    {
+        return v_orientation;
+    }
+
+    public Vector3 getPosition()
+    {
+        return position;
+    }
+
+    public double getRenderPlaneWidth()
+    {
+        return renderPlaneWidth;
     }
 }
 
