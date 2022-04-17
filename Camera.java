@@ -1,10 +1,9 @@
-import javax.management.MalformedObjectNameException;
-import javax.net.ssl.HostnameVerifier;
-import javax.swing.*;
-import javax.swing.plaf.synth.SynthPasswordFieldUI;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 
-import java.awt.event.*;
-import java.awt.Point;
 public class Camera
 {
     private double fov; //strictly reffers to the horizontal fov as vertical fov is based off screen height 

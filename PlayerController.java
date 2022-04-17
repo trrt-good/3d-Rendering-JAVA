@@ -30,20 +30,23 @@ public class PlayerController implements KeyListener
     @Override
     public void keyPressed(KeyEvent e)
     {
-        switch (e.getKeyChar()) 
+        if (enabled)
         {
-            case 'w':
-                parentGameObject.forwardControl();
-                break;
-            case 's':
-                parentGameObject.backwardControl();
-                break;
-            case 'a':
-                parentGameObject.leftControl();
-                break;
-            case 'd':
-                parentGameObject.rightControl();
-                break;
+            switch (e.getKeyChar()) 
+            {
+                case 'w':
+                    parentGameObject.forwardControl();
+                    break;
+                case 's':
+                    parentGameObject.backwardControl();
+                    break;
+                case 'a':
+                    parentGameObject.leftControl();
+                    break;
+                case 'd':
+                    parentGameObject.rightControl();
+                    break;
+            }
         }
     }
 
