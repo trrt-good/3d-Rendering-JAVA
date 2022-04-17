@@ -73,6 +73,13 @@ public class RenderingPanel extends JPanel implements ActionListener
         System.out.println("finished in " + (System.nanoTime()-lightingStartTime)/1000000.0 + "ms");
     }
 
+    public void setBackground(Color color)
+    {
+        emptyImagePixelColorData = new int[getWidth()*getHeight()];
+        backgroundColor = color;
+        Arrays.fill(emptyImagePixelColorData, convertToIntRGB(backgroundColor));
+    }
+
     public void addGameObject(GameObject gameObject)
     {
         long gameObjectStartTime = System.nanoTime();
