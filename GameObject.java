@@ -34,21 +34,9 @@ public class GameObject
         System.out.println("finished in all " + mesh.size() + " triangles in " + (System.nanoTime() - start)/1000000 + "ms");
     }
 
-    public GameObject(Vector3 positionIn, EulerAngle orientationIn, double scaleIn, String modelFileName, Color colorIn, PlayerController playerControllerIn)
+    public void setController(PlayerController controller)
     {
-        System.out.print("Creating gameObject: " + modelFileName + "... ");
-        long start = System.nanoTime();
-        mesh = new ArrayList<Triangle>();
-        orientation = orientationIn;
-        color = colorIn;
-        name = modelFileName.substring(0, modelFileName.indexOf("."));
-        globalPosition = new Vector3();
-        readObjFile(modelFileName);
-        setGlobalRotation(orientation);
-        setScale(scaleIn);
-        setPosition(positionIn);
-        playerController = playerControllerIn;
-        System.out.println("finished in all " + mesh.size() + " triangles in " + (System.nanoTime() - start)/1000000 + "ms");
+        playerController = controller;
     }
 
     public void recalculateLighting(Lighting lighting)
@@ -67,25 +55,29 @@ public class GameObject
         return localCenter;
     }
     
+    public Vector3 getPosition()
+    {
+        return globalPosition;
+    }
 
     public void forwardControl()
     {
-
+        move(new Vector3(0, 0, 10));
     }
 
     public void backwardControl()
     {
-
+        move(new Vector3(0, 0, -10));
     }
 
     public void leftControl()
     {
-
+        move(new Vector3(-10, 0, 0));
     }
 
     public void rightControl()
     {
-        
+        move(new Vector3(10, 0, 0));
     }
 
     public boolean hasPlayerController()

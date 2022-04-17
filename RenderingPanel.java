@@ -58,10 +58,10 @@ public class RenderingPanel extends JPanel implements ActionListener
         frameDrawTime.startTimer();
         g.drawImage(renderImage, 0, 0, this);
         frameDrawTime.stopTimer();
-
-
         if (gameObjects.size() > 0 && camera != null)
+        {
             drawTriangles(g);
+        }
     }
 
     public void setLighting(Lighting lighting)
@@ -89,15 +89,14 @@ public class RenderingPanel extends JPanel implements ActionListener
     {
         long camStartTime = System.nanoTime();
         System.out.print("\tadding camera... ");
-        if (camera == null)
+        camera = camIn;
+        renderPlane = camera.getRenderPlane();
+        addMouseMotionListener(camIn.getController());
+        addMouseListener(camIn.getController());
+        addMouseWheelListener(camIn.getController());
+        if (camIn.getFocusObj() == null && gameObjects.size() > 0)
         {
-            camera = camIn;
-            renderPlane = camera.getRenderPlane();
-        }
-        else    
-        {
-            camera = camIn;
-            renderPlane = camera.getRenderPlane();
+            camIn.setFocus(gameObjects.get(0));
         }
         System.out.println("finished in " + (System.nanoTime()-camStartTime)/1000000.0 + "ms");
     }

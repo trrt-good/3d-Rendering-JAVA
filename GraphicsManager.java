@@ -1,5 +1,7 @@
 import javax.swing.JFrame;
 
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.awt.Color;
 public class GraphicsManager 
 {
@@ -14,7 +16,8 @@ public class GraphicsManager
 
     public static void startGraphics(String name)
     {
-        gameObject1 = new GameObject(new Vector3(0, 0, 1000), new EulerAngle(Math.toRadians(0), Math.toRadians(0), Math.toRadians(0)), 1, "lowPolyPlane1.obj", new Color(50, 50, 50));
+        gameObject1 = new GameObject(new Vector3(0, 0, 0), new EulerAngle(Math.toRadians(0), Math.toRadians(0), Math.toRadians(0)), 100, "thing.obj", new Color(50, 50, 50));
+        gameObject1.setController(new PlayerController(gameObject1));
         gameObject1.shading = true;
         // gameObject2 = new GameObject(new Vector3(0, 0, 0), "cat.obj", new Color(200, 200, 200), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 1, true);
         // gameObject2.shading = true;
@@ -26,21 +29,67 @@ public class GraphicsManager
         mainFrame.setSize(defaultWidth, defaultHeight);
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         mainFrame.setVisible(true);
+        mainFrame.addWindowListener(new WindowCloseListener());
 
         renderingPanel = new RenderingPanel(1600, 900);
         mainFrame.getContentPane().add(renderingPanel);
         renderingPanel.setVisible(true);
-        // renderingPanel.addKeyListener(Main.inputManager);
-        // renderingPanel.addMouseListener(Main.inputManager);
-        // renderingPanel.addMouseMotionListener(Main.inputManager);
 
-        //renderingPanel.setCamera(new Camera());
+        renderingPanel.setCamera(new Camera(gameObject1, 10000, 50, 60));
         renderingPanel.setLighting(new Lighting(new Vector3(1, -1, 1), 70, 50));
         renderingPanel.addGameObject(gameObject1);
-        renderingPanel.setFog(1000, 3000, new Color(190, 210, 245));
+        //renderingPanel.setFog(1000, 3000, new Color(190, 210, 245));
         renderingPanel.startRenderUpdates();
         // renderingPanel.addGameObject(gameObject2);
         
         System.out.println("finished creating graphics in " + (System.nanoTime()-start)/1000000 + "ms");
     }
+
+    
 }
+
+class WindowCloseListener implements WindowListener
+    {
+
+        @Override
+        public void windowOpened(WindowEvent e) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        @Override
+        public void windowClosing(WindowEvent e) {
+            TimingHelper.printSummary();
+        }
+
+        @Override
+        public void windowClosed(WindowEvent e) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        @Override
+        public void windowIconified(WindowEvent e) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        @Override
+        public void windowDeiconified(WindowEvent e) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        @Override
+        public void windowActivated(WindowEvent e) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        @Override
+        public void windowDeactivated(WindowEvent e) {
+            // TODO Auto-generated method stub
+            
+        }
+
+    }
