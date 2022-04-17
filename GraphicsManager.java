@@ -16,8 +16,7 @@ public class GraphicsManager
 
     public static void startGraphics(String name)
     {
-        gameObject1 = new GameObject(new Vector3(0, 0, 0), new EulerAngle(Math.toRadians(0), Math.toRadians(0), Math.toRadians(0)), 100, "thing.obj", new Color(50, 50, 50));
-        gameObject1.setController(new PlayerController(gameObject1));
+        gameObject1 = new GameObject(new Vector3(0, 0, 0), new EulerAngle(Math.toRadians(0), Math.toRadians(0), Math.toRadians(0)), 1, "cat.obj", new Color(50, 50, 50));
         gameObject1.shading = true;
         // gameObject2 = new GameObject(new Vector3(0, 0, 0), "cat.obj", new Color(200, 200, 200), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 1, true);
         // gameObject2.shading = true;
@@ -35,7 +34,7 @@ public class GraphicsManager
         mainFrame.getContentPane().add(renderingPanel);
         renderingPanel.setVisible(true);
 
-        renderingPanel.setCamera(new Camera(gameObject1, 10000, 50, 60));
+        renderingPanel.setCamera(new Camera(gameObject1, 10000, 5, 50, 60));
         renderingPanel.setLighting(new Lighting(new Vector3(1, -1, 1), 70, 50));
         renderingPanel.addGameObject(gameObject1);
         //renderingPanel.setFog(1000, 3000, new Color(190, 210, 245));

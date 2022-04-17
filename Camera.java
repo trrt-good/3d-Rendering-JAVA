@@ -13,24 +13,22 @@ public class Camera
     private double v_orientation;
     private double renderPlaneDistance;
     private double viewDistance;
-    private double sensitivity;
 
     private GameObject focusObject;
 
     private double renderPlaneWidth;
 
-    private CameraController controller;
+    private FreeCamController controller;
 
-    public Camera(GameObject focus, double viewDistanceIn, double sensitivityIn, double fovIn)
+    public Camera(GameObject focus, double viewDistanceIn, double sensitivityIn, double movementSpeedIn, double fovIn)
     {
         renderPlaneDistance = 10;
-        controller = new CameraController();
+        controller = new FreeCamController(sensitivityIn, movementSpeedIn);
         h_orientation = 0;
         v_orientation = 0;
         focusObject = focus;
         position = new Vector3(0, 10, -1000);
         viewDistance = viewDistanceIn;
-        sensitivity = sensitivityIn;
         setFov(fovIn);
     }
 
@@ -46,45 +44,78 @@ public class Camera
         v_orientation%=360;
     }
 
-    class CameraController implements MouseMotionListener, MouseListener, MouseWheelListener
+    class FreeCamController implements KeyListener, MouseMotionListener, MouseListener
     {
         private int prevX = 0;
         private int prevY = 0;
-        private int deltaX = 0;
-        private int deltaY = 0;
-        private double camDistance;
+        private double sensitivity;
+        private double movementSpeed;
+
+        public FreeCamController(double sensitivityIn, double movementSpeedIn)
+        {
+            sensitivity = sensitivityIn;
+            movementSpeed = movementSpeedIn;
+        }
 
         @Override
-        public void mouseDragged(MouseEvent e)
+        public void mouseDragged(MouseEvent e) 
         {
-            deltaX = e.getX()-prevX; 
-            deltaY = e.getY()-prevY;
+            h_orientation = h_orientation + (e.getX()-prevX)/(100/sensitivity);
+            v_orientation = v_orientation - (e.getY()-prevY)/(100/sensitivity);
+            if (h_orientation < 0)
+                h_orientation += 360;
+            if (v_orientation < 0)
+                h_orientation += 360;
+            h_orientation%=360;
+            v_orientation%=360;
+
             prevX = e.getX();
             prevY = e.getY();
-            if (focusObject != null)
-            {
-                position = Vector3.add(Vector3.rotateAroundYaxis(Vector3.subtract(position, focusObject.getPosition()), ((deltaX)/10000.0)*sensitivity), focusObject.getPosition()); 
-                lookAt(focusObject.getPosition());
-                System.out.println(h_orientation + "  " + v_orientation);
-            }
-            else
-            {
-                System.out.println("Camera must have a focus object");
-            }
         }
 
         @Override
         public void mouseMoved(MouseEvent e) {}
 
         @Override
-        public void mousePressed(MouseEvent e) 
+        public void keyTyped(KeyEvent e) {}
+
+        @Override
+        public void keyPressed(KeyEvent e) 
         {
-            prevX = e.getX();
-            prevY = e.getY();
+            switch (e.getKeyChar()) 
+            {
+                case 'w':
+                    moveForward(movementSpeed);
+                    break;
+                case 's':
+                    moveForward(-movementSpeed);
+                    break;
+                case 'a':
+                    moveLeft(movementSpeed);
+                    break;
+                case 'd':
+                    moveLeft(-movementSpeed);
+                    break;
+                case 'e':
+                    moveUp(movementSpeed);
+                    break;
+                case 'q':
+                    moveUp(-movementSpeed);
+                    break;
+            }
         }
 
         @Override
+        public void keyReleased(KeyEvent e) {}
+
+        @Override
         public void mouseClicked(MouseEvent e) {}
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+            prevX = e.getX();
+            prevY = e.getY();
+        }
 
         @Override
         public void mouseReleased(MouseEvent e) {}
@@ -94,18 +125,10 @@ public class Camera
 
         @Override
         public void mouseExited(MouseEvent e) {}
-
-        @Override
-        public void mouseWheelMoved(MouseWheelEvent e) 
-        {
-            if (e.getScrollAmount() > 0)
-            {
-                camDistance += e.getScrollAmount();
-            }
-        }
+        
     }
 
-    public CameraController getController()
+    public FreeCamController getController()
     {
         return controller;
     }
@@ -138,12 +161,12 @@ public class Camera
 
     private void moveLeft(double distanceIn)
     {
-        position.add(Vector3.multiply(Vector3.angleToVector(h_orientation*0.017453292519943295-Math.PI/4, 0), distanceIn));
+        position.add(Vector3.multiply(Vector3.angleToVector(h_orientation*0.017453292519943295-Math.PI/2, 0), distanceIn));
     }
 
     private void moveUp(double distanceIn)
     {
-        position.add(Vector3.multiply(Vector3.angleToVector(h_orientation*0.017453292519943295, v_orientation*0.017453292519943295+Math.PI/4), distanceIn));
+        position.add(Vector3.multiply(Vector3.angleToVector(h_orientation*0.017453292519943295, v_orientation*0.017453292519943295+Math.PI/2), distanceIn));
     }
 
     public Vector3 getDirectionVector()

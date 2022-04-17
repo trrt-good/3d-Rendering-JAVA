@@ -101,7 +101,7 @@ public class Vector3 //An object which represents 3d points or vectors
 
     public static Vector3 angleToVector(double horizontalAng, double verticalAng)
     {
-        return new Vector3(Math.sin(horizontalAng), Math.sin(verticalAng), Math.cos(horizontalAng));
+        return new Vector3(Math.sin(horizontalAng)*Math.cos(verticalAng), Math.sin(verticalAng), Math.cos(horizontalAng)*Math.cos(verticalAng));
     }
 
     public static Vector3 getIntersectionPoint(Vector3 lineDirection, Vector3 linePoint, Plane plane)

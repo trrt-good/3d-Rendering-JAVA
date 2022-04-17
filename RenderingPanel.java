@@ -93,7 +93,7 @@ public class RenderingPanel extends JPanel implements ActionListener
         renderPlane = camera.getRenderPlane();
         addMouseMotionListener(camIn.getController());
         addMouseListener(camIn.getController());
-        addMouseWheelListener(camIn.getController());
+        addKeyListener(camIn.getController());
         if (camIn.getFocusObj() == null && gameObjects.size() > 0)
         {
             camIn.setFocus(gameObjects.get(0));
