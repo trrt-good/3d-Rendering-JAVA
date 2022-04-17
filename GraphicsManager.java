@@ -16,7 +16,7 @@ public class GraphicsManager
 
     public static void startGraphics(String name)
     {
-        gameObject1 = new GameObject(new Vector3(0, 0, 0), new EulerAngle(Math.toRadians(0), Math.toRadians(0), Math.toRadians(0)), 1, "cat.obj", new Color(50, 50, 50));
+        gameObject1 = new GameObject(new Vector3(0, 0, 0), new EulerAngle(Math.toRadians(0), Math.toRadians(0), Math.toRadians(0)), 1, "lowPolyPlane1.obj", new Color(50, 50, 50));
         gameObject1.shading = true;
         // gameObject2 = new GameObject(new Vector3(0, 0, 0), "cat.obj", new Color(200, 200, 200), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 1, true);
         // gameObject2.shading = true;
