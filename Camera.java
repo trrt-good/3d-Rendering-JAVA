@@ -66,7 +66,6 @@ public class Camera
 
             prevX = e.getX();
             prevY = e.getY();
-            System.out.println(position);
         }
 
         public void keyPressed(KeyEvent e) 
@@ -113,6 +112,9 @@ public class Camera
 
     class OrbitCamController implements MouseMotionListener, MouseWheelListener, MouseListener
     {
+        private int maxDistance = 3000;
+        private int minDistance = 300;
+
         private GameObject focusObj;
         private double startDistance;
         private double sensitivity;
@@ -131,8 +133,10 @@ public class Camera
 
         public void mouseWheelMoved(MouseWheelEvent e) 
         {
-        
-            moveForward(-e.getWheelRotation()*10);
+            if (Vector3.subtract(position, focusObj.getPosition()).getSqrMagnitude() > minDistance*minDistance && e.getWheelRotation()<0)
+                moveForward(-e.getWheelRotation()*30);
+            else if (Vector3.subtract(position, focusObj.getPosition()).getSqrMagnitude() < maxDistance*maxDistance && e.getWheelRotation()>0)
+                moveForward(-e.getWheelRotation()*30);
         }
 
         public void mouseDragged(MouseEvent e) 

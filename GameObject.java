@@ -16,7 +16,24 @@ public class GameObject
     private PlayerController playerController = null;
     private Vector3 globalPosition;
     private Vector3 localCenter = new Vector3();
+    private Vector3 autoCenter = new Vector3();
     private EulerAngle orientation;
+
+    public GameObject(Vector3 positionIn, Vector3 localCenterIn, EulerAngle orientationIn, double scaleIn, String modelFileName, Color colorIn)
+    {
+        System.out.print("Creating gameObject: " + modelFileName + "... ");
+        long start = System.nanoTime();
+        mesh = new ArrayList<Triangle>();
+        orientation = orientationIn;
+        color = colorIn;
+        name = modelFileName.substring(0, modelFileName.indexOf("."));
+        globalPosition = new Vector3();
+        readObjFile(modelFileName);
+        setGlobalRotation(orientation);
+        setScale(scaleIn);
+        setPosition(positionIn);
+        System.out.println("finished in all " + mesh.size() + " triangles in " + (System.nanoTime() - start)/1000000 + "ms");
+    }
 
     public GameObject(Vector3 positionIn, EulerAngle orientationIn, double scaleIn, String modelFileName, Color colorIn)
     {
@@ -31,6 +48,9 @@ public class GameObject
         setGlobalRotation(orientation);
         setScale(scaleIn);
         setPosition(positionIn);
+        localCenter = autoCenter;
+        System.out.println(globalPosition);
+        System.out.println(autoCenter);
         System.out.println("finished in all " + mesh.size() + " triangles in " + (System.nanoTime() - start)/1000000 + "ms");
     }
 
@@ -127,6 +147,8 @@ public class GameObject
             triangle.point3 = Vector3.multiply(triangle.point3, scale);
         }
         localCenter = Vector3.multiply(localCenter, scale);
+        autoCenter = Vector3.multiply(autoCenter, scale);
+
     }
 
     public void localRotate(EulerAngle angle)
@@ -225,10 +247,10 @@ public class GameObject
                 {
                     String[] lineArr = line.substring(1).trim().split(" ");
                     Vector3 vertex = new Vector3(Double.parseDouble(lineArr[0]), Double.parseDouble(lineArr[1]), Double.parseDouble(lineArr[2]));
-                    if (localCenter.getSqrMagnitude() == 0)
-                        localCenter = new Vector3(vertex);
+                    if (autoCenter.getSqrMagnitude() == 0)
+                        autoCenter = new Vector3(vertex);
                     else
-                        localCenter = Vector3.multiply(Vector3.add(localCenter, vertex), 0.5);
+                        autoCenter = Vector3.multiply(Vector3.add(autoCenter, vertex), 0.5);
                     vertices.add(vertex);
                 }
                 if (line.startsWith("f "))

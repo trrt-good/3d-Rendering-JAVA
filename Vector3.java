@@ -32,7 +32,7 @@ public class Vector3 //An object which represents 3d points or vectors
 
     public double getSqrMagnitude()
     {
-        return (x*x+z*z) + y*y;
+        return x*x+z*z + y*y;
     }
 
     public Vector3 getNormalized()

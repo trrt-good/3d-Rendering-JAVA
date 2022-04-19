@@ -1,5 +1,4 @@
 import javax.swing.*;
-import javax.swing.text.AttributeSet.ColorAttribute;
 
 import java.util.List;
 import java.util.ArrayList;
