@@ -1,8 +1,11 @@
 import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelListener;
+import javax.swing.JPanel;
 
 public class Camera
 {
@@ -13,32 +16,26 @@ public class Camera
     private double renderPlaneDistance;
     private double viewDistance;
 
-    private GameObject focusObject;
-
     private double renderPlaneWidth;
 
-    private FreeCamController controller;
-
-    public Camera(GameObject focus, double viewDistanceIn, double sensitivityIn, double movementSpeedIn, double fovIn)
+    public Camera(Vector3 positionIn, double viewDistanceIn, double fovIn)
     {
         renderPlaneDistance = 10;
-        controller = new FreeCamController(sensitivityIn, movementSpeedIn);
         h_orientation = 0;
         v_orientation = 0;
-        focusObject = focus;
-        position = new Vector3(0, 10, -1000);
+        position = positionIn;
         viewDistance = viewDistanceIn;
         setFov(fovIn);
     }
 
     public void lookAt(Vector3 pos)
     {
-        h_orientation = Math.toDegrees(Math.atan((pos.x-position.x)/(pos.z-position.z)));
+        h_orientation = (pos.x-position.x < 0)? -Math.toDegrees(Math.atan((pos.z-position.z)/(pos.x-position.x)))-90 : 90-Math.toDegrees(Math.atan((pos.z-position.z)/(pos.x-position.x)));
+
         v_orientation = Math.toDegrees(Math.atan((pos.y-position.y)/(Math.sqrt((pos.x-position.x)*(pos.x-position.x) + (pos.z-position.z)*(pos.z-position.z)))));
-        if (h_orientation < 0)
-            h_orientation += 360;
-        if (v_orientation < 0)
-            h_orientation += 360;
+        
+        //Vector3(Math.sin(horizontalAng)*Math.cos(verticalAng), Math.sin(verticalAng), Math.cos(horizontalAng)*Math.cos(verticalAng))
+
         h_orientation%=360;
         v_orientation%=360;
     }
@@ -56,7 +53,6 @@ public class Camera
             movementSpeed = movementSpeedIn;
         }
 
-        @Override
         public void mouseDragged(MouseEvent e) 
         {
             h_orientation = h_orientation + (e.getX()-prevX)/(100/sensitivity);
@@ -70,15 +66,9 @@ public class Camera
 
             prevX = e.getX();
             prevY = e.getY();
+            System.out.println(position);
         }
 
-        @Override
-        public void mouseMoved(MouseEvent e) {}
-
-        @Override
-        public void keyTyped(KeyEvent e) {}
-
-        @Override
         public void keyPressed(KeyEvent e) 
         {
             switch (e.getKeyChar()) 
@@ -104,32 +94,88 @@ public class Camera
             }
         }
 
-        @Override
-        public void keyReleased(KeyEvent e) {}
-
-        @Override
-        public void mouseClicked(MouseEvent e) {}
-
-        @Override
-        public void mousePressed(MouseEvent e) {
+        public void mousePressed(MouseEvent e) 
+        {
             prevX = e.getX();
             prevY = e.getY();
         }
 
-        @Override
+        public void keyReleased(KeyEvent e) {}
+        public void mouseClicked(MouseEvent e) {}
+
+        public void mouseMoved(MouseEvent e) {}
+        public void keyTyped(KeyEvent e) {}
+
         public void mouseReleased(MouseEvent e) {}
-
-        @Override
         public void mouseEntered(MouseEvent e) {}
-
-        @Override
         public void mouseExited(MouseEvent e) {}
-        
     }
 
-    public FreeCamController getController()
+    class OrbitCamController implements MouseMotionListener, MouseWheelListener, MouseListener
     {
-        return controller;
+        private GameObject focusObj;
+        private double startDistance;
+        private double sensitivity;
+
+        private int prevX = 0;
+        private int prevY = 0;
+        
+        public OrbitCamController(GameObject focusObjectIn, double startDistanceIn, double sensitivityIn)
+        {
+            focusObj = focusObjectIn;
+            startDistance = startDistanceIn;
+            sensitivity = sensitivityIn;
+
+            position = Vector3.add(focusObj.getPosition(), new Vector3(0, 0, -startDistance));
+        }
+
+        public void mouseWheelMoved(MouseWheelEvent e) 
+        {
+        
+            moveForward(-e.getWheelRotation()*10);
+        }
+
+        public void mouseDragged(MouseEvent e) 
+        {
+            position = Vector3.add(Vector3.rotateAroundYaxis(Vector3.subtract(position, focusObj.getPosition()), (e.getX()-prevX)/(2000/sensitivity)) , focusObj.getPosition());
+            if (v_orientation > -80 && (e.getY()-prevY)/(200/sensitivity) > 0)
+                position = Vector3.add(Vector3.rotateAroundYaxis(Vector3.rotateAroundXaxis(Vector3.rotateAroundYaxis(Vector3.subtract(position, focusObj.getPosition()), -h_orientation*0.017453292519943295), (e.getY()-prevY)/(2000/sensitivity)), h_orientation*0.017453292519943295) , focusObj.getPosition());
+            else if (v_orientation < 80 && (e.getY()-prevY)/(200/sensitivity) < 0)
+                position = Vector3.add(Vector3.rotateAroundYaxis(Vector3.rotateAroundXaxis(Vector3.rotateAroundYaxis(Vector3.subtract(position, focusObj.getPosition()), -h_orientation*0.017453292519943295), (e.getY()-prevY)/(2000/sensitivity)), h_orientation*0.017453292519943295) , focusObj.getPosition());
+
+            lookAt(focusObj.getPosition());
+            v_orientation = Math.max(-89, Math.min(89, v_orientation));
+            prevX = e.getX();
+            prevY = e.getY();
+        }
+
+        public void mousePressed(MouseEvent e) 
+        {
+            prevX = e.getX();
+            prevY = e.getY();
+        }
+
+        public void mouseMoved(MouseEvent e) {}
+        public void mouseClicked(MouseEvent e) {}
+        public void mouseReleased(MouseEvent e) {}
+        public void mouseEntered(MouseEvent e) {}
+        public void mouseExited(MouseEvent e) {}
+    }
+
+    public void setOrbitControls(JPanel panel, GameObject focusObject, double startDistance, double sensitivity)
+    {
+        OrbitCamController controller = new OrbitCamController(focusObject, startDistance, sensitivity);
+        panel.addMouseListener(controller);
+        panel.addMouseMotionListener(controller);
+        panel.addMouseWheelListener(controller);
+    }
+
+    public void setFreeControls(JPanel panel, double movementSpeed, double sensitivity)
+    {
+        FreeCamController controller = new FreeCamController(sensitivity, movementSpeed);
+        panel.addKeyListener(controller);
+        panel.addMouseListener(controller);
+        panel.addMouseMotionListener(controller);
     }
 
     public double getViewDistance()
@@ -141,16 +187,6 @@ public class Camera
     {
         fov = fovIn;
         renderPlaneWidth = calculateRenderPlaneWidth();
-    }
-
-    public void setFocus(GameObject gameObject)
-    {
-        focusObject = gameObject;
-    }
-
-    public GameObject getFocusObj()
-    {
-        return focusObject;
     }
 
     private void moveForward(double distanceIn)

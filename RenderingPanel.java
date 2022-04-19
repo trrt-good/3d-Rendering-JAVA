@@ -1,4 +1,6 @@
 import javax.swing.*;
+import javax.swing.text.AttributeSet.ColorAttribute;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -99,13 +101,6 @@ public class RenderingPanel extends JPanel implements ActionListener
         System.out.print("\tadding camera... ");
         camera = camIn;
         renderPlane = camera.getRenderPlane();
-        addMouseMotionListener(camIn.getController());
-        addMouseListener(camIn.getController());
-        addKeyListener(camIn.getController());
-        if (camIn.getFocusObj() == null && gameObjects.size() > 0)
-        {
-            camIn.setFocus(gameObjects.get(0));
-        }
         System.out.println("finished in " + (System.nanoTime()-camStartTime)/1000000.0 + "ms");
     }
 
@@ -192,7 +187,7 @@ public class RenderingPanel extends JPanel implements ActionListener
                     Vector3.subtract(tempPoint1, camCenterPoint), //moves the point to be centered around 0,0,0
                     -camera.getHorientation()*0.017453292519943295), //amount to be rotated by horizontally
                     camera.getVorientation()*0.017453292519943295); //amount to  be rotated by vertically
-                if ((Math.abs(rotatedPoint.x) < renderPlaneWidth/2*1.2 && Math.abs(rotatedPoint.y) < renderPlaneWidth*((double)GraphicsManager.renderingPanel.getHeight()/(double)GraphicsManager.renderingPanel.getWidth())/2*1.2))
+                if ((Math.abs(rotatedPoint.x) < renderPlaneWidth/2*1.2 && Math.abs(rotatedPoint.y) < renderPlaneWidth*((double)getHeight()/(double)getWidth())/2*1.2))
                     shouldDrawTriangle = true;
                 p1ScreenCoords.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
                 p1ScreenCoords.y = (int)(getHeight()/2 - rotatedPoint.y*pixelsPerUnit);
@@ -202,7 +197,7 @@ public class RenderingPanel extends JPanel implements ActionListener
                     Vector3.subtract(tempPoint2, camCenterPoint), //moves the point to be centered around 0,0,0
                     -camera.getHorientation()*0.017453292519943295), //amount to be rotated by horizontally
                     camera.getVorientation()*0.017453292519943295); //amount to  be rotated by vertically
-                if ((Math.abs(rotatedPoint.x) < renderPlaneWidth/2*1.2 && Math.abs(rotatedPoint.y) < renderPlaneWidth*((double)GraphicsManager.renderingPanel.getHeight()/GraphicsManager.renderingPanel.getWidth())/2*1.2))
+                if ((Math.abs(rotatedPoint.x) < renderPlaneWidth/2*1.2 && Math.abs(rotatedPoint.y) < renderPlaneWidth*((double)getHeight()/getWidth())/2*1.2))
                     shouldDrawTriangle = true;
                 p2ScreenCoords.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
                 p2ScreenCoords.y = (int)(getHeight()/2 - rotatedPoint.y*pixelsPerUnit);
@@ -213,7 +208,7 @@ public class RenderingPanel extends JPanel implements ActionListener
                     Vector3.subtract(tempPoint3, camCenterPoint), //moves the point to be centered around 0,0,0
                     -camera.getHorientation()*0.017453292519943295), //amount to be rotated by horizontally
                     camera.getVorientation()*0.017453292519943295); //amount to  be rotated by vertically
-                if ((Math.abs(rotatedPoint.x) < renderPlaneWidth/2*1.2 && Math.abs(rotatedPoint.y) < renderPlaneWidth*((double)GraphicsManager.renderingPanel.getHeight()/GraphicsManager.renderingPanel.getWidth())/2*1.2))
+                if ((Math.abs(rotatedPoint.x) < renderPlaneWidth/2*1.2 && Math.abs(rotatedPoint.y) < renderPlaneWidth*((double)getHeight()/getWidth())/2*1.2))
                     shouldDrawTriangle = true;
                 p3ScreenCoords.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
                 p3ScreenCoords.y = (int)(getHeight()/2 - rotatedPoint.y*pixelsPerUnit);
@@ -386,7 +381,6 @@ public class RenderingPanel extends JPanel implements ActionListener
         totalFrameTime.stopTimer();
         totalFrameTime.startTimer();
         repaint();
-        requestFocusInWindow();
     }
 }
 

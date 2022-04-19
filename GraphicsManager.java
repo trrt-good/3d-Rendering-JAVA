@@ -34,10 +34,12 @@ public class GraphicsManager
         mainFrame.getContentPane().add(renderingPanel);
         renderingPanel.setVisible(true);
 
-        renderingPanel.setCamera(new Camera(gameObject1, 10000, 5, 50, 60));
+        Camera cam = new Camera(new Vector3(0, 0, 0), 10000, 60);
+        renderingPanel.setCamera(cam);
+        cam.setOrbitControls(renderingPanel, gameObject1, 1000, 10);
         renderingPanel.setLighting(new Lighting(new Vector3(1, -1, 1), 70, 50));
         renderingPanel.addGameObject(gameObject1);
-        //renderingPanel.setFog(1000, 3000, new Color(190, 210, 245));
+        renderingPanel.setFog(1000, 3000, new Color(190, 210, 245));
         renderingPanel.startRenderUpdates();
         // renderingPanel.addGameObject(gameObject2);
         
