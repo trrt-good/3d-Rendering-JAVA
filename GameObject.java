@@ -13,7 +13,6 @@ public class GameObject
     public boolean shading = true;
     public String name;
 
-    private PlayerController playerController = null;
     private Vector3 globalPosition;
     private Vector3 localCenter = new Vector3();
     private Vector3 autoCenter = new Vector3();
@@ -52,11 +51,6 @@ public class GameObject
         setScale(scaleIn);
         setPosition(positionIn);
         System.out.println("finished in all " + mesh.size() + " triangles in " + (System.nanoTime() - start)/1000000 + "ms");
-    }
-
-    public void setController(PlayerController controller)
-    {
-        playerController = controller;
     }
 
     public void recalculateLighting(Lighting lighting)
@@ -98,16 +92,6 @@ public class GameObject
     public void rightControl()
     {
         move(new Vector3(10, 0, 0));
-    }
-
-    public boolean hasPlayerController()
-    {
-        return playerController != null;
-    }
-
-    public PlayerController getPlayerController()
-    {
-        return playerController;
     }
 
     public void setPosition(Vector3 positionIn)

@@ -89,8 +89,6 @@ public class RenderingPanel extends JPanel implements ActionListener
         if (lightingObject != null)
             lightingObject.update(gameObjects);
         triangles.addAll(gameObject.mesh);
-        if (gameObject.hasPlayerController())
-            this.addKeyListener(gameObject.getPlayerController());
         System.out.println("finished in " + (System.nanoTime()-gameObjectStartTime)/1000000.0 + "ms");
     }
 
