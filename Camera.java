@@ -115,6 +115,9 @@ public class Camera
         private int maxDistance = 3000;
         private int minDistance = 300;
 
+        private int maxAngle = 80;
+        private int minAngle = 3;
+
         private GameObject focusObj;
         private double startDistance;
         private double sensitivity;
@@ -142,9 +145,9 @@ public class Camera
         public void mouseDragged(MouseEvent e) 
         {
             position = Vector3.add(Vector3.rotateAroundYaxis(Vector3.subtract(position, focusObj.getPosition()), (e.getX()-prevX)/(2000/sensitivity)) , focusObj.getPosition());
-            if (v_orientation > -80 && (e.getY()-prevY)/(200/sensitivity) > 0)
+            if (v_orientation > -maxAngle && (e.getY()-prevY)/(200/sensitivity) > 0)
                 position = Vector3.add(Vector3.rotateAroundYaxis(Vector3.rotateAroundXaxis(Vector3.rotateAroundYaxis(Vector3.subtract(position, focusObj.getPosition()), -h_orientation*0.017453292519943295), (e.getY()-prevY)/(2000/sensitivity)), h_orientation*0.017453292519943295) , focusObj.getPosition());
-            else if (v_orientation < 80 && (e.getY()-prevY)/(200/sensitivity) < 0)
+            else if (v_orientation < -minAngle && (e.getY()-prevY)/(200/sensitivity) < 0)
                 position = Vector3.add(Vector3.rotateAroundYaxis(Vector3.rotateAroundXaxis(Vector3.rotateAroundYaxis(Vector3.subtract(position, focusObj.getPosition()), -h_orientation*0.017453292519943295), (e.getY()-prevY)/(2000/sensitivity)), h_orientation*0.017453292519943295) , focusObj.getPosition());
 
             lookAt(focusObj.getPosition());

@@ -28,10 +28,12 @@ public class GameObject
         color = colorIn;
         name = modelFileName.substring(0, modelFileName.indexOf("."));
         globalPosition = new Vector3();
+        localCenter = localCenterIn;
         readObjFile(modelFileName);
         setGlobalRotation(orientation);
         setScale(scaleIn);
         setPosition(positionIn);
+        
         System.out.println("finished in all " + mesh.size() + " triangles in " + (System.nanoTime() - start)/1000000 + "ms");
     }
 
@@ -44,13 +46,11 @@ public class GameObject
         color = colorIn;
         name = modelFileName.substring(0, modelFileName.indexOf("."));
         globalPosition = new Vector3();
+        localCenter = autoCenter;
         readObjFile(modelFileName);
         setGlobalRotation(orientation);
         setScale(scaleIn);
         setPosition(positionIn);
-        localCenter = autoCenter;
-        System.out.println(globalPosition);
-        System.out.println(autoCenter);
         System.out.println("finished in all " + mesh.size() + " triangles in " + (System.nanoTime() - start)/1000000 + "ms");
     }
 
