@@ -59,6 +59,7 @@ public class RenderingPanel extends JPanel implements ActionListener
 
     public void paintComponent(Graphics g) 
     {
+        requestFocusInWindow();
         frameDrawTime.startTimer();
         g.drawImage(renderImage, 0, 0, this);
         frameDrawTime.stopTimer();
@@ -86,13 +87,16 @@ public class RenderingPanel extends JPanel implements ActionListener
 
     public void addGameObject(GameObject gameObject)
     {
-        long gameObjectStartTime = System.nanoTime();
-        System.out.print("\tadding gameObject " + gameObject.name + "... ");
-        gameObjects.add(gameObject);
-        if (lightingObject != null)
-            lightingObject.update(gameObjects);
-        triangles.addAll(gameObject.getMesh());
-        System.out.println("finished in " + (System.nanoTime()-gameObjectStartTime)/1000000.0 + "ms");
+        if (gameObject != null)
+        {
+            long gameObjectStartTime = System.nanoTime();
+            System.out.print("\tadding gameObject " + gameObject.name + "... ");
+            gameObjects.add(gameObject);
+            if (lightingObject != null)
+                lightingObject.update(gameObjects);
+            triangles.addAll(gameObject.getMesh());
+            System.out.println("finished in " + (System.nanoTime()-gameObjectStartTime)/1000000.0 + "ms");
+        }
     }
 
     public void setCamera(Camera camIn)

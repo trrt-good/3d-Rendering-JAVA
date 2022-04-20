@@ -16,10 +16,9 @@ public class GraphicsManager
 
     public static void startGraphics(String name)
     {
-        gameObject1 = new GameObject(new Vector3(0, 0, 0), new EulerAngle(Math.toRadians(0), Math.toRadians(0), Math.toRadians(0)), 100, "jet.obj", new Color(50, 50, 50));
-        gameObject1.shading = true;
-        // gameObject2 = new GameObject(new Vector3(0, 0, 0), "cat.obj", new Color(200, 200, 200), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 1, true);
-        // gameObject2.shading = true;
+        gameObject1 = new GameObject(new Vector3(0, 0, 0), new Vector3(-100, 10, -100), new EulerAngle(Math.toRadians(0), Math.toRadians(90), Math.toRadians(90)), 1, "lowPolyCity3.obj", new Color(100, 100, 100));
+        gameObject1.backFaceCull = true;
+        //gameObject2 = new GameObject(new Vector3(0, 0, 0), new EulerAngle(Math.toRadians(0), Math.toRadians(0), Math.toRadians(0)), 150, "jet.obj", new Color(50, 50, 50));
         System.out.println("Creating graphics... ");
         long start = System.nanoTime();
 
@@ -38,11 +37,11 @@ public class GraphicsManager
         renderingPanel.setCamera(cam);
         //cam.setFreeControls(renderingPanel, 200, 10);
         cam.setOrbitControls(renderingPanel, gameObject1, 1000, 10);
-        renderingPanel.setLighting(new Lighting(new Vector3(-1, -1, -1), 70, 500));
+        renderingPanel.setLighting(new Lighting(new Vector3(-0.5, -1, -0.5), 70, 30));
         renderingPanel.addGameObject(gameObject1);
         renderingPanel.setFog(1000, 3000, new Color(190, 210, 245));
         renderingPanel.startRenderUpdates();
-        // renderingPanel.addGameObject(gameObject2);
+        renderingPanel.addGameObject(gameObject2);
         
         System.out.println("finished creating graphics in " + (System.nanoTime()-start)/1000000 + "ms");
     }
