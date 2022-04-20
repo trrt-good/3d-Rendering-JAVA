@@ -47,7 +47,6 @@ public class GameObject
         globalPosition = new Vector3();
         readObjFile(modelFileName);
         localCenter = autoCenter;
-        System.out.println(autoCenter);
         setGlobalRotation(orientation);
         setScale(scaleIn);
         setPosition(positionIn);
