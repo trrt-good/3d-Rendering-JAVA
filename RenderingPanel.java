@@ -128,8 +128,6 @@ public class RenderingPanel extends JPanel implements ActionListener
         renderImage.getRaster().setDataElements(0, 0, renderImage.getWidth(), renderImage.getHeight(), emptyImagePixelColorData);
         renderPlane = camera.getRenderPlane();
 
-        
-
         trianglesCalculateTime.startTimer();
         for (int i = 0; i < triangles.size(); i ++)
         {
@@ -162,16 +160,17 @@ public class RenderingPanel extends JPanel implements ActionListener
         Vector3 tempPoint2 = new Vector3(triangle.point2);
         Vector3 tempPoint3 = new Vector3(triangle.point3);
 
+        Vector3 camDirectionVector = camera.getDirectionVector();
         Vector3 camPos = camera.getPosition();
         double distanceToTriangle = Vector3.subtract(Vector3.centerOfTriangle(triangle), camPos).getMagnitude();  
-        if (distanceToTriangle < camera.getViewDistance())
+        if (distanceToTriangle < camera.getViewDistance() && Vector3.dotProduct(triangle.getPlane().normal, camDirectionVector) < 0)
         {
             double renderPlaneWidth = camera.getRenderPlaneWidth();
             if (Vector3.dotProduct(renderPlane.normal, Vector3.subtract(tempPoint1, renderPlane.pointOnPlane)) > 0 && Vector3.dotProduct(renderPlane.normal, Vector3.subtract(tempPoint2, renderPlane.pointOnPlane)) > 0 && Vector3.dotProduct(renderPlane.normal, Vector3.subtract(tempPoint3, renderPlane.pointOnPlane)) > 0)
             {
                 tempPoint1 = Vector3.getIntersectionPoint(Vector3.subtract(tempPoint1, camPos), camPos, renderPlane);
                 double pixelsPerUnit = getWidth()/renderPlaneWidth;
-                Vector3 camCenterPoint = Vector3.getIntersectionPoint(camera.getDirectionVector(), camPos, renderPlane);
+                Vector3 camCenterPoint = Vector3.getIntersectionPoint(camDirectionVector, camPos, renderPlane);
                 Vector3 rotatedPoint = Vector3.rotateAroundXaxis(Vector3.rotateAroundYaxis( //rotates the points to only be on the XY plane
                     Vector3.subtract(tempPoint1, camCenterPoint), //moves the point to be centered around 0,0,0
                     -camera.getHorientation()*0.017453292519943295), //amount to be rotated by horizontally
