@@ -116,7 +116,7 @@ public class Camera
         private int minDistance = 300;
 
         private int maxAngle = 80;
-        private int minAngle = 3;
+        private int minAngle = -80;
 
         private GameObject focusObj;
         private double startDistance;

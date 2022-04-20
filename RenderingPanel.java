@@ -91,7 +91,7 @@ public class RenderingPanel extends JPanel implements ActionListener
         gameObjects.add(gameObject);
         if (lightingObject != null)
             lightingObject.update(gameObjects);
-        triangles.addAll(gameObject.mesh);
+        triangles.addAll(gameObject.getMesh());
         System.out.println("finished in " + (System.nanoTime()-gameObjectStartTime)/1000000.0 + "ms");
     }
 
@@ -398,9 +398,9 @@ public class RenderingPanel extends JPanel implements ActionListener
         public int compareTo(Triangle2D o) 
         {
             int num = 0;
-            if (o.triangle3DDistance < triangle3DDistance)
+            if (o.triangle3DDistance > triangle3DDistance)
                 num = 1;
-            else if (o.triangle3DDistance > triangle3DDistance)
+            else if (o.triangle3DDistance < triangle3DDistance)
                 num = -1;
             return num;
         }
