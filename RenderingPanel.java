@@ -128,6 +128,8 @@ public class RenderingPanel extends JPanel implements ActionListener
         renderImage.getRaster().setDataElements(0, 0, renderImage.getWidth(), renderImage.getHeight(), emptyImagePixelColorData);
         renderPlane = camera.getRenderPlane();
 
+        
+
         trianglesCalculateTime.startTimer();
         for (int i = 0; i < triangles.size(); i ++)
         {
@@ -145,6 +147,7 @@ public class RenderingPanel extends JPanel implements ActionListener
             Triangle2D triangle2d = triangle2dList.get(i);
             paintTriangle(triangle2d.p1, triangle2d.p2, triangle2d.p3, triangle2d.color);
         }
+        triangle2dList.clear();
         trianglesPaintTime.stopTimer();
     }
 
