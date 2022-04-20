@@ -45,8 +45,8 @@ public class GameObject
         color = colorIn;
         name = modelFileName.substring(0, modelFileName.indexOf("."));
         globalPosition = new Vector3();
-        localCenter = autoCenter;
         readObjFile(modelFileName);
+        localCenter = autoCenter;
         setGlobalRotation(orientation);
         setScale(scaleIn);
         setPosition(positionIn);

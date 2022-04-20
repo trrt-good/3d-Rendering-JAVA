@@ -3,6 +3,7 @@ import javax.swing.*;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -18,6 +19,7 @@ public class RenderingPanel extends JPanel implements ActionListener
     private Color backgroundColor;
     private Plane renderPlane;        
     private int[] emptyImagePixelColorData;
+    private ArrayList<Triangle2D> triangle2dList;
 
     //Camera:
     private Camera camera;
@@ -36,6 +38,7 @@ public class RenderingPanel extends JPanel implements ActionListener
     private TimingHelper trianglesOrderTime = new TimingHelper("triangleOrderTime");
     private TimingHelper trianglesCalculateTime = new TimingHelper("trianglesCalculateTime");
     private TimingHelper frameDrawTime = new TimingHelper("frameDrawTime");
+    private TimingHelper trianglesPaintTime = new TimingHelper("trianglesPaintTime");
 
     public RenderingPanel(int width, int height)
     {
@@ -98,6 +101,7 @@ public class RenderingPanel extends JPanel implements ActionListener
         System.out.print("\tadding camera... ");
         camera = camIn;
         renderPlane = camera.getRenderPlane();
+        triangle2dList = new ArrayList<Triangle2D>();
         System.out.println("finished in " + (System.nanoTime()-camStartTime)/1000000.0 + "ms");
     }
 
@@ -124,42 +128,32 @@ public class RenderingPanel extends JPanel implements ActionListener
         renderImage.getRaster().setDataElements(0, 0, renderImage.getWidth(), renderImage.getHeight(), emptyImagePixelColorData);
         renderPlane = camera.getRenderPlane();
 
+        trianglesCalculateTime.startTimer();
+        for (int i = 0; i < triangles.size(); i ++)
+        {
+            calculateTriangle(g, triangles.get(i));
+        }
+        trianglesCalculateTime.stopTimer();
         trianglesOrderTime.startTimer();
         if (gameObjects.size() > 0 && triangles.size() > 0)
             orderTriangles();    
         trianglesOrderTime.stopTimer();
 
-        trianglesCalculateTime.startTimer();
-        for (int i = 0; i < triangles.size(); i ++)
+        trianglesPaintTime.startTimer();
+        for (int i = 0; i < triangle2dList.size(); i++)
         {
-            renderTriangle(g, triangles.get(i));
+            Triangle2D triangle2d = triangle2dList.get(i);
+            paintTriangle(triangle2d.p1, triangle2d.p2, triangle2d.p3, triangle2d.color);
         }
-        trianglesCalculateTime.stopTimer();
+        trianglesPaintTime.stopTimer();
     }
 
     private void orderTriangles()
     {
-        boolean changed = true;
-        while (changed == true)
-        {
-            changed = false;
-            for (int i = 0; i < triangles.size()-1; i++)
-            {
-                if (triangles.get(i).parentGameObject.shading)
-                {
-                    if (Vector3.subtract(camera.getPosition(), Vector3.centerOfTriangle(triangles.get(i))).getMagnitude() < Vector3.subtract(camera.getPosition(), Vector3.centerOfTriangle(triangles.get(i+1))).getMagnitude())
-                    {
-                        Triangle closerTriangle = triangles.get(i);
-                        triangles.set(i, triangles.get(i+1));
-                        triangles.set(i + 1, closerTriangle);
-                        changed = true;
-                    }
-                }
-            }
-        }
+        Collections.sort(triangle2dList);
     }
 
-    private void renderTriangle(Graphics g, Triangle triangle)
+    private void calculateTriangle(Graphics g, Triangle triangle)
     {
         Point p1ScreenCoords = new Point();
         Point p2ScreenCoords = new Point();
@@ -240,7 +234,7 @@ public class RenderingPanel extends JPanel implements ActionListener
                 }   
                 else 
                     colorUsed = triangle.color;
-                paintTriangle(p1ScreenCoords, p2ScreenCoords, p3ScreenCoords, colorUsed);
+                triangle2dList.add(new Triangle2D(p1ScreenCoords, p2ScreenCoords, p3ScreenCoords, colorUsed, distanceToTriangle));
             }
         }
     }
@@ -378,6 +372,35 @@ public class RenderingPanel extends JPanel implements ActionListener
         totalFrameTime.stopTimer();
         totalFrameTime.startTimer();
         repaint();
+    }
+
+    class Triangle2D implements Comparable<Triangle2D>
+    {
+        public Point p1;
+        public Point p2;
+        public Point p3;
+        public Color color;
+        private double triangle3DDistance;
+
+        public Triangle2D(Point p1In, Point p2In, Point p3In, Color colorIn, double triangle3DDistanceIn)
+        {
+            p1 = p1In;
+            p2 = p2In;
+            p3 = p3In;
+            color = colorIn;
+            triangle3DDistance = triangle3DDistanceIn;
+        }
+
+        @Override
+        public int compareTo(Triangle2D o) 
+        {
+            int num = 0;
+            if (o.triangle3DDistance < triangle3DDistance)
+                num = 1;
+            else if (o.triangle3DDistance > triangle3DDistance)
+                num = -1;
+            return num;
+        }
     }
 }
 
