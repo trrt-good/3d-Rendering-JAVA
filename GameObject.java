@@ -18,6 +18,8 @@ public class GameObject
     private Vector3 autoCenter = new Vector3();
     private EulerAngle orientation;
 
+    public boolean backFaceCull = false;
+
     public GameObject(Vector3 positionIn, Vector3 localCenterIn, EulerAngle orientationIn, double scaleIn, String modelFileName, Color colorIn)
     {
         System.out.print("Creating gameObject: " + modelFileName + "... ");

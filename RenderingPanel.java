@@ -163,7 +163,7 @@ public class RenderingPanel extends JPanel implements ActionListener
         Vector3 camDirectionVector = camera.getDirectionVector();
         Vector3 camPos = camera.getPosition();
         double distanceToTriangle = Vector3.subtract(Vector3.centerOfTriangle(triangle), camPos).getMagnitude();  
-        if (distanceToTriangle < camera.getViewDistance() && Vector3.dotProduct(triangle.getPlane().normal, camDirectionVector) < 0)
+        if (distanceToTriangle < camera.getViewDistance() && (Vector3.dotProduct(triangle.getPlane().normal, camDirectionVector) < 0 || !triangle.parentGameObject.backFaceCull))
         {
             double renderPlaneWidth = camera.getRenderPlaneWidth();
             if (Vector3.dotProduct(renderPlane.normal, Vector3.subtract(tempPoint1, renderPlane.pointOnPlane)) > 0 && Vector3.dotProduct(renderPlane.normal, Vector3.subtract(tempPoint2, renderPlane.pointOnPlane)) > 0 && Vector3.dotProduct(renderPlane.normal, Vector3.subtract(tempPoint3, renderPlane.pointOnPlane)) > 0)
