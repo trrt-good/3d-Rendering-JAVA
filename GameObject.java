@@ -18,7 +18,7 @@ public class GameObject
     private Vector3 autoCenter = new Vector3();
     private EulerAngle orientation;
 
-    public boolean backFaceCull = false;
+    public boolean backFaceCull = true;
 
     public GameObject(Vector3 positionIn, Vector3 localCenterIn, EulerAngle orientationIn, double scaleIn, String modelFileName, Color colorIn)
     {
