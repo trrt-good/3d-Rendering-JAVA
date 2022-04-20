@@ -136,9 +136,9 @@ public class RenderingPanel extends JPanel implements ActionListener
             calculateTriangle(g, triangles.get(i));
         }
         trianglesCalculateTime.stopTimer();
+        
         trianglesOrderTime.startTimer();
-        if (gameObjects.size() > 0 && triangles.size() > 0)
-            orderTriangles();    
+        Collections.sort(triangle2dList);
         trianglesOrderTime.stopTimer();
 
         trianglesPaintTime.startTimer();
@@ -149,11 +149,6 @@ public class RenderingPanel extends JPanel implements ActionListener
         }
         triangle2dList.clear();
         trianglesPaintTime.stopTimer();
-    }
-
-    private void orderTriangles()
-    {
-        Collections.sort(triangle2dList);
     }
 
     private void calculateTriangle(Graphics g, Triangle triangle)
