@@ -36,7 +36,7 @@ public class GraphicsManager
         Camera cam = new Camera(new Vector3(0, 0, 0), 10000, 60);
         renderingPanel.setCamera(cam);
         //cam.setFreeControls(renderingPanel, 200, 10);
-        cam.setOrbitControls(renderingPanel, gameObject1, 1000, 10);
+        cam.setOrbitControls(renderingPanel, gameObject2, 1000, 10);
         renderingPanel.setLighting(new Lighting(new Vector3(-0.5, -1, -0.5), 70, 30));
         renderingPanel.addGameObject(gameObject1);
         renderingPanel.setFog(1000, 3000, new Color(190, 210, 245));
