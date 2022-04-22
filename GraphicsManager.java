@@ -16,9 +16,9 @@ public class GraphicsManager
 
     public static void startGraphics(String name)
     {
-        gameObject1 = new GameObject(new Vector3(0, 0, 0), new Vector3(0, 10, 0), new EulerAngle(Math.toRadians(0), Math.toRadians(0), Math.toRadians(0)), 100, "f14.obj", new Color(100, 100, 100));
-        gameObject1.backFaceCull = true;
-        //gameObject2 = new GameObject(new Vector3(0, 0, 0), new EulerAngle(Math.toRadians(0), Math.toRadians(0), Math.toRadians(0)), 150, "jet.obj", new Color(50, 50, 50));
+        // gameObject1 = new GameObject(new Vector3(0, 0, 0), new EulerAngle(Math.toRadians(0), Math.toRadians(0), Math.toRadians(0)), 100, "f14.obj", new Color(100, 100, 100));
+        // gameObject1.backFaceCull = true;
+        gameObject2 = new GameObject(new Vector3(0, 0, 0), new EulerAngle(Math.toRadians(0), Math.toRadians(0), Math.toRadians(0)), 150, "jet.obj", new Color(50, 50, 50));
         System.out.println("Creating graphics... ");
         long start = System.nanoTime();
 
