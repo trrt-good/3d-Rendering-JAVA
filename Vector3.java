@@ -154,4 +154,10 @@ public class Vector3 //An object which represents 3d points or vectors
     {
         return new Vector3((triangle.point1.x + triangle.point2.x + triangle.point3.x)/3, (triangle.point1.y + triangle.point2.y + triangle.point3.y)/3, (triangle.point1.z + triangle.point2.z + triangle.point3.z)/3);
     }
+
+    public static Vector3 projectToPlane(Vector3 vector, Vector3 normalVector)
+    {
+        Vector3 normalNormalized = normalVector.getNormalized();
+        return Vector3.subtract(vector, Vector3.multiply(normalNormalized, Vector3.dotProduct(vector, normalNormalized)));
+    }
 }
