@@ -9,8 +9,8 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 public class RenderingPanel extends JPanel implements ActionListener
 {
-    private List<GameObject> gameObjects = new ArrayList<GameObject>();
-    private List<Triangle> triangles = new ArrayList<Triangle>();
+    private ArrayList<Mesh> meshes = new ArrayList<Mesh>();
+    private ArrayList<Triangle> triangles = new ArrayList<Triangle>();
 
     private Timer renderUpdater;
 
@@ -63,7 +63,7 @@ public class RenderingPanel extends JPanel implements ActionListener
         frameDrawTime.startTimer();
         g.drawImage(renderImage, 0, 0, this);
         frameDrawTime.stopTimer();
-        if (gameObjects.size() > 0 && camera != null)
+        if (meshes.size() > 0 && camera != null)
         {
             drawTriangles(g);
         }
@@ -74,7 +74,7 @@ public class RenderingPanel extends JPanel implements ActionListener
         long lightingStartTime = System.nanoTime();
         System.out.print("\tadding lighting... ");
         lightingObject = lighting;
-        lightingObject.update(gameObjects);
+        lightingObject.update(meshes);
         System.out.println("finished in " + (System.nanoTime()-lightingStartTime)/1000000.0 + "ms");
     }
 
@@ -90,11 +90,18 @@ public class RenderingPanel extends JPanel implements ActionListener
         if (gameObject != null)
         {
             long gameObjectStartTime = System.nanoTime();
-            System.out.print("\tadding gameObject " + gameObject.name + "... ");
-            gameObjects.add(gameObject);
-            if (lightingObject != null)
-                lightingObject.update(gameObjects);
-            triangles.addAll(gameObject.getMesh());
+            System.out.print("\tadding gameObject " + gameObject.getName() + "... ");
+            if (gameObject.getMesh() != null)
+            {
+                meshes.add(gameObject.getMesh());
+                if (lightingObject != null)
+                    lightingObject.update(meshes);
+                triangles.addAll(gameObject.getMesh().getTriangles());
+            }
+            else
+            {
+                System.out.print("no triangles added: mesh is null... ");
+            }
             System.out.println("finished in " + (System.nanoTime()-gameObjectStartTime)/1000000.0 + "ms");
         }
     }
@@ -166,8 +173,8 @@ public class RenderingPanel extends JPanel implements ActionListener
 
         Vector3 camDirectionVector = camera.getDirectionVector();
         Vector3 camPos = camera.getPosition();
-        double distanceToTriangle = Vector3.subtract(Vector3.centerOfTriangle(triangle), camPos).getMagnitude();  
-        if (distanceToTriangle < camera.getViewDistance() && (Vector3.dotProduct(triangle.getPlane().normal, camDirectionVector) < 0 || !triangle.parentGameObject.backFaceCull))
+        double distanceToTriangle = Vector3.subtract(triangle.getCenter(), camPos).getMagnitude();  
+        if (distanceToTriangle < camera.getViewDistance() && (Vector3.dotProduct(triangle.getPlane().normal, camDirectionVector) < 0 || !triangle.getMesh().backFaceCulling()))
         {
             double renderPlaneWidth = camera.getRenderPlaneWidth();
             if (Vector3.dotProduct(renderPlane.normal, Vector3.subtract(tempPoint1, renderPlane.pointOnPlane)) > 0 && Vector3.dotProduct(renderPlane.normal, Vector3.subtract(tempPoint2, renderPlane.pointOnPlane)) > 0 && Vector3.dotProduct(renderPlane.normal, Vector3.subtract(tempPoint3, renderPlane.pointOnPlane)) > 0)
@@ -209,7 +216,7 @@ public class RenderingPanel extends JPanel implements ActionListener
             if (shouldDrawTriangle)
             {
                 Color colorUsed;
-                if (triangle.parentGameObject != null && triangle.parentGameObject.shading)
+                if (triangle.getMesh() != null && triangle.getMesh().isShaded())
                 {
                     Color litColor = triangle.getColorWithLighting();
                     if (fogEnabled && distanceToTriangle > fogStartDistance)

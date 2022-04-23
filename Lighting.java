@@ -1,4 +1,5 @@
 import java.util.List;
+import java.util.ArrayList;
 public class Lighting
 {
     public Vector3 lightDirection;
@@ -12,10 +13,10 @@ public class Lighting
         shadowIntensity = shadowIntensityIn;
     }
 
-    public void update(List<GameObject> objects)
+    public void update(ArrayList<Mesh> meshes)
     {
-        for (int i = 0; i < objects.size(); i++)
-            objects.get(i).recalculateLighting(this);
+        for (int i = 0; i < meshes.size(); i++)
+            meshes.get(i).recalculateLighting(this);
     }
 }
 

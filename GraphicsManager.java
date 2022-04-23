@@ -18,7 +18,12 @@ public class GraphicsManager
     {
         // gameObject1 = new GameObject(new Vector3(0, 0, 0), new EulerAngle(Math.toRadians(0), Math.toRadians(0), Math.toRadians(0)), 100, "f14.obj", new Color(100, 100, 100));
         // gameObject1.backFaceCull = true;
-        gameObject2 = new GameObject(new Vector3(0, 0, 0), new EulerAngle(Math.toRadians(0), Math.toRadians(0), Math.toRadians(0)), 150, "jet.obj", new Color(50, 50, 50));
+        gameObject2 = new GameObject
+        (
+            "High Poly Jet",
+            new Mesh("jet.obj", new Vector3(), new EulerAngle(), 1, new Color(100, 100, 100), true, true),
+            new Transform(new Vector3(), new EulerAngle())
+        );
         System.out.println("Creating graphics... ");
         long start = System.nanoTime();
 

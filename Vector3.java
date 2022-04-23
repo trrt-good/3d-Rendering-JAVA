@@ -99,9 +99,10 @@ public class Vector3 //An object which represents 3d points or vectors
         return new Vector3(-vector.x, -vector.y, -vector.z);
     }
 
-    public static Vector3 angleToVector(double horizontalAng, double verticalAng)
+    public static Vector3 angleToVector(double yaw, double pitch)
     {
-        return new Vector3(Math.sin(horizontalAng)*Math.cos(verticalAng), Math.sin(verticalAng), Math.cos(horizontalAng)*Math.cos(verticalAng));
+        //new Vector3(Math.cos(yaw)*Math.cos(pitch), Math.sin(pitch), Math.sin(yaw)*Math.cos(pitch));
+        return new Vector3(Math.sin(yaw)*Math.cos(pitch), Math.sin(pitch), Math.cos(yaw)*Math.cos(pitch));
     }
 
     public static Vector3 getIntersectionPoint(Vector3 lineDirection, Vector3 linePoint, Plane plane)
@@ -150,14 +151,24 @@ public class Vector3 //An object which represents 3d points or vectors
         return new Vector3(Vector3.dotProduct(new Vector3(cos, -sin, 0), point), Vector3.dotProduct(new Vector3(sin, cos, 0), point), Vector3.dotProduct(new Vector3(0, 0, 1), point));
     }
 
-    public static Vector3 centerOfTriangle(Triangle triangle)
-    {
-        return new Vector3((triangle.point1.x + triangle.point2.x + triangle.point3.x)/3, (triangle.point1.y + triangle.point2.y + triangle.point3.y)/3, (triangle.point1.z + triangle.point2.z + triangle.point3.z)/3);
-    }
-
+    //returns the orthagonal projection of the inputted vector onto a plane that intersects the origin and 
+    //has the normal vector "normalVector". It first calculates the orthagonal projection of the 
+    //formula: 
+    //
     public static Vector3 projectToPlane(Vector3 vector, Vector3 normalVector)
     {
-        Vector3 normalNormalized = normalVector.getNormalized();
+        Vector3 normalNormalized = (normalVector.getSqrMagnitude() == 1)? normalVector : normalVector.getNormalized();
         return Vector3.subtract(vector, Vector3.multiply(normalNormalized, Vector3.dotProduct(vector, normalNormalized)));
+    }
+
+    //returns the inputted vector rotated "angle" degrees around "axis", useful for axis-angle representation.
+    //Uses Rodrigues' rotation formula, where a is the angle, e is a unit vector representing 
+    //the axis of rotation and v is the vector to be rotated
+    //  cos(a)v + sin(a)(e cross v) + (1 - cos(a))(e dot v)e
+    public static Vector3 axisAngleRotation(Vector3 axis, double angle, Vector3 vector) 
+    {
+        axis = (axis.getSqrMagnitude() == 1)? axis : axis.getNormalized(); //makes sure axis is normalized
+        double cosAngle = Math.cos(angle); //local variable to mitigate preforming the cos function twice.
+        return Vector3.add(Vector3.add(Vector3.multiply(vector, cosAngle), Vector3.multiply(Vector3.multiply(axis, Vector3.dotProduct(vector, axis)), 1-cosAngle)), Vector3.multiply(Vector3.crossProduct(axis, vector), Math.sin(angle)));
     }
 }

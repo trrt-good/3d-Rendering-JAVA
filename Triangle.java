@@ -5,31 +5,41 @@ public class Triangle
     public Vector3 point2;
     public Vector3 point3;
     public Color color = Color.BLACK; 
-    public GameObject parentGameObject;
+    private Mesh parentMesh;
 
     private Color colorWithLighting;
 
-    public Triangle(GameObject parentGameObjectIn, Vector3 p1, Vector3 p2, Vector3 p3)
+    public Triangle(Mesh parentMeshIn, Vector3 p1, Vector3 p2, Vector3 p3)
     {
         point1 = p1;
         point2 = p2;
         point3 = p3;
         color = Color.BLACK;
-        parentGameObject = parentGameObjectIn;
+        parentMesh = parentMeshIn;
     }
 
-    public Triangle(GameObject parentGameObjectIn, Vector3 p1, Vector3 p2, Vector3 p3, Color colorIn)
+    public Triangle(Mesh parentMeshIn, Vector3 p1, Vector3 p2, Vector3 p3, Color colorIn)
     {
         point1 = p1;
         point2 = p2;
         point3 = p3;
         color = colorIn;
-        parentGameObject = parentGameObjectIn;
+        parentMesh = parentMeshIn;
+    }
+
+    public Mesh getMesh()
+    {
+        return parentMesh;
     }
 
     public Plane getPlane()
     {
         return new Plane(point1, point2, point3);
+    }
+
+    public Vector3 getCenter()
+    {
+        return new Vector3((point1.x + point2.x + point3.x)/3, (point1.y + point2.y + point3.y)/3, (point1.z + point2.z + point3.z)/3);
     }
 
     public void calculateLightingColor(Lighting lighting)
