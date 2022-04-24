@@ -52,6 +52,8 @@ public class Matrix3x3
         return Matrix3x3.multiply(getAdjugateMatrix(), 1/getDeterminant());
     }
 
+    //#region ----------- static methods ------------- 
+
     //applies matrix m1 to matrix m2 and returns the resulting matrix. order matters!
     public static Matrix3x3 multiply(Matrix3x3 m1, Matrix3x3 m2)
     {
@@ -161,4 +163,6 @@ public class Matrix3x3
             -sin_B, cos_B*sin_y, cos_B*cos_y
         );
     }
+
+    //#endregion
 }

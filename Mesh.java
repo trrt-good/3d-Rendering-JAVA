@@ -72,7 +72,6 @@ public class Mesh
     private void readObjFile(String fileName, Vector3 offsetPosition, EulerAngle offsetOrientation, double scale)
     {
         Matrix3x3 offsetRotationMatrix = Matrix3x3.eulerRotation(offsetOrientation);
-        System.out.println("\n" + offsetRotationMatrix);
         ArrayList<Vector3> vertices = new ArrayList<Vector3>();
         Scanner scanner;
         String line = "";
