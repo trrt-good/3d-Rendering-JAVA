@@ -32,7 +32,7 @@ public class GraphicsManager
         
         gameObject2.getTransform().setPitch(0.2);
         System.out.println(gameObject2.getTransform().getForward());
-        System.out.println(gameObject2.getTransform().transformToWorld(new Vector3(0, 0, 1)));
+        System.out.println(gameObject2.getTransform().transformToLocal(new Vector3(0.00, -0.20, 0.98)));
 
         System.out.println("Creating graphics... ");
         long start = System.nanoTime();

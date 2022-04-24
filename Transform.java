@@ -58,6 +58,14 @@ public class Transform
         return Vector3.applyMatrix(new Matrix3x3(right, up, forward), point);
     }
 
+    public Vector3 transformToLocal(Vector3 point)
+    {
+        up = up.getNormalized();
+        forward = forward.getNormalized();
+        right = right.getNormalized();
+        return Vector3.applyMatrix(new Matrix3x3(right, up, forward).getInverse(), point);
+    }
+
     public Vector3 getForward()
     {
         return forward;

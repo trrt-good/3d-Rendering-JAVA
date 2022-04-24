@@ -22,6 +22,36 @@ public class Matrix3x3
         return String.format("\n|%39s\n|%10.2f%10.2f%10.2f%9s\n|%39s\n|%10.2f%10.2f%10.2f%9s\n|%39s\n|%10.2f%10.2f%10.2f%9s\n|%39s\n", "|", R1C1, R1C2, R1C3, "|", "|", R2C1, R2C2, R2C3, "|", "|", R3C1, R3C2, R3C3, "|", "|");
     }
 
+    public double getDeterminant()
+    {
+        return R1C1*(R2C2*R3C3-R2C3*R3C2)-R1C2*(R2C1*R3C3-R2C3*R3C1)+R1C3*(R2C1*R3C2-R2C2*R3C1);
+    }
+
+    public Matrix3x3 getCofactorMatrix()
+    {
+        return new Matrix3x3
+        (
+            R2C2*R3C3-R2C3*R3C2, -(R2C1*R3C3-R2C3*R3C1), R2C1*R3C2-R2C2*R3C1, 
+            -(R1C2*R3C3-R1C3*R3C2), R1C1*R3C3-R1C3*R3C1, -(R1C1*R3C2-R1C2*R3C1), 
+            R1C2*R2C3-R1C3*R2C2, -(R1C1*R2C3-R1C3*R2C1), R1C1*R2C2-R1C2*R2C1
+        );
+    }
+
+    public Matrix3x3 getAdjugateMatrix()
+    {
+        return new Matrix3x3
+        (
+            R2C2*R3C3-R2C3*R3C2, -(R1C2*R3C3-R1C3*R3C2), R1C2*R2C3-R1C3*R2C2, 
+            -(R2C1*R3C3-R2C3*R3C1), R1C1*R3C3-R1C3*R3C1, -(R1C1*R2C3-R1C3*R2C1), 
+            R2C1*R3C2-R2C2*R3C1, -(R1C1*R3C2-R1C2*R3C1), R1C1*R2C2-R1C2*R2C1
+        );
+    }
+
+    public Matrix3x3 getInverse()
+    {
+        return Matrix3x3.multiply(getAdjugateMatrix(), 1/getDeterminant());
+    }
+
     //applies matrix m1 to matrix m2 and returns the resulting matrix. order matters!
     public static Matrix3x3 multiply(Matrix3x3 m1, Matrix3x3 m2)
     {
@@ -29,6 +59,17 @@ public class Matrix3x3
             m1.R1C1*m2.R1C1 + m1.R1C2*m2.R2C1 + m1.R1C3*m2.R3C1,    m1.R1C1*m2.R1C2 + m1.R1C2*m2.R2C2 + m1.R1C3*m2.R3C2,    m1.R1C1*m2.R1C3 + m1.R1C2*m2.R2C3 + m1.R1C3*m2.R3C3, 
             m1.R2C1*m2.R1C1 + m1.R2C2*m2.R2C1 + m1.R2C3*m2.R3C1,    m1.R2C1*m2.R1C2 + m1.R2C2*m2.R2C2 + m1.R2C3*m2.R3C2,    m1.R2C1*m2.R1C3 + m1.R2C2*m2.R2C3 + m1.R2C3*m2.R3C3, 
             m1.R3C1*m2.R1C1 + m1.R3C2*m2.R2C1 + m1.R3C3*m2.R3C1,    m1.R3C1*m2.R1C2 + m1.R3C2*m2.R2C2 + m1.R3C3*m2.R3C2,    m1.R3C1*m2.R1C3 + m1.R3C2*m2.R2C3 + m1.R3C3*m2.R3C3);
+    }
+
+    //multiplies a matrix by a scalar value
+    public static Matrix3x3 multiply(Matrix3x3 matrix, double scalar)
+    {
+        return new Matrix3x3
+        (
+            matrix.R1C1*scalar, matrix.R1C2*scalar, matrix.R1C3*scalar, 
+            matrix.R2C1*scalar, matrix.R2C2*scalar, matrix.R2C3*scalar, 
+            matrix.R3C1*scalar, matrix.R3C2*scalar, matrix.R3C3*scalar
+        );
     }
 
 
