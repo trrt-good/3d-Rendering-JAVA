@@ -2,9 +2,9 @@
 //The Vector3 class also contains many static methods for 3d math.  
 public class Vector3 
 {
-    public double x;
-    public double y;
-    public double z;
+    public double x; //while looking north (0, 0, 1), the x-axis would run to the left and right or east/west
+    public double y; //the y axis is vertical 
+    public double z; //the "depth" axis which runs north/south
 
     public Vector3(double xIn, double yIn, double zIn)
     {
@@ -39,30 +39,33 @@ public class Vector3
 
     public Vector3 getNormalized()
     {
-        double magnitude = getMagnitude();
-        return new Vector3(x/magnitude, y/magnitude, z/magnitude);
+        if (getSqrMagnitude() != 1)
+        {
+            double magnitude = getMagnitude();
+            return new Vector3(x/magnitude, y/magnitude, z/magnitude);
+        }
+        else
+            return this;
     }
 
-    public void add(Vector3 vectorIn)
+    //changes itself, as well as returning the result
+    public Vector3 add(Vector3 vectorIn)
     {
         x+= vectorIn.x;
         y+= vectorIn.y;
         z+= vectorIn.z;
-    }
-    
-    public void add(double xIn, double yIn, double zIn)
-    {
-        x+= xIn;
-        y+= yIn;
-        z+= zIn;
+        return this;
     }
 
-    public void multiply(double multiplier)
+    //changes itself, as well as returning the result
+    public Vector3 multiply(double multiplier)
     {
         x*=multiplier;
         y*=multiplier;
         z*=multiplier;
+        return this;
     }
+
 
     public String toString()
     {
@@ -141,9 +144,9 @@ public class Vector3
         return Math.abs(plane.normal.x*point.x + plane.normal.y*point.y + plane.normal.z*point.z - plane.normal.x*plane.pointOnPlane.x - plane.normal.y*plane.pointOnPlane.y - plane.normal.z*plane.pointOnPlane.z)/Math.sqrt(plane.normal.x*plane.normal.x + plane.normal.y*plane.normal.y + plane.normal.z* plane.normal.z);
     }
 
-    //following three methods: returns a vector rotated "angle" degrees around either the x y or z axis.
-    //elemental rotations. 
-    // ** not recommended to use these methods for transforming multiple points by the same angle **
+    //Elemental rotation methods: returns a vector rotated "angle" degrees around either the x y or z axis.
+    //intended use for rotating singular points once. For multiple points or multiple rotations, generate a single 
+    //Matrix3x3 object that represents the transformation, and apply that matrix to all the points, which is much faster.
     
     /*  |  1    0    0  |
         |  0   cos -sin |
@@ -191,11 +194,22 @@ public class Vector3
     //Uses Rodrigues' rotation formula, where a is the angle, e is a unit vector representing 
     //the axis of rotation and v is the vector to be rotated
     //  vrot = cos(a)v + sin(a)(e cross v) + (1 - cos(a))(e dot v)e
-    // ** not recommended to use this method for transforming multiple points by the same angle ** 
+    //This is intended for single time and single point use. Using this method to transform an array of points 
+    //may be very slow. Instead, generate a single Matrix3x3 object to preform the desired transformation on all points.  
     public static Vector3 axisAngleRotation(Vector3 axis, double angle, Vector3 vector) 
     {
-        axis = (axis.getSqrMagnitude() == 1)? axis : axis.getNormalized(); //makes sure axis is normalized
+        axis = axis.getNormalized(); //makes sure axis is normalized
         double cosAngle = Math.cos(angle); //local variable to mitigate preforming the cos function twice.
         return Vector3.add(Vector3.add(Vector3.multiply(vector, cosAngle), Vector3.multiply(Vector3.multiply(axis, Vector3.dotProduct(vector, axis)), 1-cosAngle)), Vector3.multiply(Vector3.crossProduct(axis, vector), Math.sin(angle)));
+    }
+
+    public static Vector3 applyMatrix(Matrix3x3 matrix, Vector3 vector)
+    {
+        return new Vector3
+        (
+        vector.x*matrix.R1C1 + vector.y*matrix.R1C2 + vector.z*matrix.R1C3,
+        vector.x*matrix.R2C1 + vector.y*matrix.R2C2 + vector.z*matrix.R2C3,
+        vector.x*matrix.R3C1 + vector.y*matrix.R3C2 + vector.z*matrix.R3C3
+        );
     }
 }

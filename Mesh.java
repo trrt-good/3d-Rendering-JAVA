@@ -33,6 +33,16 @@ public class Mesh
         System.out.println("finished in all " + triangles.size() + " triangles in " + (System.nanoTime() - start)/1000000 + "ms");
     }
 
+    public void applyMatrix(Matrix3x3 matrix)
+    {
+        for (int i = 0; i < triangles.size(); i ++)
+        {
+            triangles.get(i).point1 = Vector3.applyMatrix(matrix, triangles.get(i).point1);
+            triangles.get(i).point2 = Vector3.applyMatrix(matrix, triangles.get(i).point2);
+            triangles.get(i).point3 = Vector3.applyMatrix(matrix, triangles.get(i).point3);
+        }
+    }
+
     public boolean isShaded()
     {
         return shading;
@@ -61,6 +71,8 @@ public class Mesh
 
     private void readObjFile(String fileName, Vector3 offsetPosition, EulerAngle offsetOrientation, double scale)
     {
+        Matrix3x3 offsetRotationMatrix = Matrix3x3.eulerRotation(offsetOrientation);
+        System.out.println("\n" + offsetRotationMatrix);
         ArrayList<Vector3> vertices = new ArrayList<Vector3>();
         Scanner scanner;
         String line = "";
@@ -83,8 +95,10 @@ public class Mesh
                 if (line.startsWith("v "))
                 {
                     String[] lineArr = line.substring(1).trim().split(" ");
-                    Vector3 vertex = Vector3.add(offsetPosition, new Vector3(Double.parseDouble(lineArr[0]), Double.parseDouble(lineArr[1]), Double.parseDouble(lineArr[2])));
-                    vertex = Vector3.rotateAroundZaxis(Vector3.rotateAroundYaxis(Vector3.rotateAroundXaxis(vertex, offsetOrientation.x), offsetOrientation.y), offsetOrientation.z);
+                    Vector3 vertex = new Vector3(Double.parseDouble(lineArr[0]), Double.parseDouble(lineArr[1]), Double.parseDouble(lineArr[2]));
+                    //TODO: use rotation matrices to make this intrinsic rotation. 
+                    vertex = Vector3.applyMatrix(offsetRotationMatrix, vertex);
+                    vertex = Vector3.add(offsetPosition, vertex);
                     vertex = Vector3.multiply(vertex, scale);
                     vertices.add(vertex);
                 }
