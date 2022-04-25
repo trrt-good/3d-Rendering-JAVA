@@ -129,7 +129,7 @@ public class Camera
         private int prevX = 0;
         private int prevY = 0;
 
-        private Vector3 difference = new Vector3();
+        private Vector3 difference;
         private Vector3 directionUnit = new Vector3();
         
         public OrbitCamController(GameObject focusObjectIn, double startDistanceIn, double sensitivityIn)
@@ -140,6 +140,7 @@ public class Camera
 
             position = Vector3.add(focusObj.getTransform().getPosition(), new Vector3(0, 0, -distance));
             directionUnit = Vector3.subtract(position, focusObj.getTransform().getPosition()).getNormalized();
+            difference = Vector3.multiply(directionUnit, startDistanceIn);
         }
 
         public void mouseWheelMoved(MouseWheelEvent e) 
@@ -172,6 +173,7 @@ public class Camera
 
         public void updatePosition()
         {
+            System.out.println(h_orientation);
             position = Vector3.add(focusObj.getTransform().getPosition(), difference);
         }
 
