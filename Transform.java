@@ -23,13 +23,15 @@ public class Transform
         gameObject = gameObjectIn;
     }
 
+
+
     public void setPitch(double angle)
     {
         Matrix3x3 rotationMatrix = Matrix3x3.axisAngleMatrix(right, angle-rotation.x);
         up = Vector3.applyMatrix(rotationMatrix, up);
         forward = Vector3.applyMatrix(rotationMatrix, forward);
         if (gameObject.getMesh() != null)
-            gameObject.getMesh().applyMatrix(rotationMatrix);
+            gameObject.getMesh().rotate(rotationMatrix, position);
         rotation.x = angle;
     }
 
@@ -39,7 +41,7 @@ public class Transform
         forward = Vector3.applyMatrix(rotationMatrix, forward);
         right = Vector3.applyMatrix(rotationMatrix, right);
         if (gameObject.getMesh() != null)
-            gameObject.getMesh().applyMatrix(rotationMatrix);
+            gameObject.getMesh().rotate(rotationMatrix, position);
         rotation.y = angle;
     }
     
@@ -49,7 +51,7 @@ public class Transform
         up = Vector3.applyMatrix(rotationMatrix, up);
         right = Vector3.applyMatrix(rotationMatrix, right);
         if (gameObject.getMesh() != null)
-            gameObject.getMesh().applyMatrix(rotationMatrix);
+            gameObject.getMesh().rotate(rotationMatrix, position);
         rotation.z = angle;
     }
 
