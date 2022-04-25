@@ -157,7 +157,7 @@ public class Camera
             else if (v_orientation < -minAngle && (e.getY()-prevY)/(200/sensitivity) < 0)
                 directionUnit = Vector3.rotateAroundYaxis(Vector3.rotateAroundXaxis(Vector3.rotateAroundYaxis(directionUnit, -h_orientation*0.017453292519943295), (e.getY()-prevY)/(2000/sensitivity)), h_orientation*0.017453292519943295);
             difference = Vector3.multiply(directionUnit, distance);
-            position = Vector3.add(focusObj.getTransform().getPosition(), difference);
+            updatePosition();
             lookAt(focusObj.getTransform().getPosition());
             v_orientation = Math.max(-89, Math.min(89, v_orientation));
             prevX = e.getX();
@@ -172,8 +172,7 @@ public class Camera
 
         public void updatePosition()
         {
-            if (difference.getSqrMagnitude()>0)
-                position = Vector3.add(focusObj.getTransform().getPosition(), difference);
+            position = Vector3.add(focusObj.getTransform().getPosition(), difference);
         }
 
         public void mouseMoved(MouseEvent e) {}
