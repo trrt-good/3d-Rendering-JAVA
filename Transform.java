@@ -68,22 +68,22 @@ public class Transform
 
     public Vector3 getForward()
     {
-        return forward;
+        return forward.getNormalized();
     }
 
     public Vector3 getUp()
     {
-        return up;
+        return up.getNormalized();
     }
 
     public Vector3 getRight()
     {
-        return right;
+        return right.getNormalized();
     }
 
     public Vector3 getPosition()
     {
-        return position;
+        return position.getNormalized();
     }
 
     
