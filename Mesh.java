@@ -12,18 +12,17 @@ public class Mesh
 
     private boolean backFaceCull = true;
 
-    public Mesh(String modelFileName, Vector3 offsetPosition, EulerAngle offsetOrientation, double scale, Color colorIn, boolean shaded, boolean shouldBackFaceCull)
+    public Mesh(String modelFileName, Vector3 modelOffsetAmount, EulerAngle modelOffsetRotation, double scale, Color colorIn, boolean shaded, boolean shouldBackFaceCull)
     {
         System.out.print("Creating mesh: " + modelFileName + "... ");
         long start = System.nanoTime();
         triangles = new ArrayList<Triangle>();
-
         shading = shaded;
         backFaceCull = shouldBackFaceCull;
         color = colorIn;
         if (modelFileName.endsWith(".obj"))
         {
-            readObjFile(modelFileName, offsetPosition, offsetOrientation, scale);
+            readObjFile(modelFileName, modelOffsetAmount, modelOffsetRotation, scale);
         }
         else
         {
@@ -33,13 +32,13 @@ public class Mesh
         System.out.println("finished in all " + triangles.size() + " triangles in " + (System.nanoTime() - start)/1000000 + "ms");
     }
 
-    public void applyMatrix(Matrix3x3 matrix)
+    public void rotate(Matrix3x3 rotationMatrix, Vector3 centerOfRotation)
     {
         for (int i = 0; i < triangles.size(); i ++)
         {
-            triangles.get(i).point1 = Vector3.applyMatrix(matrix, triangles.get(i).point1);
-            triangles.get(i).point2 = Vector3.applyMatrix(matrix, triangles.get(i).point2);
-            triangles.get(i).point3 = Vector3.applyMatrix(matrix, triangles.get(i).point3);
+            triangles.get(i).point1 = Vector3.add(Vector3.applyMatrix(rotationMatrix, Vector3.subtract(triangles.get(i).point1, centerOfRotation)), centerOfRotation);
+            triangles.get(i).point2 = Vector3.add(Vector3.applyMatrix(rotationMatrix, Vector3.subtract(triangles.get(i).point2, centerOfRotation)), centerOfRotation);
+            triangles.get(i).point3 = Vector3.add(Vector3.applyMatrix(rotationMatrix, Vector3.subtract(triangles.get(i).point3, centerOfRotation)), centerOfRotation);
         }
     }
 
