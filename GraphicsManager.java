@@ -13,13 +13,16 @@ public class GraphicsManager
 
     public static GameObject gameObject1;
     public static GameObject gameObject2;
+    public static GameObject gameObject3;
 
     public static void startGraphics(String name)
     {
+        
+
         gameObject1 = new GameObject
         (
-            "1", 
-            new Mesh("airplane.obj", new Vector3(0, -200, 0), new EulerAngle(0, Math.toRadians(90), Math.toRadians(90)), 1, new Color(100, 100, 100), true, true), 
+            "propellerPlane", 
+            new Mesh("propellerPlane.obj", new Vector3(0, 0, 0), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 1, new Color(100, 100, 100), true, true), 
             new Transform(new Vector3())
         );
 
@@ -27,6 +30,13 @@ public class GraphicsManager
         (
             "High Poly Jet",
             new Mesh("jet.obj", new Vector3(), new EulerAngle(0, 0, 0), 100, new Color(100, 100, 100), true, true), 
+            new Transform(new Vector3())
+        );
+
+        gameObject3 = new GameObject
+        (
+            "lowPolyGulfstream", 
+            new Mesh("lowPolyGulfstream.obj", new Vector3(0, 0, 0), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 1, new Color(100, 100, 100), true, true), 
             new Transform(new Vector3())
         );
 
@@ -46,9 +56,9 @@ public class GraphicsManager
         Camera cam = new Camera(new Vector3(0, 0, 0), 10000, 60);
         renderingPanel.setCamera(cam);
         //cam.setFreeControls(renderingPanel, 200, 10);
-        cam.setOrbitControls(renderingPanel, gameObject2, 1000, 10);
+        cam.setOrbitControls(renderingPanel, gameObject3, 1000, 10);
         renderingPanel.setLighting(new Lighting(new Vector3(-0.5, -1, -0.5), 70, 30));
-        renderingPanel.addGameObject(gameObject2);
+        renderingPanel.addGameObject(gameObject3);
         renderingPanel.setFog(1000, 3000, new Color(190, 210, 245));
         renderingPanel.startRenderUpdates();
         
