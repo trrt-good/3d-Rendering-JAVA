@@ -28,7 +28,8 @@ public class Transform
         Matrix3x3 rotationMatrix = Matrix3x3.axisAngleMatrix(right, angle-rotation.x);
         up = Vector3.applyMatrix(rotationMatrix, up);
         forward = Vector3.applyMatrix(rotationMatrix, forward);
-        gameObject.getMesh().applyMatrix(rotationMatrix);
+        if (gameObject.getMesh() != null)
+            gameObject.getMesh().applyMatrix(rotationMatrix);
         rotation.x = angle;
     }
 
@@ -37,7 +38,8 @@ public class Transform
         Matrix3x3 rotationMatrix = Matrix3x3.axisAngleMatrix(up, angle-rotation.y);
         forward = Vector3.applyMatrix(rotationMatrix, forward);
         right = Vector3.applyMatrix(rotationMatrix, right);
-        gameObject.getMesh().applyMatrix(rotationMatrix);
+        if (gameObject.getMesh() != null)
+            gameObject.getMesh().applyMatrix(rotationMatrix);
         rotation.y = angle;
     }
     
@@ -46,7 +48,8 @@ public class Transform
         Matrix3x3 rotationMatrix = Matrix3x3.axisAngleMatrix(forward, angle-rotation.z);
         up = Vector3.applyMatrix(rotationMatrix, up);
         right = Vector3.applyMatrix(rotationMatrix, right);
-        gameObject.getMesh().applyMatrix(rotationMatrix);
+        if (gameObject.getMesh() != null)
+            gameObject.getMesh().applyMatrix(rotationMatrix);
         rotation.z = angle;
     }
 
