@@ -90,11 +90,4 @@ public class Transform
     {
         return position;
     }
-
-    
-    /*
-    TODO: 
-    create a rotate function that rotates the forward, right and up vectors. In order to set the triangles in the mesh to the same rotation,
-    use the forward right and up vectors as a matrix and multiply each triangle by that matrix. 
-    */
 }
