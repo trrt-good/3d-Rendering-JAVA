@@ -37,8 +37,6 @@ public class Camera
 
         v_orientation = Math.toDegrees(Math.atan((pos.y-position.y)/(Math.sqrt((pos.x-position.x)*(pos.x-position.x) + (pos.z-position.z)*(pos.z-position.z)))));
         
-        //Vector3(Math.sin(horizontalAng)*Math.cos(verticalAng), Math.sin(verticalAng), Math.cos(horizontalAng)*Math.cos(verticalAng))
-
         h_orientation%=360;
         v_orientation%=360;
     }
@@ -173,7 +171,6 @@ public class Camera
 
         public void updatePosition()
         {
-            System.out.println(h_orientation);
             position = Vector3.add(focusObj.getTransform().getPosition(), difference);
         }
 

@@ -86,7 +86,7 @@ public class Transform
 
     public Vector3 getPosition()
     {
-        return position.getNormalized();
+        return position;
     }
 
     
