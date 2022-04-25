@@ -118,44 +118,46 @@ public class Camera
         private int maxDistance = 3000;
         private int minDistance = 300;
 
+        private double distance;
+
         private int maxAngle = 80;
         private int minAngle = -80;
 
         private GameObject focusObj;
-        private double startDistance;
         private double sensitivity;
 
         private int prevX = 0;
         private int prevY = 0;
 
         private Vector3 difference = new Vector3();
+        private Vector3 directionUnit = new Vector3();
         
         public OrbitCamController(GameObject focusObjectIn, double startDistanceIn, double sensitivityIn)
         {
             focusObj = focusObjectIn;
-            startDistance = startDistanceIn;
+            distance = startDistanceIn;
             sensitivity = sensitivityIn;
 
-            position = Vector3.add(focusObj.getTransform().getPosition(), new Vector3(0, 0, -startDistance));
+            position = Vector3.add(focusObj.getTransform().getPosition(), new Vector3(0, 0, -distance));
+            directionUnit = Vector3.subtract(position, focusObj.getTransform().getPosition()).getNormalized();
         }
 
         public void mouseWheelMoved(MouseWheelEvent e) 
         {
-            if (Vector3.subtract(position, focusObj.getTransform().getPosition()).getSqrMagnitude() > minDistance*minDistance && e.getWheelRotation()<0)
-                moveForward(-e.getWheelRotation()*30);
-            else if (Vector3.subtract(position, focusObj.getTransform().getPosition()).getSqrMagnitude() < maxDistance*maxDistance && e.getWheelRotation()>0)
-                moveForward(-e.getWheelRotation()*30);
+            distance = Math.max(minDistance, Math.min(distance + e.getWheelRotation()*30, maxDistance));
+            difference = Vector3.multiply(directionUnit, distance);
+            updatePosition();
         }
 
         public void mouseDragged(MouseEvent e) 
         {
-            position = Vector3.add(Vector3.rotateAroundYaxis(Vector3.subtract(position, focusObj.getTransform().getPosition()), (e.getX()-prevX)/(2000/sensitivity)) , focusObj.getTransform().getPosition());
-            difference = Vector3.subtract(position, focusObj.getTransform().getPosition());
+            directionUnit = Vector3.rotateAroundYaxis(directionUnit, (e.getX()-prevX)/(2000/sensitivity));
             if (v_orientation > -maxAngle && (e.getY()-prevY)/(200/sensitivity) > 0)
-                position = Vector3.add(Vector3.rotateAroundYaxis(Vector3.rotateAroundXaxis(Vector3.rotateAroundYaxis(difference, -h_orientation*0.017453292519943295), (e.getY()-prevY)/(2000/sensitivity)), h_orientation*0.017453292519943295) , focusObj.getTransform().getPosition());
+                directionUnit = Vector3.rotateAroundYaxis(Vector3.rotateAroundXaxis(Vector3.rotateAroundYaxis(directionUnit, -h_orientation*0.017453292519943295), (e.getY()-prevY)/(2000/sensitivity)), h_orientation*0.017453292519943295);
             else if (v_orientation < -minAngle && (e.getY()-prevY)/(200/sensitivity) < 0)
-                position = Vector3.add(Vector3.rotateAroundYaxis(Vector3.rotateAroundXaxis(Vector3.rotateAroundYaxis(difference, -h_orientation*0.017453292519943295), (e.getY()-prevY)/(2000/sensitivity)), h_orientation*0.017453292519943295) , focusObj.getTransform().getPosition());
-
+                directionUnit = Vector3.rotateAroundYaxis(Vector3.rotateAroundXaxis(Vector3.rotateAroundYaxis(directionUnit, -h_orientation*0.017453292519943295), (e.getY()-prevY)/(2000/sensitivity)), h_orientation*0.017453292519943295);
+            difference = Vector3.multiply(directionUnit, distance);
+            position = Vector3.add(focusObj.getTransform().getPosition(), difference);
             lookAt(focusObj.getTransform().getPosition());
             v_orientation = Math.max(-89, Math.min(89, v_orientation));
             prevX = e.getX();

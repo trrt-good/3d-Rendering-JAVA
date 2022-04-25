@@ -34,6 +34,11 @@ public class TimingHelper
             averageProcessTime = (averageProcessTime + mostRecentProcessTime)/2;
     }
 
+    public double getDeltaTime()
+    {
+        return mostRecentProcessTime/1000000.0;
+    }
+
     public static void printSummary()
     {
         System.out.printf("\n\n%-30s|  %-10s\n\n", "process name", "avg time");

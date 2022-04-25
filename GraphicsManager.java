@@ -34,7 +34,6 @@ public class GraphicsManager
         long start = System.nanoTime();
 
         mainFrame = new JFrame(name);
-        //mainFrame.addWindowListener(Main.inputManager);
         mainFrame.setSize(defaultWidth, defaultHeight);
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         mainFrame.setVisible(true);
@@ -60,47 +59,23 @@ public class GraphicsManager
 }
 
 class WindowCloseListener implements WindowListener
+{
+    @Override
+    public void windowClosing(WindowEvent e) 
     {
-
-        @Override
-        public void windowOpened(WindowEvent e) {
-            // TODO Auto-generated method stub
-            
-        }
-
-        @Override
-        public void windowClosing(WindowEvent e) {
-            TimingHelper.printSummary();
-        }
-
-        @Override
-        public void windowClosed(WindowEvent e) {
-            // TODO Auto-generated method stub
-            
-        }
-
-        @Override
-        public void windowIconified(WindowEvent e) {
-            // TODO Auto-generated method stub
-            
-        }
-
-        @Override
-        public void windowDeiconified(WindowEvent e) {
-            // TODO Auto-generated method stub
-            
-        }
-
-        @Override
-        public void windowActivated(WindowEvent e) {
-            // TODO Auto-generated method stub
-            
-        }
-
-        @Override
-        public void windowDeactivated(WindowEvent e) {
-            // TODO Auto-generated method stub
-            
-        }
-
+        TimingHelper.printSummary();
     }
+    
+    @Override
+    public void windowOpened(WindowEvent e) {}
+    @Override
+    public void windowClosed(WindowEvent e) {}
+    @Override
+    public void windowIconified(WindowEvent e) {}
+    @Override
+    public void windowDeiconified(WindowEvent e) {}
+    @Override
+    public void windowActivated(WindowEvent e) {}
+    @Override
+    public void windowDeactivated(WindowEvent e) {}
+}

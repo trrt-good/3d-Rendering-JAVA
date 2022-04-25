@@ -68,6 +68,7 @@ public class RenderingPanel extends JPanel implements ActionListener
         {
             drawTriangles(g);
         }
+        g.drawString("fps: " + (int)(1000/totalFrameTime.getDeltaTime()), 30, 30);
     }
 
     public void setLighting(Lighting lighting)
