@@ -57,6 +57,7 @@ public class RenderingPanel extends JPanel implements ActionListener
         renderUpdater.start();
         validate();
         requestFocusInWindow();
+        revalidate();
     }
 
     public void paintComponent(Graphics g) 
