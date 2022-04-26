@@ -163,7 +163,7 @@ public class RenderingPanel extends JPanel implements ActionListener
         fogEnabled = false;
     }
     
-    //
+    //computes the 2d screen coordinates of all the triangles, then paints them on the buffered image. 
     private void computeAndDrawTriangles(Graphics g)
     {
         renderImage.getRaster().setDataElements(0, 0, renderImage.getWidth(), renderImage.getHeight(), blankImagePixelColorData);
@@ -196,29 +196,33 @@ public class RenderingPanel extends JPanel implements ActionListener
     //It then adds the resulting 2d triangle into the triangle2dList for painting later. 
     private void calculateTriangle(Graphics g, Triangle triangle)
     {
-        //the screen coords of the triangle, to be determined by the rest of the method.
-        Point p1ScreenCoords = new Point();
-        Point p2ScreenCoords = new Point();
-        Point p3ScreenCoords = new Point();
-        //boolean default false, but set true if just one of the verticies is within the camera's fov. 
-        boolean shouldDrawTriangle = false;
-
-        Vector3 triangleVertex1 = new Vector3(triangle.point1);
-        Vector3 triangleVertex2 = new Vector3(triangle.point2);
-        Vector3 triangleVertex3 = new Vector3(triangle.point3);
-
         Vector3 camDirectionVector = camera.getDirectionVector();
         Vector3 camPos = camera.getPosition();
-        double distanceToTriangle = Vector3.subtract(triangle.getCenter(), camPos).getMagnitude();  
-        double renderPlaneWidth = camera.getRenderPlaneWidth();
-
+        Vector3 triangleCenter = triangle.getCenter();
+        double distanceToTriangle = Vector3.subtract(triangleCenter, camPos).getMagnitude();  
         if 
         (
             distanceToTriangle < camera.getFarClipDistancee() //is the triangle within the camera's render distance?
             && distanceToTriangle > camera.getNearClipDistance() //is the triangle far enough from the camera?
+            && Vector3.dotProduct(Vector3.subtract(triangleCenter, camPos), camDirectionVector) > 0 //is the triangle on the side that the camera is facing?
             && (Vector3.dotProduct(triangle.getPlane().normal, camDirectionVector) < 0 || !triangle.getMesh().backFaceCulling()) //is the triangle facing away? 
         )
         {
+            //create local variables: 
+
+            //the screen coords of the triangle, to be determined by the rest of the method.
+            Point p1ScreenCoords = new Point();
+            Point p2ScreenCoords = new Point();
+            Point p3ScreenCoords = new Point();
+            //boolean default false, but set true if just one of the verticies is within the camera's fov. 
+            boolean shouldDrawTriangle = false;
+
+            Vector3 triangleVertex1 = new Vector3(triangle.point1);
+            Vector3 triangleVertex2 = new Vector3(triangle.point2);
+            Vector3 triangleVertex3 = new Vector3(triangle.point3);
+
+            double renderPlaneWidth = camera.getRenderPlaneWidth();
+
             triangleVertex1 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex1, camPos), camPos, renderPlane);
             double pixelsPerUnit = getWidth()/renderPlaneWidth;
             Vector3 camCenterPoint = Vector3.getIntersectionPoint(camDirectionVector, camPos, renderPlane);
