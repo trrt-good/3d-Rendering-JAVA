@@ -44,6 +44,8 @@ public class Mesh
         System.out.println("mesh created: " + modelFileName + " in " + (System.nanoTime() - start)/1000000 + "ms\n\t- " + triangles.size() + " triangles");
     }
 
+    protected Mesh(){}
+
     //rotates each triangle in the mesh according to a rotation matrix, and around the center of rotation.
     public void rotate(Matrix3x3 rotationMatrix, Vector3 centerOfRotation)
     {
