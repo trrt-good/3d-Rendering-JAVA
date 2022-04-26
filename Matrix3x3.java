@@ -3,6 +3,7 @@ public class Matrix3x3
     //R means row and C means column. R2C3 would be second row third column.
     public final double R1C1, R1C2, R1C3, R2C1, R2C2, R2C3, R3C1, R3C2, R3C3;
 
+    //overloaded constructor which accepts three Vector3s. 
     public Matrix3x3(Vector3 column1, Vector3 column2, Vector3 column3)
     {
         R1C1 = column1.x;    R1C2 = column2.x;    R1C3 = column3.x; 
@@ -10,6 +11,7 @@ public class Matrix3x3
         R3C1 = column1.z;    R3C2 = column2.z;    R3C3 = column3.z; 
     }
 
+    //overloaded constructor which allows all 9 values of the matrix. 
     public Matrix3x3(double r1c1, double r1c2, double r1c3, double r2c1, double r2c2, double r2c3, double r3c1, double r3c2, double r3c3)
     {
         R1C1 = r1c1;    R1C2 = r1c2;    R1C3 = r1c3; 
@@ -17,16 +19,20 @@ public class Matrix3x3
         R3C1 = r3c1;    R3C2 = r3c2;    R3C3 = r3c3; 
     }
 
+    //formats the values in the matrix into a string. 
     public String toString()
     {
-        return String.format("\n|%39s\n|%10.2f%10.2f%10.2f%9s\n|%39s\n|%10.2f%10.2f%10.2f%9s\n|%39s\n|%10.2f%10.2f%10.2f%9s\n|%39s\n", "|", R1C1, R1C2, R1C3, "|", "|", R2C1, R2C2, R2C3, "|", "|", R3C1, R3C2, R3C3, "|", "|");
+        return String.format("\n|%39s\n|%10.2f%10.2f%10.2f%9s\n|%39s\n|%10.2f%10.2f%10.2f%9s\n|%39s\n|%10.2f%10.2f%10.2f%9s\n|%39s\n",
+        "|", R1C1, R1C2, R1C3, "|", "|", R2C1, R2C2, R2C3, "|", "|", R3C1, R3C2, R3C3, "|", "|");
     }
 
+    //returns the determinant of the 3x3 matrix. 
     public double getDeterminant()
     {
         return R1C1*(R2C2*R3C3-R2C3*R3C2)-R1C2*(R2C1*R3C3-R2C3*R3C1)+R1C3*(R2C1*R3C2-R2C2*R3C1);
     }
 
+    //returns the cofactor matrix. 
     public Matrix3x3 getCofactorMatrix()
     {
         return new Matrix3x3
@@ -37,6 +43,7 @@ public class Matrix3x3
         );
     }
 
+    //returns the adjugate matrix, basically just the transposed cofactor matrix.  
     public Matrix3x3 getAdjugateMatrix()
     {
         return new Matrix3x3
@@ -47,6 +54,7 @@ public class Matrix3x3
         );
     }
 
+    //returns the inverse of the matrix, which is just the adjugate/det
     public Matrix3x3 getInverse()
     {
         return Matrix3x3.multiply(getAdjugateMatrix(), 1/getDeterminant());
@@ -74,12 +82,17 @@ public class Matrix3x3
         );
     }
 
-
+    //
     public static Matrix3x3 rotationMatrixAxisX(double angle)
     {
         //local variables to mitigate preforming the same slow trig function multiple times. 
         double cosAngle = Math.cos(angle); 
         double sinAngle = Math.sin(angle); 
+
+        /*  | cos -sin   0  |
+            | sin  cos   0  |
+            |  0    0    1  |  */
+
         return new Matrix3x3
         (
             1, 0, 0, 
@@ -94,9 +107,9 @@ public class Matrix3x3
         double cosAngle = Math.cos(angle); 
         double sinAngle = Math.sin(angle); 
 
-        /*  |  1    0    0  |
-            |  0   cos -sin |
-            |  1   sin  cos |  */
+        /*  | cos   0   sin |
+            |  0    1    0  |
+            |-sin   0   cos |  */
 
         return new Matrix3x3
         (
@@ -112,9 +125,9 @@ public class Matrix3x3
         double cosAngle = Math.cos(angle); 
         double sinAngle = Math.sin(angle); 
 
-        /*  | cos   0   sin |
-            |  0    1    0  |
-            |-sin   0   cos |  */
+    /*  | cos -sin   0  |
+        | sin  cos   0  |
+        |  0    0    1  |  */
 
         return new Matrix3x3
         (
@@ -124,6 +137,7 @@ public class Matrix3x3
         );
     }
 
+    //returns a matrix which can preform a rotation "angle" radians about "axis"
     public static Matrix3x3 axisAngleMatrix(Vector3 axis, double angle)
     {
         axis = axis.getNormalized();
@@ -132,10 +146,6 @@ public class Matrix3x3
         double cos = Math.cos(angle); 
         double cos1 = 1-cos;
         double sin = Math.sin(angle); 
-
-        /*  | cos -sin   0  |
-            | sin  cos   0  |
-            |  0    0    1  |  */
 
         return new Matrix3x3
         (
@@ -146,7 +156,8 @@ public class Matrix3x3
     }
 
     // https://en.wikipedia.org/wiki/Rotation_matrix
-    // incentric rotation y-x-z order
+    // incentric rotation y-x-z order, however note that this program uses the y axis 
+    // as vertical, so yaw is rotation about the y-axis and roll is about the z axis.
     public static Matrix3x3 eulerRotation(EulerAngle angle)
     {
         double cos_a = Math.cos(angle.z);

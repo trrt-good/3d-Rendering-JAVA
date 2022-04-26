@@ -14,20 +14,22 @@ public class Camera
     private double h_orientation;
     private double v_orientation;
     private double renderPlaneDistance;
-    private double viewDistance;
+    private double farClipDistance;
+    private double nearClipDistance;
 
     private OrbitCamController orbitController = null;
     private FreeCamController freeCamController = null;
 
     private double renderPlaneWidth;
 
-    public Camera(Vector3 positionIn, double viewDistanceIn, double fovIn)
+    public Camera(Vector3 positionIn, double farClipDistanceIn, double nearClipDistanceIn, double fovIn)
     {
         renderPlaneDistance = 10;
         h_orientation = 0;
         v_orientation = 0;
         position = positionIn;
-        viewDistance = viewDistanceIn;
+        farClipDistance = farClipDistanceIn;
+        nearClipDistance = nearClipDistanceIn;
         setFov(fovIn);
     }
 
@@ -197,9 +199,14 @@ public class Camera
         panel.addMouseMotionListener(freeCamController);
     }
 
-    public double getViewDistance()
+    public double getFarClipDistancee()
     {
-        return viewDistance;
+        return farClipDistance;
+    }
+
+    public double getNearClipDistance()
+    {
+        return nearClipDistance;
     }
 
     public OrbitCamController getOrbitCamController()

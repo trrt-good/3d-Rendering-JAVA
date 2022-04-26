@@ -2,10 +2,20 @@ public class Transform
 {
     private GameObject gameObject; //the gameobject that this transform is attached to
 
-    private Vector3 position;
-    private Vector3 forward; //the forward vector of the transform in world space. This is always the z-axis in local transform space
-    private Vector3 right; //the rightwards vector of the transform in world space. This is always the x-axis in local transform space. 
-    private Vector3 up; //the upwards vector of the transform in world space. This is always the y-axis in local transform space. 
+    private Vector3 position; //position of transform in world-space.
+
+    //the forward vector of the transform in world space. This is always the z-axis in local transform space
+    private Vector3 forward; 
+
+    //the rightwards vector of the transform in world space. This is always the x-axis in local transform space. 
+    private Vector3 right; 
+
+    //the upwards vector of the transform in world space. This is always the y-axis in local transform space. 
+    private Vector3 up; 
+
+    //the rotation of the transform, x = pitch, y = yaw, z = roll. x value represents rotation about
+    //the right vector, y represents rotation about up vector and z represents rotation about the 
+    //forward vector.
     private EulerAngle rotation;
 
     //default rotation always 0, 0, 0
@@ -18,13 +28,9 @@ public class Transform
         up = new Vector3(0, 1, 0);
     }
 
-    public void setGameObject(GameObject gameObjectIn)
-    {
-        gameObject = gameObjectIn;
-    }
-
-
-
+    //following three methods:
+    //sets the specified rotation around a local axis, as well as updating
+    //the orientation of an attached mesh. 
     public void setPitch(double angle)
     {
         Matrix3x3 rotationMatrix = Matrix3x3.axisAngleMatrix(right, angle-rotation.x);
@@ -55,6 +61,11 @@ public class Transform
         rotation.z = angle;
     }
 
+    //returns the world-space equivilant of "point" in local space. 
+    //example: in local space, the forward direction can always be 
+    //represented by (0, 0, 1), but translating that into world space will 
+    //return "forward" vector, which could be something like (0, 0.3, 0.4) if 
+    //the transform is pitched up. 
     public Vector3 transformToWorld(Vector3 point)
     {
         up = up.getNormalized();
@@ -63,6 +74,8 @@ public class Transform
         return Vector3.applyMatrix(new Matrix3x3(right, up, forward), point);
     }
 
+    //opposite of "transformToWorld". It returns a point with local-space
+    //coorindates equivilant to the inputted world-space coordinates.  
     public Vector3 transformToLocal(Vector3 point)
     {
         up = up.getNormalized();
@@ -71,6 +84,7 @@ public class Transform
         return Vector3.applyMatrix(new Matrix3x3(right, up, forward).getInverse(), point);
     }
 
+    //#region getter/setter methods
     public Vector3 getForward()
     {
         return forward.getNormalized();
@@ -90,4 +104,10 @@ public class Transform
     {
         return position;
     }
+
+    public void setGameObject(GameObject gameObjectIn)
+    {
+        gameObject = gameObjectIn;
+    }
+    //#endregion
 }

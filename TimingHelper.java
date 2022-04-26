@@ -19,12 +19,12 @@ public class TimingHelper
         processName = processNameIn;
     }
 
-    public void startTimer()
+    public void startClock()
     {
         startTime = System.nanoTime();
     }
 
-    public void stopTimer()
+    public void stopClock()
     {
         lastProcessTime = mostRecentProcessTime;
         mostRecentProcessTime = System.nanoTime()-startTime;

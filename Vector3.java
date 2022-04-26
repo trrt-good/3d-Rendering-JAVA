@@ -27,16 +27,23 @@ public class Vector3
         z = 0;
     }
 
+    //returns the magnitude of the vector
     public double getMagnitude()
     {
         return Math.sqrt((x*x+z*z) + y*y);
     }
 
+    //returns the squared magnitude of the vector (faster)
+    //recomended for cases where you are only comparing the 
+    //magnitude with another value, because squaring the value 
+    //that you are comparing with is faster than the getMagnitude()
+    //method which contains the slow Math.sqrt function.
     public double getSqrMagnitude()
     {
         return x*x+z*z + y*y;
     }
 
+    //returns the normalized vector. 
     public Vector3 getNormalized()
     {
         if (getSqrMagnitude() != 1)
@@ -48,7 +55,7 @@ public class Vector3
             return this;
     }
 
-    //changes itself, as well as returning the result
+    //adds the specified vector to itself, as well as returning the result.
     public Vector3 add(Vector3 vectorIn)
     {
         x+= vectorIn.x;
@@ -57,7 +64,7 @@ public class Vector3
         return this;
     }
 
-    //changes itself, as well as returning the result
+    //multiplies itself by the value, as well as returning the result.
     public Vector3 multiply(double multiplier)
     {
         x*=multiplier;
@@ -66,7 +73,7 @@ public class Vector3
         return this;
     }
 
-
+    //formats the vector into a string for printing. 
     public String toString()
     {
         return new String(String.format("[%.2f, %.2f, %.2f]", x, y, z));
@@ -203,6 +210,7 @@ public class Vector3
         return Vector3.add(Vector3.add(Vector3.multiply(vector, cosAngle), Vector3.multiply(Vector3.multiply(axis, Vector3.dotProduct(vector, axis)), 1-cosAngle)), Vector3.multiply(Vector3.crossProduct(axis, vector), Math.sin(angle)));
     }
 
+    //applies the specified matrix to the specified vector and returns the result.
     public static Vector3 applyMatrix(Matrix3x3 matrix, Vector3 vector)
     {
         return new Vector3

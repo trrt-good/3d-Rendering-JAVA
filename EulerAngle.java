@@ -5,6 +5,7 @@ public class EulerAngle
     public double x; //pitch
     public double z; //roll
 
+    //no-arg constructor default 0, 0, 0
     public EulerAngle()
     {
         x = 0;
@@ -19,6 +20,7 @@ public class EulerAngle
         z = zIn;
     }
 
+    //formats into string, similar to Vector3s 
     public String toString()
     {
         return new String(String.format("[%.2f, %.2f, %.2f]", x, y, z));
