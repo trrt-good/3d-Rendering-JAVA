@@ -7,7 +7,7 @@ public class Triangle
     public Vector3 point3;
 
     //the default color of the triangle before lighting
-    public Color color;
+    private Color color;
 
     //the mesh the this triangle is a part of (might be null)
     private Mesh parentMesh;
@@ -46,6 +46,16 @@ public class Triangle
     public Vector3 getCenter()
     {
         return new Vector3((point1.x + point2.x + point3.x)/3, (point1.y + point2.y + point3.y)/3, (point1.z + point2.z + point3.z)/3);
+    }
+
+    public void setBaseColor(Color colorIn)
+    {
+        color = colorIn;
+    }
+
+    public Color getBaseColor()
+    {
+        return color;
     }
 
     public Color getColorWithLighting()

@@ -278,7 +278,7 @@ public class RenderingPanel extends JPanel implements ActionListener
                         colorUsed = litColor;
                 }   
                 else 
-                    colorUsed = triangle.color;
+                    colorUsed = triangle.getBaseColor();
 
                 //adds the 2d triangle object into the triangle2d array.
                 triangle2dList.add(new Triangle2D(p1ScreenCoords, p2ScreenCoords, p3ScreenCoords, colorUsed, distanceToTriangle));
