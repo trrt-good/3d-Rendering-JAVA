@@ -18,6 +18,9 @@ public class Mesh
     //should the mesh be effected by lighting?
     private boolean shading;
 
+    //a sum of all translations
+    private Vector3 totalMovement;
+
     //should the back face of the mesh be rendered? (keeping enabled greatly increases preformance, roughly 2x faster)*
     //*however, due to a poor implementation of backFaceCulling, for some cases, it is recommended to dissable this, 
     //which will may sacrafice preformance (especially for larger models), however it will mitigate the
@@ -32,6 +35,7 @@ public class Mesh
         shading = shaded;
         backFaceCull = shouldBackFaceCull;
         color = colorIn;
+        totalMovement = new Vector3();
         if (modelFileName.endsWith(".obj"))
         {
             readObjFile(modelFileName, modelOffsetAmount, modelOffsetRotation, scale);
@@ -55,6 +59,18 @@ public class Mesh
             triangles.get(i).point2 = Vector3.add(Vector3.applyMatrix(rotationMatrix, Vector3.subtract(triangles.get(i).point2, centerOfRotation)), centerOfRotation);
             triangles.get(i).point3 = Vector3.add(Vector3.applyMatrix(rotationMatrix, Vector3.subtract(triangles.get(i).point3, centerOfRotation)), centerOfRotation);
         }
+    }
+
+    //translates each triangle in the mesh by "amount" 
+    public void translate(Vector3 amount)
+    {
+        for (int i = 0; i < triangles.size(); i ++)
+        {
+            triangles.get(i).point1 = Vector3.add(triangles.get(i).point1, amount);
+            triangles.get(i).point2 = Vector3.add(triangles.get(i).point2, amount);
+            triangles.get(i).point3 = Vector3.add(triangles.get(i).point3, amount);
+        }
+        totalMovement = Vector3.add(totalMovement, amount);
     }
 
     //#region getter methods 

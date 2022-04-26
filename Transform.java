@@ -28,6 +28,18 @@ public class Transform
         up = new Vector3(0, 1, 0);
     }
 
+    public void setPosition(Vector3 positionIn)
+    {
+        gameObject.getMesh().translate(Vector3.subtract(positionIn, position));
+        position = positionIn;
+    }
+
+    public void move(Vector3 amount)
+    {
+        gameObject.getMesh().translate(amount);
+        position = Vector3.add(position, amount);
+    }
+
     //following three methods:
     //sets the specified rotation around a local axis, as well as updating
     //the orientation of an attached mesh. 
