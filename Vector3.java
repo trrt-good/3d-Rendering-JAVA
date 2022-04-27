@@ -73,6 +73,11 @@ public class Vector3
         return this;
     }
 
+    public Vector3 getSquare()
+    {
+        return new Vector3(x*x, y*y, z*z);
+    }
+
     //formats the vector into a string for printing. 
     public String toString()
     {
@@ -110,6 +115,12 @@ public class Vector3
     public static Vector3 multiply(Vector3 vector, double scalar)
     {
         return new Vector3(vector.x*scalar, vector.y*scalar, vector.z*scalar);
+    }
+
+    //returns vector1*vector2
+    public static Vector3 multiply(Vector3 vector1, Vector3 vector2)
+    {
+        return new Vector3(vector1.x*vector2.x, vector1.y*vector2.y, vector1.z*vector2.z);
     }
 
     //returns the negated vector using the negation matrix. 
@@ -195,6 +206,12 @@ public class Vector3
     public static Vector3 projectToPlane(Vector3 vector, Vector3 normalVector)
     {
         return Vector3.subtract(vector, Vector3.multiply(normalVector, Vector3.dotProduct(vector, normalVector)/normalVector.getSqrMagnitude()));
+    }
+
+    //projects "projected" orthagonally onto "vector"
+    public static Vector3 projectToVector(Vector3 projected, Vector3 vector)
+    {
+        return Vector3.multiply(vector, Vector3.dotProduct(vector, projected));
     }
 
     //returns the inputted vector rotated "angle" degrees around "axis", useful for axis-angle representation.
