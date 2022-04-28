@@ -21,7 +21,7 @@ public class Lighting
     public void update(ArrayList<Mesh> meshes)
     {
         for (int i = 0; i < meshes.size(); i++)
-            meshes.get(i).recalculateLighting(this);
+            meshes.get(i).calculateLighting(this);
     }
 }
 

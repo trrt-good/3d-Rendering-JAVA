@@ -222,6 +222,13 @@ public class Vector3
         return Vector3.add(start, Vector3.multiply(Vector3.subtract(end, start), time));
     }
 
+    //linearly interpolates between two vectors. Interpolated value is: start + (end-start)*time
+    //time value of 1 would return the end result, and 0 would return the start
+    public static Vector3 lerp(Vector3 start, Vector3 end, double time)
+    {
+        return Vector3.add(start, Vector3.multiply(Vector3.subtract(end, start), time));
+    }
+
     //returns the inputted vector rotated "angle" degrees around "axis", useful for axis-angle representation.
     //Uses Rodrigues' rotation formula, where a is the angle, e is a unit vector representing 
     //the axis of rotation and v is the vector to be rotated
