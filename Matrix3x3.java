@@ -55,6 +55,7 @@ public class Matrix3x3
     }
 
     //returns the inverse of the matrix, which is just the adjugate/det
+    //TODO: implement Gaussian elimintation
     public Matrix3x3 getInverse()
     {
         return Matrix3x3.multiply(getAdjugateMatrix(), 1/getDeterminant());
