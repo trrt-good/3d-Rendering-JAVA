@@ -28,6 +28,17 @@ public class Transform
         up = new Vector3(0, 1, 0);
     }
 
+    public void lookTowards(Vector3 direction)
+    {
+        if (direction.x != 0 && direction.y != 0 && direction.z != 0)
+        {
+            direction = transformToLocal(direction);
+            setYaw(rotation.y + ((direction.x < 0)? -Math.atan(direction.z/direction.x)-Math.PI/2 : Math.PI/2-Math.atan(direction.z/direction.x)));
+    
+            setPitch(rotation.x + Math.atan(direction.y/Math.sqrt(direction.x*direction.x + direction.z*direction.z)));
+        }
+    }
+
     public void setPosition(Vector3 positionIn)
     {
         gameObject.getMesh().translate(Vector3.subtract(positionIn, position));
@@ -99,22 +110,27 @@ public class Transform
     //#region getter/setter methods
     public Vector3 getForward()
     {
-        return forward.getNormalized();
+        return (forward = forward.getNormalized());
     }
 
     public Vector3 getUp()
     {
-        return up.getNormalized();
+        return (up = up.getNormalized());
     }
 
     public Vector3 getRight()
     {
-        return right.getNormalized();
+        return (right = right.getNormalized());
     }
 
     public Vector3 getPosition()
     {
         return position;
+    }
+
+    public GameObject getGameObject()
+    {
+        return gameObject;
     }
 
     public void setGameObject(GameObject gameObjectIn)
