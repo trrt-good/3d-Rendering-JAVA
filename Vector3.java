@@ -203,15 +203,23 @@ public class Vector3
     //orthagonal projection onto a plane. 
     //formula where u is the inputted vector and n is the normal vector: 
     //  projPlane(u) = u-[(u dot n)/(||n||^2)]n
-    public static Vector3 projectToPlane(Vector3 vector, Vector3 normalVector)
+    public static Vector3 projectToPlane(Vector3 vector, Vector3 planeNormal)
     {
-        return Vector3.subtract(vector, Vector3.multiply(normalVector, Vector3.dotProduct(vector, normalVector)/normalVector.getSqrMagnitude()));
+        return Vector3.subtract(vector, Vector3.multiply(planeNormal, Vector3.dotProduct(vector, planeNormal)/planeNormal.getSqrMagnitude()));
     }
 
-    //projects "projected" orthagonally onto "vector"
-    public static Vector3 projectToVector(Vector3 projected, Vector3 vector)
+    //projects a orthagonally onto b
+    // projb(a) = ((a dot b)/(b dot b))b
+    public static Vector3 projectToVector(Vector3 a, Vector3 b)
     {
-        return Vector3.multiply(vector, Vector3.dotProduct(vector, projected));
+        return Vector3.multiply(b, Vector3.dotProduct(b, a)/b.getSqrMagnitude());
+    }
+
+    //linearly interpolates between two vectors. Interpolated value is: start + (end-start)*time
+    //time value of 1 would return the end result, and 0 would return the start
+    public static Vector3 lerp(Vector3 start, Vector3 end, double time)
+    {
+        return Vector3.add(start, Vector3.multiply(Vector3.subtract(end, start), time));
     }
 
     //returns the inputted vector rotated "angle" degrees around "axis", useful for axis-angle representation.
