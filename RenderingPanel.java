@@ -31,6 +31,10 @@ public class RenderingPanel extends JPanel implements ActionListener
     private ArrayList<Triangle2D> triangle2dList;
     private Matrix3x3 pointRotationMatrix;
 
+    //multithreading:
+    private int threadCount;
+    private TriangleCalculator[] threads; 
+
     //Camera:
     private Camera camera;
 
@@ -53,6 +57,14 @@ public class RenderingPanel extends JPanel implements ActionListener
     {
         setPreferredSize(new Dimension(width, height));
 
+        //set up threads:
+        threadCount = 10;
+        threads = new TriangleCalculator[threadCount];
+        for (int i = 0; i < threads.length; i++)
+        {
+            threads[i] = new TriangleCalculator();
+        }
+
         //background color: 
         backgroundColor = new Color(200, 220, 255);
 
@@ -63,6 +75,7 @@ public class RenderingPanel extends JPanel implements ActionListener
         triangles = new ArrayList<Triangle>();
         triangle2dList = new ArrayList<Triangle2D>();
         renderUpdater = new Timer(1, this);
+        
         
         //creates the buffered image which will be used to render triangles. 
         renderImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -173,7 +186,8 @@ public class RenderingPanel extends JPanel implements ActionListener
         trianglesCalculateTime.startClock();
         for (int i = 0; i < triangles.size(); i ++)
         {
-            calculateTriangle(g, triangles.get(i));
+            //threads[i%threadCount].run(triangles.get(i));
+            calculateTriangle(triangles.get(i));
         }
         trianglesCalculateTime.stopClock();
         
@@ -194,7 +208,7 @@ public class RenderingPanel extends JPanel implements ActionListener
 
     //calculates the three screen coordinates of a single triangle in world space, based off the orientation and position of the camera. 
     //It then adds the resulting 2d triangle into the triangle2dList for painting later. 
-    private void calculateTriangle(Graphics g, Triangle triangle)
+    private void calculateTriangle(Triangle triangle)
     {
         Vector3 camDirectionVector = camera.getDirectionVector();
         Vector3 camPos = camera.getPosition();
@@ -467,6 +481,115 @@ public class RenderingPanel extends JPanel implements ActionListener
             else if (o.triangle3DDistance < triangle3DDistance)
                 num = -1;
             return num;
+        }
+    }
+
+    class TriangleCalculator extends Thread
+    {
+        private Thread thread; 
+
+        public TriangleCalculator()
+        {
+
+        }
+
+        public void start()
+        {
+            thread = new Thread(this, name)
+        }
+
+        public void run(Triangle triangle)
+        {
+            //System.out.println("thread start " + this.getName());
+            Vector3 camDirectionVector = camera.getDirectionVector();
+            Vector3 camPos = camera.getPosition();
+            Vector3 triangleCenter = triangle.getCenter();
+            double distanceToTriangle = Vector3.subtract(triangleCenter, camPos).getMagnitude();  
+            if 
+            (
+                distanceToTriangle < camera.getFarClipDistancee() //is the triangle within the camera's render distance?
+                && distanceToTriangle > camera.getNearClipDistance() //is the triangle far enough from the camera?
+                && Vector3.dotProduct(Vector3.subtract(triangleCenter, camPos), camDirectionVector) > 0 //is the triangle on the side that the camera is facing?
+                && (Vector3.dotProduct(triangle.getPlane().normal, camDirectionVector) < 0 || !triangle.getMesh().backFaceCulling()) //is the triangle facing away? 
+            )
+            {
+                //create local variables: 
+    
+                //the screen coords of the triangle, to be determined by the rest of the method.
+                Point p1ScreenCoords = new Point();
+                Point p2ScreenCoords = new Point();
+                Point p3ScreenCoords = new Point();
+                //boolean default false, but set true if just one of the verticies is within the camera's fov. 
+                boolean shouldDrawTriangle = false;
+    
+                Vector3 triangleVertex1 = new Vector3(triangle.point1);
+                Vector3 triangleVertex2 = new Vector3(triangle.point2);
+                Vector3 triangleVertex3 = new Vector3(triangle.point3);
+    
+                double renderPlaneWidth = camera.getRenderPlaneWidth();
+    
+                triangleVertex1 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex1, camPos), camPos, renderPlane);
+                double pixelsPerUnit = getWidth()/renderPlaneWidth;
+                Vector3 camCenterPoint = Vector3.getIntersectionPoint(camDirectionVector, camPos, renderPlane);
+                Vector3 rotatedPoint = Vector3.applyMatrix(pointRotationMatrix, Vector3.subtract(triangleVertex1, camCenterPoint));
+                if ((Math.abs(rotatedPoint.x) < renderPlaneWidth/2*1.2 && Math.abs(rotatedPoint.y) < renderPlaneWidth*((double)getHeight()/(double)getWidth())/2*1.2))
+                    shouldDrawTriangle = true;
+                p1ScreenCoords.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
+                p1ScreenCoords.y = (int)(getHeight()/2 - rotatedPoint.y*pixelsPerUnit);
+        
+                triangleVertex2 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex2, camPos), camPos, renderPlane);
+                rotatedPoint = Vector3.applyMatrix(pointRotationMatrix, Vector3.subtract(triangleVertex2, camCenterPoint));
+                if ((Math.abs(rotatedPoint.x) < renderPlaneWidth/2*1.2 && Math.abs(rotatedPoint.y) < renderPlaneWidth*((double)getHeight()/getWidth())/2*1.2))
+                    shouldDrawTriangle = true;
+                p2ScreenCoords.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
+                p2ScreenCoords.y = (int)(getHeight()/2 - rotatedPoint.y*pixelsPerUnit);
+        
+                triangleVertex3 = new Vector3(triangle.point3);
+                triangleVertex3 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex3, camPos), camPos, renderPlane);
+                rotatedPoint = Vector3.applyMatrix(pointRotationMatrix, Vector3.subtract(triangleVertex3, camCenterPoint));
+                if ((Math.abs(rotatedPoint.x) < renderPlaneWidth/2*1.2 && Math.abs(rotatedPoint.y) < renderPlaneWidth*((double)getHeight()/getWidth())/2*1.2))
+                    shouldDrawTriangle = true;
+                p3ScreenCoords.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
+                p3ScreenCoords.y = (int)(getHeight()/2 - rotatedPoint.y*pixelsPerUnit);
+    
+                if (shouldDrawTriangle)
+                {
+                    Color colorUsed;
+                    if (triangle.getMesh() != null && triangle.getMesh().isShaded())
+                    {
+                        Color litColor = triangle.getColorWithLighting();
+                        if (fogEnabled && distanceToTriangle > fogStartDistance)
+                        {
+                            Color triangleColor;
+                            if (distanceToTriangle > fullFogDistance)
+                                triangleColor = fogColor;
+                            else
+                            {
+                                //skews the triangle's color closer to the fog color as a function of distance. 
+                                double fogAmt = (distanceToTriangle-fogStartDistance)/(fullFogDistance-fogStartDistance);
+                                int red = litColor.getRed() + (int)((fogColor.getRed()-litColor.getRed())*fogAmt*fogAmt);
+                                int green = litColor.getGreen() + (int)((fogColor.getGreen()-litColor.getGreen())*fogAmt*fogAmt);
+                                int blue = litColor.getBlue() + (int)((fogColor.getBlue()-litColor.getBlue())*fogAmt*fogAmt);
+    
+                                //clamps color values to between 0 and 255
+                                red = Math.max(0, Math.min(255, red));
+                                green = Math.max(0, Math.min(255, green));
+                                blue = Math.max(0, Math.min(255, blue));
+                                triangleColor = new Color(red, green, blue);
+                            }
+                            colorUsed = triangleColor;
+                        }
+                        else 
+                            colorUsed = litColor;
+                    }   
+                    else 
+                        colorUsed = triangle.getBaseColor();
+    
+                    //adds the 2d triangle object into the triangle2d array.
+                    triangle2dList.add(new Triangle2D(p1ScreenCoords, p2ScreenCoords, p3ScreenCoords, colorUsed, distanceToTriangle));
+                }
+            }
+            //System.out.println("thread end " + this.getName());
         }
     }
 }
