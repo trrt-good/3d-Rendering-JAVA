@@ -7,6 +7,5 @@ public class Main
     public static void main(String [] args)
     {   
         GraphicsManager.startGraphics("3d");
-
     }
 }

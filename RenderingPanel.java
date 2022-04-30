@@ -1,4 +1,3 @@
-import javax.swing.Timer;
 import javax.swing.JPanel;
 
 import java.util.ArrayList;
@@ -10,18 +9,13 @@ import java.awt.Point;
 import java.awt.Dimension;
 import java.awt.Graphics;
 
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 
-public class RenderingPanel extends JPanel implements ActionListener
+public class RenderingPanel extends JPanel implements Runnable
 {
     //collection of all the objects that the rendering panel will render
     private ArrayList<Mesh> meshes = new ArrayList<Mesh>(); 
     private ArrayList<Triangle> triangles = new ArrayList<Triangle>(); 
-
-    //timer used to repaint every frame. 
-    private Timer renderUpdater;
 
     //for rendering:
     private BufferedImage renderImage;
@@ -31,8 +25,16 @@ public class RenderingPanel extends JPanel implements ActionListener
     private ArrayList<Triangle2D> triangle2dList;
     private Matrix3x3 pointRotationMatrix;
 
+    //Threads:
+    private Thread thisThread;
+    private boolean threadRunning;
+
     //Camera:
     private Camera camera;
+    private Vector3 camDirection;
+    private Vector3 camPos;
+    private double renderPlaneWidth;
+
 
     //lighting:
     private Lighting lightingObject; 
@@ -62,8 +64,8 @@ public class RenderingPanel extends JPanel implements ActionListener
         meshes = new ArrayList<Mesh>();
         triangles = new ArrayList<Triangle>();
         triangle2dList = new ArrayList<Triangle2D>();
-        renderUpdater = new Timer(1, this);
-        
+        camDirection = new Vector3();   
+        camPos = new Vector3();
         
         //creates the buffered image which will be used to render triangles. 
         renderImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -74,34 +76,19 @@ public class RenderingPanel extends JPanel implements ActionListener
         Arrays.fill(blankImagePixelColorData, convertToIntRGB(backgroundColor));
     }
 
-    //starts the actual rendering of the panel by starting the timer.
-    public void startRenderUpdates()
-    {
-        totalFrameTime.startClock();
-        renderUpdater.start();
-
-        //validate and revalidate are necessary in order for paintComponent to 
-        //be called.
-        validate();
-        requestFocusInWindow();
-        revalidate();
-    }
-
-    //called by the renderUpdater timer which repaints. 
-    public void actionPerformed(ActionEvent e) 
-    {
-        totalFrameTime.stopClock();
-        totalFrameTime.startClock();
-        repaint();
-    }
-
     public void paintComponent(Graphics g) 
     {
+        totalFrameTime.startClock();
         //makes sure that there are triangles to render in the first place, and that the camera exists.
         if (meshes.size() > 0 && camera != null)
         {
-            computeAndDrawTriangles(g);
+            
+            computeTriangles();
+            sortTriangles();
+            drawBufferedImage();
+            g.drawImage(renderImage, 0, 0, this);
         }
+        totalFrameTime.stopClock();
         //fps counter 
         g.drawString("fps: " + (int)(1000/totalFrameTime.getDeltaTime()), 30, 30);
     }
@@ -143,7 +130,8 @@ public class RenderingPanel extends JPanel implements ActionListener
             return;
         }
         camera = camIn;
-        renderPlane = camera.getRenderPlane();
+        renderPlaneWidth = camera.getRenderPlaneWidth();
+        renderPlane = new Plane(Vector3.add(Vector3.multiply(camDirection, camera.getRenderPlaneDistance()), camera.getPosition()), camDirection);;
     }
 
     public void setFog(double fogStartDistanceIn, double fullFogDistanceIn, Color fogColorIn)
@@ -163,51 +151,93 @@ public class RenderingPanel extends JPanel implements ActionListener
     {
         fogEnabled = false;
     }
-    
-    //computes the 2d screen coordinates of all the triangles, then paints them on the buffered image. 
-    private void computeAndDrawTriangles(Graphics g)
-    {
-        renderImage.getRaster().setDataElements(0, 0, renderImage.getWidth(), renderImage.getHeight(), blankImagePixelColorData);
-        renderPlane = camera.getRenderPlane();
-        pointRotationMatrix = Matrix3x3.multiply(Matrix3x3.rotationMatrixAxisX(camera.getVorientation()*0.017453292519943295), Matrix3x3.rotationMatrixAxisY(-camera.getHorientation()*0.017453292519943295));
 
+    public void computeTriangles()
+    {
         trianglesCalculateTime.startClock();
+
+        camPos = camera.getPosition();
+        camDirection = camera.getDirectionVector();
+        renderPlane = new Plane(Vector3.add(Vector3.multiply(camDirection, camera.getRenderPlaneDistance()), camPos), camDirection);
+        pointRotationMatrix = Matrix3x3.multiply(Matrix3x3.rotationMatrixAxisX(camera.getVorientation()*0.017453292519943295), Matrix3x3.rotationMatrixAxisY(-camera.getHorientation()*0.017453292519943295));
+        
+        triangle2dList.clear();
         for (int i = 0; i < triangles.size(); i ++)
         {
-            //threads[i%threadCount].run(triangles.get(i));
             calculateTriangle(triangles.get(i));
         }
+
         trianglesCalculateTime.stopClock();
-        
+    }
+
+    public void sortTriangles()
+    {
         trianglesOrderTime.startClock();
         Collections.sort(triangle2dList);
         trianglesOrderTime.stopClock();
+    }
 
+    public void drawBufferedImage()
+    {
         trianglesPaintTime.startClock();
+        renderImage.getRaster().setDataElements(0, 0, renderImage.getWidth(), renderImage.getHeight(), blankImagePixelColorData);
         for (int i = 0; i < triangle2dList.size(); i++)
         {
             Triangle2D triangle2d = triangle2dList.get(i);
             paintTriangle(triangle2d.p1, triangle2d.p2, triangle2d.p3, triangle2d.color);
         }
-        triangle2dList.clear();
-        g.drawImage(renderImage, 0, 0, this);
         trianglesPaintTime.stopClock();
+    }
+
+    public void start()
+    {
+        validate();
+        requestFocusInWindow();
+        revalidate();
+        if (thisThread == null)
+        {
+            thisThread = new Thread(this, "Rendering Panel Thread");
+            thisThread.start();
+            threadRunning = true;
+        }
+    }
+
+    public void run() 
+    {
+        while(true)
+        {
+            repaint();
+            if (!threadRunning)
+                break;
+        }
+    }
+
+    public void stop()
+    {
+        try 
+        {
+            threadRunning = false;
+            thisThread.join();
+        } 
+        catch (InterruptedException e) 
+        {
+            System.err.println("ERROR: could not stop rendering thread");
+        }
+        thisThread = null;
     }
 
     //calculates the three screen coordinates of a single triangle in world space, based off the orientation and position of the camera. 
     //It then adds the resulting 2d triangle into the triangle2dList for painting later. 
     private void calculateTriangle(Triangle triangle)
     {
-        Vector3 camDirectionVector = camera.getDirectionVector();
-        Vector3 camPos = camera.getPosition();
         Vector3 triangleCenter = triangle.getCenter();
         double distanceToTriangle = Vector3.subtract(triangleCenter, camPos).getMagnitude();  
         if 
         (
             distanceToTriangle < camera.getFarClipDistancee() //is the triangle within the camera's render distance?
             && distanceToTriangle > camera.getNearClipDistance() //is the triangle far enough from the camera?
-            && Vector3.dotProduct(Vector3.subtract(triangleCenter, camPos), camDirectionVector) > 0 //is the triangle on the side that the camera is facing?
-            && (Vector3.dotProduct(triangle.getPlane().normal, camDirectionVector) < 0 || !triangle.getMesh().backFaceCulling()) //is the triangle facing away? 
+            && Vector3.dotProduct(Vector3.subtract(triangleCenter, camPos), camDirection) > 0 //is the triangle on the side that the camera is facing?
+            && (Vector3.dotProduct(triangle.getPlane().normal, camDirection) < 0 || !triangle.getMesh().backFaceCulling()) //is the triangle facing away? 
         )
         {
             //create local variables: 
@@ -218,16 +248,13 @@ public class RenderingPanel extends JPanel implements ActionListener
             Point p3ScreenCoords = new Point();
             //boolean default false, but set true if just one of the verticies is within the camera's fov. 
             boolean shouldDrawTriangle = false;
-
             Vector3 triangleVertex1 = new Vector3(triangle.point1);
             Vector3 triangleVertex2 = new Vector3(triangle.point2);
             Vector3 triangleVertex3 = new Vector3(triangle.point3);
 
-            double renderPlaneWidth = camera.getRenderPlaneWidth();
-
             triangleVertex1 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex1, camPos), camPos, renderPlane);
             double pixelsPerUnit = getWidth()/renderPlaneWidth;
-            Vector3 camCenterPoint = Vector3.getIntersectionPoint(camDirectionVector, camPos, renderPlane);
+            Vector3 camCenterPoint = Vector3.getIntersectionPoint(camDirection, camPos, renderPlane);
             Vector3 rotatedPoint = Vector3.applyMatrix(pointRotationMatrix, Vector3.subtract(triangleVertex1, camCenterPoint));
             if ((Math.abs(rotatedPoint.x) < renderPlaneWidth/2*1.2 && Math.abs(rotatedPoint.y) < renderPlaneWidth*((double)getHeight()/(double)getWidth())/2*1.2))
                 shouldDrawTriangle = true;
@@ -281,7 +308,10 @@ public class RenderingPanel extends JPanel implements ActionListener
                 }   
                 else 
                     colorUsed = triangle.getBaseColor();
-
+                if (colorUsed == null)
+                {
+                    colorUsed = Color.BLACK;
+                }
                 //adds the 2d triangle object into the triangle2d array.
                 triangle2dList.add(new Triangle2D(p1ScreenCoords, p2ScreenCoords, p3ScreenCoords, colorUsed, distanceToTriangle));
             }
@@ -376,7 +406,6 @@ public class RenderingPanel extends JPanel implements ActionListener
                 }
             }
         }
-        
 
         //bottom part of triangle: 
         if (p3.y-p2.y != 0 && p3.y-p1.y != 0)

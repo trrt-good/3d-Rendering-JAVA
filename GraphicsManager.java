@@ -20,7 +20,7 @@ public class GraphicsManager
         gameObject1 = new GameObject
         (
             "plane", 
-            new Mesh("planeBody.obj", new Vector3(0, 0, 0), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 1, new Color(100, 100, 100), true, true), 
+            new Mesh("propellerPlane.obj", new Vector3(0, 0, 0), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 1, new Color(100, 100, 100), true, true), 
             new Transform(new Vector3())
         );
 
@@ -53,13 +53,14 @@ public class GraphicsManager
 
         Camera cam = new Camera(new Vector3(0, 0, 0), 10000, 10, 60);
         renderingPanel.setCamera(cam);
+        renderingPanel.addMesh(gameObject1.getMesh());
+        cam.setOrbitControls(renderingPanel, gameObject1, 1000, 10);
         //cam.setFreeControls(renderingPanel, 200, 10);
-        cam.setOrbitControls(renderingPanel, gameObject2, 1000, 10);
         renderingPanel.setLighting(new Lighting(new Vector3(-0.5, -1, -0.5), 70, 30));
-        renderingPanel.addMesh(gameObject2.getMesh());
         renderingPanel.setFog(1000, 3000, new Color(190, 210, 245));
-        renderingPanel.startRenderUpdates();
         
+        renderingPanel.start();
+
         System.out.println("finished creating graphics in " + (System.nanoTime()-start)/1000000 + "ms");
     }
 }

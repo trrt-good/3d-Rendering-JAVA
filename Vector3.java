@@ -30,7 +30,7 @@ public class Vector3
     //returns the magnitude of the vector
     public double getMagnitude()
     {
-        return Math.sqrt((x*x+z*z) + y*y);
+        return Math.sqrt(x*x+z*z + y*y);
     }
 
     //returns the squared magnitude of the vector (faster)
@@ -54,7 +54,7 @@ public class Vector3
         else
             return this;
     }
-
+    
     //adds the specified vector to itself, as well as returning the result.
     public Vector3 add(Vector3 vectorIn)
     {

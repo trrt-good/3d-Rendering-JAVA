@@ -264,16 +264,15 @@ public class Camera
         renderPlaneWidth = calculateRenderPlaneWidth();
     }
 
+    public double getRenderPlaneDistance()
+    {
+        return renderPlaneDistance;
+    }
+
     public Vector3 getDirectionVector()
     {
         return Vector3.angleToVector(hAngle*0.017453292519943295, vAngle*0.017453292519943295);
     }
-
-    public Plane getRenderPlane()
-    {
-        Vector3 directionVector = getDirectionVector();
-        return new Plane(Vector3.add(Vector3.multiply(directionVector, renderPlaneDistance), position), directionVector);
-    }  
 
     public double getHorientation()
     {
