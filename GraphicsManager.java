@@ -19,24 +19,24 @@ public class GraphicsManager
     {
         gameObject1 = new GameObject
         (
-            "plane", 
-            new Mesh("propellerPlane.obj", new Vector3(0, 0, 0), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 1, new Color(100, 100, 100), true, true), 
+            "car", 
+            new Mesh("car.obj", "carTexture.png", new Vector3(0, 0, 0), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 10, new Color(100, 100, 100), true, true), 
             new Transform(new Vector3())
         );
 
-        gameObject2 = new GameObject
-        (
-            "High Poly Jet",
-            new Mesh("jet.obj", new Vector3(), new EulerAngle(0, 0, 0), 100, new Color(100, 100, 100), true, true), 
-            new Transform(new Vector3())
-        );
+        // gameObject2 = new GameObject
+        // (
+        //     "High Poly Jet",
+        //     new Mesh("jet.obj", new Vector3(), new EulerAngle(0, 0, 0), 100, new Color(100, 100, 100), true, true), 
+        //     new Transform(new Vector3())
+        // );
 
-        gameObject3 = new GameObject
-        (
-            "lowPolyGulfstream", 
-            new Mesh("lowPolyGulfstream.obj", new Vector3(0, 0, 0), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 1, new Color(100, 100, 100), true, true), 
-            new Transform(new Vector3())
-        );
+        // gameObject3 = new GameObject
+        // (
+        //     "lowPolyGulfstream", 
+        //     new Mesh("lowPolyGulfstream.obj", new Vector3(0, 0, 0), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 1, new Color(100, 100, 100), true, true), 
+        //     new Transform(new Vector3())
+        // );
 
         System.out.println("Creating graphics... ");
         long start = System.nanoTime();
@@ -50,6 +50,7 @@ public class GraphicsManager
         renderingPanel = new RenderingPanel(1600, 900);
         mainFrame.getContentPane().add(renderingPanel);
         renderingPanel.setVisible(true);
+        renderingPanel.setFPSlimit(150);
 
         Camera cam = new Camera(new Vector3(0, 0, 0), 10000, 10, 60);
         renderingPanel.setCamera(cam);

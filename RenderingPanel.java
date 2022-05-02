@@ -28,6 +28,7 @@ public class RenderingPanel extends JPanel implements Runnable
     //Threads:
     private Thread thisThread;
     private boolean threadRunning;
+    private int fps;
 
     //Camera:
     private Camera camera;
@@ -66,6 +67,7 @@ public class RenderingPanel extends JPanel implements Runnable
         triangle2dList = new ArrayList<Triangle2D>();
         camDirection = new Vector3();   
         camPos = new Vector3();
+        fps = -1;
         
         //creates the buffered image which will be used to render triangles. 
         renderImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -91,6 +93,11 @@ public class RenderingPanel extends JPanel implements Runnable
         totalFrameTime.stopClock();
         //fps counter 
         g.drawString("fps: " + (int)(1000/totalFrameTime.getDeltaTime()), 30, 30);
+    }
+
+    public void setFPSlimit(int limit)
+    {
+        fps = Math.max(0, limit);
     }
 
     //sets the lighting, which updates the lighting of all meshes. 
@@ -206,6 +213,18 @@ public class RenderingPanel extends JPanel implements Runnable
     {
         while(true)
         {
+            if (fps > 0)
+            {
+                try
+                {
+                    Thread.sleep(1000/fps);
+                }
+                catch (InterruptedException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+
             repaint();
             if (!threadRunning)
                 break;

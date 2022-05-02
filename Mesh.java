@@ -3,8 +3,12 @@ import java.util.Scanner;
 
 import java.io.FileNotFoundException;
 import java.io.File;
+import java.io.IOException;
 
 import java.awt.Color;
+import java.awt.Image;
+
+import javax.imageio.ImageIO;
 
 //a class for storing groups of triangles in a mesh.
 public class Mesh 
@@ -24,6 +28,9 @@ public class Mesh
     //the lighting object which was used last to recalculate lighting
     private Lighting lighting;
 
+    //the texture applied to the mesh
+    private Image texture; 
+
     //should the back face of the mesh be rendered? (keeping enabled greatly increases preformance, roughly 2x faster)*
     //*however, due to a poor implementation of backFaceCulling, for some cases, it is recommended to dissable this, 
     //which will may sacrafice preformance (especially for larger models), however it will mitigate the
@@ -31,7 +38,7 @@ public class Mesh
     private boolean backFaceCull = true;
 
     //overloaded constructor takes in the name of the model, transform offsets, color and the boolean values 
-    public Mesh(String modelFileName, Vector3 modelOffsetAmount, EulerAngle modelOffsetRotation, double scale, Color colorIn, boolean shaded, boolean shouldBackFaceCull)
+    public Mesh(String modelFileName, String textureFileName, Vector3 modelOffsetAmount, EulerAngle modelOffsetRotation, double scale, Color colorIn, boolean shaded, boolean shouldBackFaceCull)
     {
         long start = System.nanoTime();
         triangles = new ArrayList<Triangle>();
@@ -39,13 +46,24 @@ public class Mesh
         backFaceCull = shouldBackFaceCull;
         color = colorIn;
         totalMovement = new Vector3();
+        texture = null;
+
         if (modelFileName.endsWith(".obj"))
         {
-            readObjFile(modelFileName, modelOffsetAmount, modelOffsetRotation, scale);
+            createTriangles(modelFileName, modelOffsetAmount, modelOffsetRotation, scale);
         }
         else
         {
             System.err.println("ERROR at: Mesh/constructor:\n\tUnsupported 3d model file type. Please use .obj files");
+        }
+
+        try
+        {
+            texture = ImageIO.read(new File(Main.resourcesDirectory,textureFileName));
+        } 
+        catch (IOException e)
+        {
+            System.err.println("ERROR at: Mesh/constructor:\n\tError while loading texture: " + textureFileName);
         }
 
         System.out.println("mesh created: " + modelFileName + " in " + (System.nanoTime() - start)/1000000 + "ms\n\t- " + triangles.size() + " triangles");
@@ -125,7 +143,7 @@ public class Mesh
     }
 
     //reads a .obj file (a text file) and stores triangles inside the triangle list. 
-    private void readObjFile(String fileName, Vector3 offsetPosition, EulerAngle offsetOrientation, double scale)
+    private void createTriangles(String fileName, Vector3 offsetPosition, EulerAngle offsetOrientation, double scale)
     {
         Matrix3x3 offsetRotationMatrix = Matrix3x3.eulerRotation(offsetOrientation);
         //vertices are temporarily stored before they are conbined into triangles and added into the main
@@ -143,6 +161,11 @@ public class Mesh
         {
             System.err.println("ERROR at: Mesh/readObjFile() method:\n\tfile " + fileName + " not found in " + Main.resourcesDirectory.getAbsolutePath());
             return;
+        }
+
+        if (texture != null)
+        {
+
         }
 
         //scanner goes through the file
@@ -171,21 +194,22 @@ public class Mesh
                 if (line.startsWith("f "))
                 {
                     String[] lineArr = line.split(" ");
-                    int[] indexArr = new int[lineArr.length-1];
+                    int[] vertexIndexes = new int[lineArr.length-1];
+                    int[] textureIndexes = new int[lineArr.length-1]; 
                     for (int i = 1; i < lineArr.length; i ++)
                     {
                         if (lineArr[i].contains("/"))
-                            indexArr[i-1] = Integer.parseInt(lineArr[i].substring(0, lineArr[i].indexOf("/")))-1;
+                            vertexIndexes[i-1] = Integer.parseInt(lineArr[i].substring(0, lineArr[i].indexOf("/")))-1;
                     }
                     //if the face contains three vertex indeces, create only one triangle, else create two. 
-                    if (indexArr.length <= 3)
+                    if (vertexIndexes.length <= 3)
                     {
-                        triangles.add(new Triangle(this, vertices.get(indexArr[0]), vertices.get(indexArr[1]), vertices.get(indexArr[2]), color));
+                        triangles.add(new Triangle(this, vertices.get(vertexIndexes[0]), vertices.get(vertexIndexes[1]), vertices.get(vertexIndexes[2]), color));
                     }
                     else
                     {
-                        triangles.add(new Triangle(this, vertices.get(indexArr[0]), vertices.get(indexArr[1]), vertices.get(indexArr[2]), color));
-                        triangles.add(new Triangle(this, vertices.get(indexArr[0]), vertices.get(indexArr[2]), vertices.get(indexArr[3]), color));
+                        triangles.add(new Triangle(this, vertices.get(vertexIndexes[0]), vertices.get(vertexIndexes[1]), vertices.get(vertexIndexes[2]), color));
+                        triangles.add(new Triangle(this, vertices.get(vertexIndexes[0]), vertices.get(vertexIndexes[2]), vertices.get(vertexIndexes[3]), color));
                     }
                 }
             }
