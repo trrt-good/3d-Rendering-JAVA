@@ -18,7 +18,7 @@ public class Mesh
     private ArrayList<Triangle> triangles;
 
     //the color of all the triangles of the mesh.
-    //private Color color;
+    private Color baseColor;
 
     //should the mesh be effected by lighting?
     private boolean shading;
@@ -46,18 +46,20 @@ public class Mesh
         texture = null;
         try
         {
-            texture = ImageIO.read(new File(Main.resourcesDirectory, textureFileName));
+            if (textureFileName != null)
+                texture = ImageIO.read(new File(Main.resourcesDirectory, textureFileName));
         } 
         catch (IOException e)
         {
             System.err.println("ERROR at: Mesh/constructor:\n\tError while loading texture: " + textureFileName);
         }
-        textureRaster = texture.getData();
+        if (texture != null)
+            textureRaster = texture.getData();
 
         triangles = new ArrayList<Triangle>();
         shading = shaded;
         backFaceCull = shouldBackFaceCull;
-        //color = colorIn;
+        baseColor = colorIn;
         totalMovement = new Vector3();
         
 
@@ -193,7 +195,7 @@ public class Mesh
                 }
 
                 //vt means vertex texture coordinates.
-                if (line.startsWith("vt "))
+                if (texture!= null && line.startsWith("vt "))
                 {
                     StringTokenizer tokens = new StringTokenizer(line);
                     tokens.nextToken();
@@ -210,13 +212,16 @@ public class Mesh
                     int[] vertexIndexes = new int[tokenLength];
                     int[] textureIndexes = new int[tokenLength]; 
                     String[] tempArr;
+
+                    Color color = baseColor;
                     for (int i = 0; i < tokenLength; i ++)
                     {
                         tempArr = lineTokens.nextToken().split("/");
                         vertexIndexes[i] = Integer.parseInt(tempArr[0])-1;
                         textureIndexes[i] = Integer.parseInt(tempArr[1])-1;
                     }
-                    Color color = calculateTriangleBaseColor(textureCoordsX.get(textureIndexes[0]), textureCoordsY.get(textureIndexes[0]), textureCoordsX.get(textureIndexes[1]), textureCoordsY.get(textureIndexes[1]), textureCoordsX.get(textureIndexes[2]), textureCoordsY.get(textureIndexes[2]));
+                    if (texture != null)
+                        color = calculateTriangleBaseColor(textureCoordsX.get(textureIndexes[0]), textureCoordsY.get(textureIndexes[0]), textureCoordsX.get(textureIndexes[1]), textureCoordsY.get(textureIndexes[1]), textureCoordsX.get(textureIndexes[2]), textureCoordsY.get(textureIndexes[2]));
                     //if the face contains three vertex indeces, create only one triangle, else create two. 
                     if (vertexIndexes.length <= 3)
                     {
