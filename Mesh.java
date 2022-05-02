@@ -62,7 +62,6 @@ public class Mesh
         baseColor = colorIn;
         totalMovement = new Vector3();
         
-
         if (modelFileName.endsWith(".obj"))
         {
             createTriangles(modelFileName, modelOffsetAmount, modelOffsetRotation, scale);
