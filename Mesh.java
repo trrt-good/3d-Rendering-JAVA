@@ -59,7 +59,7 @@ public class Mesh
         triangles = new ArrayList<Triangle>();
         shading = shaded;
         backFaceCull = shouldBackFaceCull;
-        baseColor = colorIn;
+        baseColor = (colorIn == null)? Color.MAGENTA : colorIn;
         totalMovement = new Vector3();
         
         if (modelFileName.endsWith(".obj"))
@@ -219,18 +219,19 @@ public class Mesh
                         vertexIndexes[i] = Integer.parseInt(tempArr[0])-1;
                         textureIndexes[i] = Integer.parseInt(tempArr[1])-1;
                     }
-                    if (texture != null)
-                        color = calculateTriangleBaseColor(textureCoordsX.get(textureIndexes[0]), textureCoordsY.get(textureIndexes[0]), textureCoordsX.get(textureIndexes[1]), textureCoordsY.get(textureIndexes[1]), textureCoordsX.get(textureIndexes[2]), textureCoordsY.get(textureIndexes[2]));
-                    //if the face contains three vertex indeces, create only one triangle, else create two. 
-                    if (vertexIndexes.length <= 3)
+                    
+                    //create triangles based on the indicated verticies. However often verticies are not in sets of 3, so create multiple triangles if necessary.
+                    for (int i = 0; i < vertexIndexes.length - 2; i ++)
                     {
-                        triangles.add(new Triangle(this, vertices.get(vertexIndexes[0]), vertices.get(vertexIndexes[1]), vertices.get(vertexIndexes[2]), color));
-                    }
-                    else
-                    {
-                        triangles.add(new Triangle(this, vertices.get(vertexIndexes[0]), vertices.get(vertexIndexes[1]), vertices.get(vertexIndexes[2]), color));
-                        triangles.add(new Triangle(this, vertices.get(vertexIndexes[0]), vertices.get(vertexIndexes[2]), vertices.get(vertexIndexes[3]), color));
-                    }
+                        if (texture != null)
+                        color = calculateTriangleBaseColor
+                        (
+                            textureCoordsX.get(textureIndexes[0]), textureCoordsY.get(textureIndexes[0]), 
+                            textureCoordsX.get(textureIndexes[i + 1]), textureCoordsY.get(textureIndexes[i + 1]), 
+                            textureCoordsX.get(textureIndexes[i + 2]), textureCoordsY.get(textureIndexes[i + 2])
+                        );
+                        triangles.add(new Triangle(this, vertices.get(vertexIndexes[0]), vertices.get(vertexIndexes[i + 1]), vertices.get(vertexIndexes[i +2]), color));
+                    } 
                 }
             }
         }
