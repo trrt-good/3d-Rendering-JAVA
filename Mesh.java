@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.File;
 import java.io.IOException;
 import java.awt.Color;
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 

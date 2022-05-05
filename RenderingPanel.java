@@ -10,7 +10,6 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 
 import java.awt.image.BufferedImage;
-import java.time.chrono.ThaiBuddhistChronology;
 
 public class RenderingPanel extends JPanel implements Runnable
 {
@@ -28,7 +27,6 @@ public class RenderingPanel extends JPanel implements Runnable
 
     //Threads:
     private Thread renderingThread;
-    private Thread mainThread; //the thread from which this object was created from
     private boolean threadRunning;
     private int fps;
 
@@ -70,7 +68,6 @@ public class RenderingPanel extends JPanel implements Runnable
         camDirection = new Vector3();   
         camPos = new Vector3();
         fps = -1;
-        mainThread = Thread.currentThread();
         
         //creates the buffered image which will be used to render triangles. 
         renderImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
