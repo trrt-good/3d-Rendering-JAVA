@@ -112,6 +112,11 @@ public class Camera
             prevY = e.getY();
         }
 
+        public void setSensitivity(double sens)
+        {
+            sensitivity = sens;
+        }
+
         //updates the position of the camera to be around the focusObject.
         public void updatePosition()
         {
@@ -262,6 +267,12 @@ public class Camera
     {
         fov = fovIn;
         renderPlaneWidth = calculateRenderPlaneWidth();
+    }
+
+    public void setSensitivity(double sense)
+    {
+        if (orbitController != null)
+            orbitController.setSensitivity(sense);
     }
 
     public double getRenderPlaneDistance()

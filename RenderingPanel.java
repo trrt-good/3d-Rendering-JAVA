@@ -80,7 +80,6 @@ public class RenderingPanel extends JPanel implements Runnable
 
     public void paintComponent(Graphics g) 
     {
-        totalFrameTime.startClock();
         //makes sure that there are triangles to render in the first place, and that the camera exists.
         if (meshes.size() > 0 && camera != null)
         {
@@ -90,7 +89,6 @@ public class RenderingPanel extends JPanel implements Runnable
             drawBufferedImage();
             g.drawImage(renderImage, 0, 0, this);
         }
-        totalFrameTime.stopClock();
         //fps counter 
         g.drawString("fps: " + (int)(1000/totalFrameTime.getDeltaTime()), 30, 30);
     }
@@ -213,18 +211,17 @@ public class RenderingPanel extends JPanel implements Runnable
     {
         while(true)
         {
+            totalFrameTime.stopClock();
+            totalFrameTime.startClock();
             if (fps > 0)
             {
                 try
                 {
-                    Thread.sleep(1000/fps);
+                    Thread.sleep(1000/(fps));
                 }
                 catch (InterruptedException e)
-                {
-                    e.printStackTrace();
-                }
+                {}
             }
-
             repaint();
             if (!threadRunning)
                 break;

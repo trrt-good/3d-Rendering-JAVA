@@ -50,7 +50,7 @@ public class GraphicsManager
         renderingPanel = new RenderingPanel(1600, 900);
         mainFrame.getContentPane().add(renderingPanel);
         renderingPanel.setVisible(true);
-        renderingPanel.setFPSlimit(150);
+        renderingPanel.setFPSlimit(20);
 
         Camera cam = new Camera(new Vector3(0, 0, 0), 10000, 10, 60);
         renderingPanel.setCamera(cam);
@@ -61,7 +61,6 @@ public class GraphicsManager
         renderingPanel.setFog(1000, 3000, new Color(190, 210, 245));
         
         renderingPanel.start();
-
         System.out.println("finished creating graphics in " + (System.nanoTime()-start)/1000000 + "ms");
     }
 }
