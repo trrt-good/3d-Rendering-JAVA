@@ -10,6 +10,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 
 import java.awt.image.BufferedImage;
+import java.time.chrono.ThaiBuddhistChronology;
 
 public class RenderingPanel extends JPanel implements Runnable
 {
@@ -26,7 +27,8 @@ public class RenderingPanel extends JPanel implements Runnable
     private Matrix3x3 pointRotationMatrix;
 
     //Threads:
-    private Thread thisThread;
+    private Thread renderingThread;
+    private Thread mainThread; //the thread from which this object was created from
     private boolean threadRunning;
     private int fps;
 
@@ -68,6 +70,7 @@ public class RenderingPanel extends JPanel implements Runnable
         camDirection = new Vector3();   
         camPos = new Vector3();
         fps = -1;
+        mainThread = Thread.currentThread();
         
         //creates the buffered image which will be used to render triangles. 
         renderImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -80,10 +83,11 @@ public class RenderingPanel extends JPanel implements Runnable
 
     public void paintComponent(Graphics g) 
     {
+        totalFrameTime.stopClock();
+        totalFrameTime.startClock();
         //makes sure that there are triangles to render in the first place, and that the camera exists.
         if (meshes.size() > 0 && camera != null)
         {
-            
             computeTriangles();
             sortTriangles();
             drawBufferedImage();
@@ -199,10 +203,10 @@ public class RenderingPanel extends JPanel implements Runnable
         validate();
         requestFocusInWindow();
         revalidate();
-        if (thisThread == null)
+        if (renderingThread == null)
         {
-            thisThread = new Thread(this, "Rendering Panel Thread");
-            thisThread.start();
+            renderingThread = new Thread(this, "Rendering Panel Thread");
+            renderingThread.start();
             threadRunning = true;
         }
     }
@@ -211,8 +215,6 @@ public class RenderingPanel extends JPanel implements Runnable
     {
         while(true)
         {
-            totalFrameTime.stopClock();
-            totalFrameTime.startClock();
             if (fps > 0)
             {
                 try
@@ -233,13 +235,13 @@ public class RenderingPanel extends JPanel implements Runnable
         try 
         {
             threadRunning = false;
-            thisThread.join();
+            renderingThread.join();
         } 
         catch (InterruptedException e) 
         {
             System.err.println("ERROR: could not stop rendering thread");
         }
-        thisThread = null;
+        renderingThread = null;
     }
 
     //calculates the three screen coordinates of a single triangle in world space, based off the orientation and position of the camera. 

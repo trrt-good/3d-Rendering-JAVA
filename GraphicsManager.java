@@ -24,12 +24,12 @@ public class GraphicsManager
             new Transform(new Vector3())
         );
 
-        // gameObject2 = new GameObject
-        // (
-        //     "High Poly Jet",
-        //     new Mesh("jet.obj", new Vector3(), new EulerAngle(0, 0, 0), 100, new Color(100, 100, 100), true, true), 
-        //     new Transform(new Vector3())
-        // );
+        gameObject2 = new GameObject
+        (
+            "High Poly Jet",
+            new Mesh("jet.obj", null, new Vector3(), new EulerAngle(0, 0, 0), 100, new Color(100, 100, 100), true, true), 
+            new Transform(new Vector3())
+        );
 
         // gameObject3 = new GameObject
         // (
@@ -50,12 +50,12 @@ public class GraphicsManager
         renderingPanel = new RenderingPanel(1600, 900);
         mainFrame.getContentPane().add(renderingPanel);
         renderingPanel.setVisible(true);
-        renderingPanel.setFPSlimit(20);
+        //renderingPanel.setFPSlimit(150);
 
         Camera cam = new Camera(new Vector3(0, 0, 0), 10000, 10, 60);
         renderingPanel.setCamera(cam);
-        renderingPanel.addMesh(gameObject1.getMesh());
-        cam.setOrbitControls(renderingPanel, gameObject1, 1000, 10);
+        renderingPanel.addMesh(gameObject2.getMesh());
+        cam.setOrbitControls(renderingPanel, gameObject2, 1000, 10);
         //cam.setFreeControls(renderingPanel, 200, 10);
         renderingPanel.setLighting(new Lighting(new Vector3(-0.5, -1, -0.5), 70, 30));
         renderingPanel.setFog(1000, 3000, new Color(190, 210, 245));

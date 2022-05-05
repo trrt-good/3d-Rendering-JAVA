@@ -217,6 +217,7 @@ public class Mesh
                     {
                         tempArr = lineTokens.nextToken().split("/");
                         vertexIndexes[i] = Integer.parseInt(tempArr[0])-1;
+                        if (texture != null)
                         textureIndexes[i] = Integer.parseInt(tempArr[1])-1;
                     }
                     
