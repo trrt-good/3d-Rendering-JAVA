@@ -27,6 +27,7 @@ public class RenderingPanel extends JPanel implements Runnable
 
     //Threads:
     private Thread renderingThread;
+    private Thread mainThread; //the thread from which this object was created from
     private boolean threadRunning;
     private int fps;
 
@@ -68,6 +69,7 @@ public class RenderingPanel extends JPanel implements Runnable
         camDirection = new Vector3();   
         camPos = new Vector3();
         fps = -1;
+        mainThread = Thread.currentThread();
         
         //creates the buffered image which will be used to render triangles. 
         renderImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -198,19 +200,18 @@ public class RenderingPanel extends JPanel implements Runnable
     public void start()
     {
         validate();
-        requestFocusInWindow();
         revalidate();
         if (renderingThread == null)
         {
-            renderingThread = new Thread(this, "Rendering Panel Thread");
-            renderingThread.start();
             threadRunning = true;
+            renderingThread = new Thread(this, "Rendering");
+            renderingThread.start();
         }
     }
 
     public void run() 
     {
-        while(true)
+        while(threadRunning)
         {
             if (fps > 0)
             {
@@ -222,23 +223,21 @@ public class RenderingPanel extends JPanel implements Runnable
                 {}
             }
             repaint();
-            if (!threadRunning)
-                break;
         }
     }
 
-    public void stop()
+    public void stopThread()
     {
-        try 
+        try
         {
             threadRunning = false;
-            renderingThread.join();
-        } 
-        catch (InterruptedException e) 
-        {
-            System.err.println("ERROR: could not stop rendering thread");
+            renderingThread.interrupt();
+            renderingThread = null;
         }
-        renderingThread = null;
+        catch (SecurityException e)
+        {
+
+        }
     }
 
     //calculates the three screen coordinates of a single triangle in world space, based off the orientation and position of the camera. 
