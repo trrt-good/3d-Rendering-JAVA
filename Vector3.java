@@ -132,7 +132,8 @@ public class Vector3
     //returns a vector with the specified rotation
     public static Vector3 angleToVector(double yaw, double pitch)
     {
-        return new Vector3(Math.sin(yaw)*Math.cos(pitch), Math.sin(pitch), Math.cos(yaw)*Math.cos(pitch));
+        double cosPitch = Math.cos(pitch);
+        return new Vector3(Math.sin(yaw)*cosPitch, Math.sin(pitch), Math.cos(yaw)*cosPitch);
     }
 
     //returns the point at which the vector "lineDirection" starting at point "linePoint" intersects "plane"

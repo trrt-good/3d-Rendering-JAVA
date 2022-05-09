@@ -13,30 +13,30 @@ public class GraphicsManager
 
     public static GameObject gameObject1;
     public static GameObject gameObject2;
-    public static GameObject gameObject3;
+    public static GameObject sphere;
 
     public static void startGraphics(String name)
     {
-        gameObject1 = new GameObject
-        (
-            "car", 
-            new Mesh("car.obj", "carTexture.png", new Vector3(0, 0, 0), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 10, new Color(100, 100, 100), true, true), 
-            new Transform(new Vector3())
-        );
-
-        gameObject2 = new GameObject
-        (
-            "High Poly Jet",
-            new Mesh("jet.obj", null, new Vector3(), new EulerAngle(0, 0, 0), 100, new Color(100, 100, 100), true, true), 
-            new Transform(new Vector3())
-        );
-
-        // gameObject3 = new GameObject
+        // gameObject1 = new GameObject
         // (
-        //     "lowPolyGulfstream", 
-        //     new Mesh("lowPolyGulfstream.obj", new Vector3(0, 0, 0), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 1, new Color(100, 100, 100), true, true), 
+        //     "car", 
+        //     new Mesh("car.obj", "carTexture.png", new Vector3(0, 0, 0), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 10, new Color(100, 100, 100), true, true), 
         //     new Transform(new Vector3())
         // );
+
+        // gameObject2 = new GameObject
+        // (
+        //     "High Poly Jet",
+        //     new Mesh("jet.obj", null, new Vector3(), new EulerAngle(0, 0, 0), 100, new Color(100, 100, 100), true, true), 
+        //     new Transform(new Vector3())
+        // );
+
+        sphere = new GameObject
+        (
+            "shere", 
+            new Mesh("sphere.obj", null, new Vector3(0, 0, 0), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 100, new Color(100, 100, 100), true, true), 
+            new Transform(new Vector3())
+        );
 
         System.out.println("Creating graphics... ");
         long start = System.nanoTime();
@@ -54,10 +54,10 @@ public class GraphicsManager
 
         Camera cam = new Camera(new Vector3(0, 0, 0), 10000, 10, 60);
         renderingPanel.setCamera(cam);
-        renderingPanel.addMesh(gameObject2.getMesh());
-        cam.setOrbitControls(renderingPanel, gameObject2, 1000, 10);
+        renderingPanel.addMesh(sphere.getMesh());
+        cam.setOrbitControls(renderingPanel, sphere, 1000, 10);
         //cam.setFreeControls(renderingPanel, 200, 10);
-        renderingPanel.setLighting(new Lighting(new Vector3(-0.5, -1, -0.5), 70, 30));
+        renderingPanel.setLighting(new Lighting(new Vector3(0, -1, 0), 70, 30));
         renderingPanel.setFog(1000, 3000, new Color(190, 210, 245));
         
         renderingPanel.start();

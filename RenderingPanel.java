@@ -164,6 +164,7 @@ public class RenderingPanel extends JPanel implements Runnable
     {
         trianglesCalculateTime.startClock();
 
+        renderPlaneWidth = camera.getRenderPlaneWidth();
         camPos = camera.getPosition();
         camDirection = camera.getDirectionVector();
         renderPlane = new Plane(Vector3.add(Vector3.multiply(camDirection, camera.getRenderPlaneDistance()), camPos), camDirection);
