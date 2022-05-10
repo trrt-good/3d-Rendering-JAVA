@@ -240,8 +240,12 @@ public class Mesh
                     {
                         if (texture != null)
                             color = calculateTriangleBaseColor(textureCoords.get(textureIndexes[0]), textureCoords.get(textureIndexes[i+1]), textureCoords.get(textureIndexes[i+2]));
-                        //TODO: make vertex objects 
-                        triangles.add(new Triangle(this, vertices.get(coordinateIndexes[0]), vertices.get(coordinateIndexes[i + 1]), vertices.get(coordinateIndexes[i +2]), color));
+                        Vertex vertex1 = new Vertex(vertexCoords.get(coordinateIndexes[0]));
+                        Vertex vertex2 = new Vertex(vertexCoords.get(coordinateIndexes[i + 1]));
+                        Vertex vertex3 = new Vertex(vertexCoords.get(coordinateIndexes[i + 2]));
+
+                            //TODO: make vertex objects 
+                        triangles.add(new Triangle(this, vertex1, vertex2, vertex3, color));
                     } 
                 }
             }

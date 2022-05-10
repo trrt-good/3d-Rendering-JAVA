@@ -8,7 +8,7 @@ public class Vertex
     private Vector2 textureCoordinate;
     private Vector3 normal;
 
-    public Vertex(Vector3 coordinate3d)
+    public Vertex(Vector3 coordinate3d, Vector3 normal, Vector2 textureCoord)
     {
         worldCoordinate = coordinate3d;
     }
