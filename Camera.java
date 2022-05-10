@@ -13,6 +13,7 @@ public class Camera
     private double fov; //strictly reffers to the horizontal fov as vertical fov is based off screen height 
 
     private Vector3 position; //position of camera in world-space
+    private Vector3 directionVector; //direction the camera is facing as a normalized vector
     private double hAngle; //horizontal angle of camera
     private double vAngle; //vertical angle of camera
     private double renderPlaneDistance; //distance from the camera that the rendering plane is
@@ -34,6 +35,7 @@ public class Camera
         position = positionIn;
         farClipDistance = farClipDistanceIn;
         nearClipDistance = nearClipDistanceIn;
+        directionVector = Vector3.angleToVector(hAngle*0.017453292519943295, vAngle*0.017453292519943295);
         setFov(fovIn);
     }
 
@@ -46,6 +48,7 @@ public class Camera
         
         hAngle%=360;
         vAngle%=360;
+        directionVector = Vector3.angleToVector(hAngle*0.017453292519943295, vAngle*0.017453292519943295);
     }
 
     //camera controller which orbits a specified GameObject. panning the camera will cause it to 
@@ -158,6 +161,7 @@ public class Camera
 
             prevX = e.getX();
             prevY = e.getY();
+            directionVector = Vector3.angleToVector(hAngle*0.017453292519943295, vAngle*0.017453292519943295);
         }
 
         //checks for keys
@@ -282,7 +286,7 @@ public class Camera
 
     public Vector3 getDirectionVector()
     {
-        return Vector3.angleToVector(hAngle*0.017453292519943295, vAngle*0.017453292519943295);
+        return directionVector;
     }
 
     public double getHorientation()

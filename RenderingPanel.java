@@ -19,6 +19,7 @@ public class RenderingPanel extends JPanel implements Runnable
     //collection of all the objects that the rendering panel will render
     private ArrayList<Mesh> meshes = new ArrayList<Mesh>(); 
     private ArrayList<Triangle> triangles = new ArrayList<Triangle>(); 
+    private ArrayList<Vertex> vertices = new ArrayList<Vertex>();
 
     //for rendering:
     private BufferedImage renderImage;
@@ -125,6 +126,7 @@ public class RenderingPanel extends JPanel implements Runnable
             if (lightingObject != null)
                 lightingObject.update(meshes);
             triangles.addAll(mesh.getTriangles());
+            vertices.addAll(mesh.getVertices());
         }
         else
         {
@@ -244,6 +246,30 @@ public class RenderingPanel extends JPanel implements Runnable
         }
     }
 
+    private void calculateScreenCoordinates()
+    {
+        double pixelsPerUnit = getWidth()/renderPlaneWidth;
+        
+        for (int i = 0; i < vertices.size(); i ++)
+        {
+            Vector3 worldPoint = new Vector3(vertices.get(i).getWordCoords());
+            vertices.get(i).setCamDistance(Vector3.subtract(worldPoint, camPos).getMagnitude());
+            double distanceToCam = vertices.get(i).getCamDistance();
+            if 
+            (
+                distanceToCam < camera.getFarClipDistancee() //is the triangle within the camera's render distance?
+                && distanceToCam > camera.getNearClipDistance() //is the triangle far enough from the camera?
+                && Vector3.dotProduct(Vector3.subtract(worldPoint, camPos), camDirection) > 0 //is the triangle on the side that the camera is facing?
+                && (Vector3.dotProduct(triangle.getPlane().normal, camDirection) < 0 || !triangle.getMesh().backFaceCulling()) //is the triangle facing away? 
+            )
+
+            
+            
+            worldPoint = Vector3.getIntersectionPoint(Vector3.subtract(worldPoint, camPos), camPos, renderPlane);
+
+        }
+    }
+
     //calculates the three screen coordinates of a single triangle in world space, based off the orientation and position of the camera. 
     //It then adds the resulting 2d triangle into the triangle2dList for painting later. 
     private void calculateTriangle(Triangle triangle)
@@ -266,9 +292,9 @@ public class RenderingPanel extends JPanel implements Runnable
             Point p3ScreenCoords = new Point();
             //boolean default false, but set true if just one of the verticies is within the camera's fov. 
             boolean shouldDrawTriangle = false;
-            Vector3 triangleVertex1 = new Vector3(triangle.point1);
-            Vector3 triangleVertex2 = new Vector3(triangle.point2);
-            Vector3 triangleVertex3 = new Vector3(triangle.point3);
+            Vector3 triangleVertex1 = new Vector3(triangle.vertex1.getWordCoords());
+            Vector3 triangleVertex2 = new Vector3(triangle.vertex2.getWordCoords());
+            Vector3 triangleVertex3 = new Vector3(triangle.vertex3.getWordCoords());
 
             triangleVertex1 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex1, camPos), camPos, renderPlane);
             double pixelsPerUnit = getWidth()/renderPlaneWidth;
@@ -286,7 +312,7 @@ public class RenderingPanel extends JPanel implements Runnable
             p2ScreenCoords.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
             p2ScreenCoords.y = (int)(getHeight()/2 - rotatedPoint.y*pixelsPerUnit);
     
-            triangleVertex3 = new Vector3(triangle.point3);
+            triangleVertex3 = new Vector3(triangle.vertex3.getWordCoords());
             triangleVertex3 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex3, camPos), camPos, renderPlane);
             rotatedPoint = Vector3.applyMatrix(pointRotationMatrix, Vector3.subtract(triangleVertex3, camCenterPoint));
             if ((Math.abs(rotatedPoint.x) < renderPlaneWidth/2*1.2 && Math.abs(rotatedPoint.y) < renderPlaneWidth*((double)getHeight()/getWidth())/2*1.2))

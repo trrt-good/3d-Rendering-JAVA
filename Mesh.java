@@ -15,6 +15,7 @@ public class Mesh
 {
     //a collection of all the triangles in the mesh.
     private ArrayList<Triangle> triangles;
+    private ArrayList<Vertex> vertices;
 
     //the color of all the triangles of the mesh.
     private Color baseColor;
@@ -55,6 +56,7 @@ public class Mesh
         if (texture != null)
             textureRaster = texture.getData();
 
+        vertices = new ArrayList<Vertex>();
         triangles = new ArrayList<Triangle>();
         shading = shaded;
         backFaceCull = shouldBackFaceCull;
@@ -82,22 +84,18 @@ public class Mesh
     //rotates each triangle in the mesh according to a rotation matrix, and around the center of rotation.
     public void rotate(Matrix3x3 rotationMatrix, Vector3 centerOfRotation)
     {
-        for (int i = 0; i < triangles.size(); i ++)
+        for (int i = 0; i < vertices.size(); i ++)
         {
-            triangles.get(i).point1 = Vector3.add(Vector3.applyMatrix(rotationMatrix, Vector3.subtract(triangles.get(i).point1, centerOfRotation)), centerOfRotation);
-            triangles.get(i).point2 = Vector3.add(Vector3.applyMatrix(rotationMatrix, Vector3.subtract(triangles.get(i).point2, centerOfRotation)), centerOfRotation);
-            triangles.get(i).point3 = Vector3.add(Vector3.applyMatrix(rotationMatrix, Vector3.subtract(triangles.get(i).point3, centerOfRotation)), centerOfRotation);
+            vertices.get(i).setWorldCoordinate(Vector3.add(Vector3.applyMatrix(rotationMatrix, Vector3.subtract(triangles.get(i).vertex1.getWordCoords(), centerOfRotation)), centerOfRotation));
         }
     }
 
     //translates each triangle in the mesh by "amount" 
     public void translate(Vector3 amount)
     {
-        for (int i = 0; i < triangles.size(); i ++)
+        for (int i = 0; i < vertices.size(); i ++)
         {
-            triangles.get(i).point1 = Vector3.add(triangles.get(i).point1, amount);
-            triangles.get(i).point2 = Vector3.add(triangles.get(i).point2, amount);
-            triangles.get(i).point3 = Vector3.add(triangles.get(i).point3, amount);
+            vertices.get(i).setWorldCoordinate(Vector3.add(vertices.get(i).getWordCoords(), amount));
         }
         totalMovement = Vector3.add(totalMovement, amount);
     }
@@ -117,6 +115,12 @@ public class Mesh
     {
         return triangles;
     }
+
+    public ArrayList<Vertex> getVertices()
+    {
+        return vertices;
+    }
+
     //#endregion
 
     //calculates the lighting of each triangle in the mesh based off the given
@@ -151,9 +155,9 @@ public class Mesh
         Matrix3x3 offsetRotationMatrix = Matrix3x3.eulerRotation(offsetOrientation);
         //vertices are temporarily stored before they are conbined into triangles and added into the main
         //triangle list.
-        ArrayList<Vector3> vertices = new ArrayList<Vector3>();
-        ArrayList<Double> textureCoordsX = new ArrayList<Double>();
-        ArrayList<Double> textureCoordsY = new ArrayList<Double>();
+        ArrayList<Vector3> vertexCoords = new ArrayList<Vector3>();
+        ArrayList<Vector2> textureCoords = new ArrayList<Vector2>();
+        ArrayList<Vector3> vertexNormals = new ArrayList<Vector3>();
         Scanner scanner;
         String line = "";
 
@@ -181,15 +185,27 @@ public class Mesh
                     StringTokenizer lineTokens = new StringTokenizer(line);
                     lineTokens.nextToken();
                     //create the vertex object
-                    Vector3 vertex = new Vector3(Double.parseDouble(lineTokens.nextToken()), Double.parseDouble(lineTokens.nextToken()), Double.parseDouble(lineTokens.nextToken()));
+                    Vector3 vertexCoordinate = new Vector3(Double.parseDouble(lineTokens.nextToken()), Double.parseDouble(lineTokens.nextToken()), Double.parseDouble(lineTokens.nextToken()));
 
                     //apply transformations to the vertex based on offset params
-                    vertex = Vector3.applyMatrix(offsetRotationMatrix, vertex);
-                    vertex = Vector3.add(offsetPosition, vertex);
-                    vertex = Vector3.multiply(vertex, scale);
+                    vertexCoordinate = Vector3.applyMatrix(offsetRotationMatrix, vertexCoordinate);
+                    vertexCoordinate = Vector3.add(offsetPosition, vertexCoordinate);
+                    vertexCoordinate = Vector3.multiply(vertexCoordinate, scale);
 
                     //adds the vertex to the array of vertices
-                    vertices.add(vertex);
+                    vertexCoords.add(vertexCoordinate);
+                }
+
+                //vn means vertex normal in .obj files
+                if (line.startsWith("vn "))
+                {
+                    StringTokenizer lineTokens = new StringTokenizer(line);
+                    lineTokens.nextToken();
+                    //create the vertex object
+                    Vector3 normalVector = new Vector3(Double.parseDouble(lineTokens.nextToken()), Double.parseDouble(lineTokens.nextToken()), Double.parseDouble(lineTokens.nextToken()));
+
+                    //adds the normal to the array of normals
+                    vertexNormals.add(normalVector);
                 }
 
                 //vt means vertex texture coordinates.
@@ -197,8 +213,7 @@ public class Mesh
                 {
                     StringTokenizer tokens = new StringTokenizer(line);
                     tokens.nextToken();
-                    textureCoordsX.add(Double.parseDouble(tokens.nextToken()));
-                    textureCoordsY.add(Double.parseDouble(tokens.nextToken()));
+                    textureCoords.add(new Vector2(Double.parseDouble(tokens.nextToken()), Double.parseDouble(tokens.nextToken())));
                 }
 
                 //f means face in .obj files
@@ -207,7 +222,7 @@ public class Mesh
                     StringTokenizer lineTokens = new StringTokenizer(line);
                     lineTokens.nextToken();
                     int tokenLength = lineTokens.countTokens();
-                    int[] vertexIndexes = new int[tokenLength];
+                    int[] coordinateIndexes = new int[tokenLength];
                     int[] textureIndexes = new int[tokenLength]; 
                     String[] tempArr;
 
@@ -215,32 +230,28 @@ public class Mesh
                     for (int i = 0; i < tokenLength; i ++)
                     {
                         tempArr = lineTokens.nextToken().split("/");
-                        vertexIndexes[i] = Integer.parseInt(tempArr[0])-1;
+                        coordinateIndexes[i] = Integer.parseInt(tempArr[0])-1;
                         if (texture != null)
                         textureIndexes[i] = Integer.parseInt(tempArr[1])-1;
                     }
                     
                     //create triangles based on the indicated verticies. However often verticies are not in sets of 3, so create multiple triangles if necessary.
-                    for (int i = 0; i < vertexIndexes.length - 2; i ++)
+                    for (int i = 0; i < coordinateIndexes.length - 2; i ++)
                     {
                         if (texture != null)
-                        color = calculateTriangleBaseColor
-                        (
-                            textureCoordsX.get(textureIndexes[0]), textureCoordsY.get(textureIndexes[0]), 
-                            textureCoordsX.get(textureIndexes[i + 1]), textureCoordsY.get(textureIndexes[i + 1]), 
-                            textureCoordsX.get(textureIndexes[i + 2]), textureCoordsY.get(textureIndexes[i + 2])
-                        );
-                        triangles.add(new Triangle(this, vertices.get(vertexIndexes[0]), vertices.get(vertexIndexes[i + 1]), vertices.get(vertexIndexes[i +2]), color));
+                            color = calculateTriangleBaseColor(textureCoords.get(textureIndexes[0]), textureCoords.get(textureIndexes[i+1]), textureCoords.get(textureIndexes[i+2]));
+                        //TODO: make vertex objects 
+                        triangles.add(new Triangle(this, vertices.get(coordinateIndexes[0]), vertices.get(coordinateIndexes[i + 1]), vertices.get(coordinateIndexes[i +2]), color));
                     } 
                 }
             }
         }
     }
 
-    private Color calculateTriangleBaseColor(double x1, double y1, double x2, double y2, double x3, double y3)
+    private Color calculateTriangleBaseColor(Vector2 p1, Vector2 p2, Vector2 p3)
     {
-        double centerX = (x1 + x2 + x3)/3;
-        double centerY = (y1 + y2 + y3)/3;
+        double centerX = (p1.x + p2.x + p3.x)/3;
+        double centerY = (p1.y + p2.y + p3.y)/3;
         int[] color = new int[4];
         color = textureRaster.getPixel((int)(centerX*texture.getWidth()), texture.getHeight() - (int)(centerY*texture.getHeight()), color);
         return new Color(color[0], color[1], color[2]);

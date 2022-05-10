@@ -8,4 +8,10 @@ public class Vector2
         x = xIn;
         y = yIn;
     }
+
+    public Vector2()
+    {
+        x = 0;
+        y = 0;
+    }
 }

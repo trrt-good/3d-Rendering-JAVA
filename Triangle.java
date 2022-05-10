@@ -2,9 +2,9 @@ import java.awt.Color;
 public class Triangle 
 {
     //3d verticies of the triangle. 
-    public Vector3 point1;
-    public Vector3 point2;
-    public Vector3 point3;
+    public Vertex vertex1;
+    public Vertex vertex2;
+    public Vertex vertex3;
 
     //the default color of the triangle before lighting
     private Color color;
@@ -15,20 +15,20 @@ public class Triangle
     //the color of the triangle with lighting calculations. 
     private Color colorWithLighting;
 
-    public Triangle(Mesh parentMeshIn, Vector3 p1, Vector3 p2, Vector3 p3)
+    public Triangle(Mesh parentMeshIn, Vertex v1, Vertex v2, Vertex v3)
     {
-        point1 = p1;
-        point2 = p2;
-        point3 = p3;
+        vertex1 = v1;
+        vertex2 = v2;
+        vertex3 = v3;
         color = Color.BLACK;
         parentMesh = parentMeshIn;
     }
 
-    public Triangle(Mesh parentMeshIn, Vector3 p1, Vector3 p2, Vector3 p3, Color colorIn)
+    public Triangle(Mesh parentMeshIn, Vertex v1, Vertex v2, Vertex v3, Color colorIn)
     {
-        point1 = p1;
-        point2 = p2;
-        point3 = p3;
+        vertex1 = v1;
+        vertex2 = v2;
+        vertex3 = v3;
         color = colorIn;
         parentMesh = parentMeshIn;
     }
@@ -40,12 +40,27 @@ public class Triangle
 
     public Plane getPlane()
     {
-        return new Plane(point1, point2, point3);
+        return new Plane(vertex1.getWordCoords(), vertex2.getWordCoords(), vertex3.getWordCoords());
+    }
+
+    public boolean inView()
+    {
+        return vertex1.inView && vertex2.inView && vertex3.inView;
     }
 
     public Vector3 getCenter()
     {
-        return new Vector3((point1.x + point2.x + point3.x)/3, (point1.y + point2.y + point3.y)/3, (point1.z + point2.z + point3.z)/3);
+        return new Vector3
+        (
+            (vertex1.getWordCoords().x + vertex2.getWordCoords().x + vertex3.getWordCoords().x)/3, 
+            (vertex1.getWordCoords().y + vertex2.getWordCoords().y + vertex3.getWordCoords().y)/3,
+            (vertex1.getWordCoords().z + vertex2.getWordCoords().z + vertex3.getWordCoords().z)/3
+        );
+    }
+
+    public double getDistanceToCam()
+    {
+        return (vertex1.getCamDistance() + vertex2.getCamDistance() + vertex3.getCamDistance())/3;
     }
 
     public void setBaseColor(Color colorIn)
@@ -69,7 +84,7 @@ public class Triangle
         int brightness = 0;
         int darkness = 0;
         //get the angle between the normal of the triangle face and the direction of the light. 
-        double angle = Vector3.getAngleBetween(lighting.lightDirection, Vector3.crossProduct(Vector3.subtract(point1, point2), Vector3.subtract(point2, point3)));
+        double angle = Vector3.getAngleBetween(lighting.lightDirection, Vector3.crossProduct(Vector3.subtract(vertex1.getWordCoords(), vertex2.getWordCoords()), Vector3.subtract(vertex2.getWordCoords(), vertex3.getWordCoords())));
 
         //determine brightness and darkness.
         if (angle > Math.PI/2)
