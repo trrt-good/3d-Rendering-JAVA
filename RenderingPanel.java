@@ -345,7 +345,6 @@ public class RenderingPanel extends JPanel implements Runnable
     {
         Point tempPoint = new Point();
         int rgb = convertToIntRGB(triangleColor);
-        Vector3 barycentricCoords = new Vector3();
 
         //sorts the three points by height using a very simple bubble sort algorithm
         if (p1.getY() > p2.getY())
@@ -387,7 +386,6 @@ public class RenderingPanel extends JPanel implements Runnable
                 edge1 = Math.max(0, Math.min(renderImage.getWidth(), p1.x));
                 for (yScanLine = p1.y; yScanLine < p2.y && yScanLine < renderImage.getHeight(); yScanLine ++)
                 {
-                    
                     if (yScanLine >= 0)
                     {
                         edge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-p1.y)/((double)(p3.y-p1.y)/(p3.x-p1.x)) + p1.x)));
@@ -415,6 +413,16 @@ public class RenderingPanel extends JPanel implements Runnable
                     {
                         edge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-p1.y)/((double)(p2.y-p1.y)/(p2.x-p1.x)) + p1.x)));
                         edge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-p1.y)/((double)(p3.y-p1.y)/(p3.x-p1.x)) + p1.x)));
+                        double w = (yScanLine-p1.y)/(p2.y-p1.y+1);
+                        Vector3 edge1Weight = new Vector3(w, 1-w, 0);
+                        w = (yScanLine-p1.y)/(p3.y-p1.y+1);
+                        Vector3 edge2Weight = new Vector3(w, 0, 1-w);
+                        Vector3[] rowWeights = new Vector3[edge2-edge1+1];
+                        for (int i = 0; i < rowWeights.length; i++)
+                        {
+                            rowWeights[i] = Vector3.multiply(Vector3.add(Vector3.multiply(vector, scalar), b), 1.0/(i-1))   
+
+                        }
                         drawHorizontalLine(Math.min(edge1, edge2), Math.max(edge1, edge2), yScanLine, rgb);
                     }
                 }
@@ -464,8 +472,10 @@ public class RenderingPanel extends JPanel implements Runnable
         }
     }
 
+
+
     //draws a horizontal line with the given constraints and the specified integer rgb color.
-    private void drawHorizontalLine(int startOFLineX, int endOfLineX, int levelY, int rgb)
+    private void drawHorizontalLine(int startOFLineX, int endOfLineX, Vector3[] barycentricWeights, int levelY, int rgb)
     {
         int[] pixelArray = new int[(Math.abs(endOfLineX-startOFLineX))];
         Arrays.fill(pixelArray, rgb);
