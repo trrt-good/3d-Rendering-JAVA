@@ -14,9 +14,17 @@ public class GraphicsManager
     public static GameObject car;
     public static GameObject jet;
     public static GameObject sphere;
+    public static GameObject cat;
 
     public static void startGraphics(String name)
     {
+        cat = new GameObject
+        (
+            "cat",
+            new Mesh("cat.obj", new Color(100, 100, 100), new Vector3(0, -100, 0), new EulerAngle(0, 0, 0), 1, true, true), 
+            new Transform(new Vector3())
+        );
+
         car = new GameObject
         (
             "car", 
@@ -54,8 +62,8 @@ public class GraphicsManager
 
         Camera cam = new Camera(new Vector3(0, 0, 0), 10000, 10, 60);
         renderingPanel.setCamera(cam);
-        renderingPanel.addMesh(car.getMesh());
-        cam.setOrbitControls(renderingPanel, car, 1000, 10);
+        renderingPanel.addMesh(cat.getMesh());
+        cam.setOrbitControls(renderingPanel, cat, 1000, 10);
         //cam.setFreeControls(renderingPanel, 200, 10);
         renderingPanel.setLighting(new Lighting(new Vector3(0, -1, 0), 70, 30));
         renderingPanel.setFog(1000, 3000, new Color(190, 210, 245));
