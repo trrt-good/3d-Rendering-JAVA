@@ -11,20 +11,28 @@ public class GraphicsManager
     public static int defaultWidth = 1600;
     public static int defaultHeight = 900;
 
-    public static GameObject gameObject1;
-    public static GameObject gameObject2;
+    public static GameObject car;
+    public static GameObject jet;
     public static GameObject sphere;
+    public static GameObject cat;
 
     public static void startGraphics(String name)
     {
-        // gameObject1 = new GameObject
+        car = new GameObject
+        (
+            "cat", 
+            new Mesh("cat.obj", null, new Vector3(0, 0, 0), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 10, new Color(100, 100, 100), true, true), 
+            new Transform(new Vector3())
+        );
+
+        // car = new GameObject
         // (
         //     "car", 
         //     new Mesh("car.obj", "carTexture.png", new Vector3(0, 0, 0), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 10, new Color(100, 100, 100), true, true), 
         //     new Transform(new Vector3())
         // );
 
-        // gameObject2 = new GameObject
+        // jet = new GameObject
         // (
         //     "High Poly Jet",
         //     new Mesh("jet.obj", null, new Vector3(), new EulerAngle(0, 0, 0), 100, new Color(100, 100, 100), true, true), 
@@ -54,9 +62,9 @@ public class GraphicsManager
 
         Camera cam = new Camera(new Vector3(0, 0, 0), 10000, 10, 60);
         renderingPanel.setCamera(cam);
-        renderingPanel.addMesh(sphere.getMesh());
-        cam.setOrbitControls(renderingPanel, sphere, 1000, 10);
-        //cam.setFreeControls(renderingPanel, 200, 10);
+        renderingPanel.addMesh(cat.getMesh());
+        //cam.setOrbitControls(renderingPanel, sphere, 1000, 10);
+        cam.setFreeControls(renderingPanel, 100, 10);
         renderingPanel.setLighting(new Lighting(new Vector3(0, -1, 0), 70, 30));
         renderingPanel.setFog(1000, 3000, new Color(190, 210, 245));
         

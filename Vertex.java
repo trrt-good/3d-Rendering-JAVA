@@ -13,6 +13,11 @@ public class Vertex
         worldCoordinate = coordinate3d;
     }
 
+    public Vertex(Vector3 coordinate3d, Vector3 normal)
+    {
+        worldCoordinate = coordinate3d;
+    }
+
     public void setScreenCoordinate(Vector2 screenCoord)
     {
         screenCoordinate = screenCoord;
@@ -26,6 +31,11 @@ public class Vertex
     public void setWorldCoordinate(Vector3 worldCoord)
     {
         worldCoordinate = worldCoord;
+    }
+
+    public void setVertexNormal(Vector3 vertexNormal)
+    {
+        normal = vertexNormal;
     }
 
     public Vector3 getWordCoords()
@@ -42,4 +52,10 @@ public class Vertex
     {
         return distanceToCamera;
     }
+
+    public Vector3 getNormal()
+    {
+        return normal;
+    }
+
 }
