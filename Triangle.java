@@ -2,10 +2,15 @@ import java.awt.Color;
 public class Triangle 
 {
     //3d verticies of the triangle. 
-    public Vertex vertex1;
-    public Vertex vertex2;
-    public Vertex vertex3;
+    public Vector3 vertex1;
+    public Vector3 vertex2;
+    public Vector3 vertex3;
 
+    //textureCoords of the triangle. 
+    public Vector2 textureCoord1;
+    public Vector2 textureCoord2;
+    public Vector2 textureCoord3;
+    
     //the default color of the triangle before lighting
     private Color color;
 
@@ -15,16 +20,16 @@ public class Triangle
     //the color of the triangle with lighting calculations. 
     private Color colorWithLighting;
 
-    public Triangle(Mesh parentMeshIn, Vertex v1, Vertex v2, Vertex v3)
+    public Triangle(Mesh parentMeshIn, Vector3 v1, Vector3 v2, Vector3 v3)
     {
         vertex1 = v1;
         vertex2 = v2;
         vertex3 = v3;
-        color = Color.BLACK;
+        color = Color.MAGENTA;
         parentMesh = parentMeshIn;
     }
 
-    public Triangle(Mesh parentMeshIn, Vertex v1, Vertex v2, Vertex v3, Color colorIn)
+    public Triangle(Mesh parentMeshIn, Vector3 v1, Vector3 v2, Vector3 v3, Color colorIn)
     {
         vertex1 = v1;
         vertex2 = v2;
@@ -33,6 +38,17 @@ public class Triangle
         parentMesh = parentMeshIn;
     }
 
+    public Triangle(Mesh parentMeshIn, Vector3 v1, Vector3 v2, Vector3 v3, Vector2 t1, Vector2 t2, Vector2 t3)
+    {
+        vertex1 = v1;
+        vertex2 = v2;
+        vertex3 = v3;
+        textureCoord1 = t1;
+        textureCoord2 = t2;
+        textureCoord3 = t3;
+        parentMesh = parentMeshIn;
+        color = calculateTextureColor();
+    }
     public Mesh getMesh()
     {
         return parentMesh;
@@ -40,27 +56,17 @@ public class Triangle
 
     public Plane getPlane()
     {
-        return new Plane(vertex1.getWordCoords(), vertex2.getWordCoords(), vertex3.getWordCoords());
-    }
-
-    public boolean inView()
-    {
-        return vertex1.inView && vertex2.inView && vertex3.inView;
+        return new Plane(vertex1, vertex2, vertex3);
     }
 
     public Vector3 getCenter()
     {
         return new Vector3
         (
-            (vertex1.getWordCoords().x + vertex2.getWordCoords().x + vertex3.getWordCoords().x)/3, 
-            (vertex1.getWordCoords().y + vertex2.getWordCoords().y + vertex3.getWordCoords().y)/3,
-            (vertex1.getWordCoords().z + vertex2.getWordCoords().z + vertex3.getWordCoords().z)/3
+            (vertex1.x + vertex2.x + vertex3.x)/3, 
+            (vertex1.y + vertex2.y + vertex3.y)/3,
+            (vertex1.z + vertex2.z + vertex3.z)/3
         );
-    }
-
-    public double getDistanceToCam()
-    {
-        return (vertex1.getCamDistance() + vertex2.getCamDistance() + vertex3.getCamDistance())/3;
     }
 
     public void setBaseColor(Color colorIn)
@@ -84,7 +90,7 @@ public class Triangle
         int brightness = 0;
         int darkness = 0;
         //get the angle between the normal of the triangle face and the direction of the light. 
-        double angle = Vector3.getAngleBetween(lighting.lightDirection, Vector3.crossProduct(Vector3.subtract(vertex1.getWordCoords(), vertex2.getWordCoords()), Vector3.subtract(vertex2.getWordCoords(), vertex3.getWordCoords())));
+        double angle = Vector3.getAngleBetween(lighting.lightDirection, Vector3.crossProduct(Vector3.subtract(vertex1, vertex2), Vector3.subtract(vertex2, vertex3)));
 
         //determine brightness and darkness.
         if (angle > Math.PI/2)
@@ -103,5 +109,14 @@ public class Triangle
         blue = Math.max(0, Math.min(blue, 255));
 
         colorWithLighting = new Color(red, green, blue);
+    }
+
+    private Color calculateTextureColor()
+    {
+        double centerX = (textureCoord1.x + textureCoord2.x + textureCoord3.x)/3;
+        double centerY = (textureCoord1.y + textureCoord2.y + textureCoord3.y)/3;
+        int[] color = new int[4];
+        color = parentMesh.getTextureRaster().getPixel((int)(centerX*parentMesh.getTextureRaster().getWidth()), parentMesh.getTextureRaster().getHeight() - (int)(centerY*parentMesh.getTextureRaster().getHeight()), color);
+        return new Color(color[0], color[1], color[2]);
     }
 }

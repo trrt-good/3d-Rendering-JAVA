@@ -84,6 +84,13 @@ public class Vector3
         return new String(String.format("[%.2f, %.2f, %.2f]", x, y, z));
     }
 
+    public void set(Vector3 vector)
+    {
+        x = vector.x;
+        y = vector.y;
+        z = vector.z;
+    }
+
 //============================= static methods ===============================
 
     //returns the dot product of two vectors.
