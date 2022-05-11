@@ -87,6 +87,7 @@ public class Mesh
         for (int i = 0; i < vertices.size(); i ++)
         {
             vertices.get(i).setWorldCoordinate(Vector3.add(Vector3.applyMatrix(rotationMatrix, Vector3.subtract(triangles.get(i).vertex1.getWordCoords(), centerOfRotation)), centerOfRotation));
+            vertices.get(i).setVertexNormal(Vector3.applyMatrix(rotationMatrix, vertices.get(i).getNormal()));
         }
     }
 
@@ -201,9 +202,9 @@ public class Mesh
                 {
                     StringTokenizer lineTokens = new StringTokenizer(line);
                     lineTokens.nextToken();
-                    //create the vertex object
+                    //create the normal
                     Vector3 normalVector = new Vector3(Double.parseDouble(lineTokens.nextToken()), Double.parseDouble(lineTokens.nextToken()), Double.parseDouble(lineTokens.nextToken()));
-
+                    
                     //adds the normal to the array of normals
                     vertexNormals.add(normalVector);
                 }
@@ -224,6 +225,7 @@ public class Mesh
                     int tokenLength = lineTokens.countTokens();
                     int[] coordinateIndexes = new int[tokenLength];
                     int[] textureIndexes = new int[tokenLength]; 
+                    int[] normalIndexes = new int[tokenLength];
                     String[] tempArr;
 
                     Color color = baseColor;
@@ -233,17 +235,44 @@ public class Mesh
                         coordinateIndexes[i] = Integer.parseInt(tempArr[0])-1;
                         if (texture != null)
                         textureIndexes[i] = Integer.parseInt(tempArr[1])-1;
+                        if (tempArr.length < 2)
+                        normalIndexes[i] = Integer.parseInt(tempArr[2])-1;
                     }
                     
                     //create triangles based on the indicated verticies. However often verticies are not in sets of 3, so create multiple triangles if necessary.
                     for (int i = 0; i < coordinateIndexes.length - 2; i ++)
                     {
+                        Vertex vertex1 = null;
+                        Vertex vertex2 = null;
+                        Vertex vertex3 = null;
+                        
                         if (texture != null)
+                        {
                             color = calculateTriangleBaseColor(textureCoords.get(textureIndexes[0]), textureCoords.get(textureIndexes[i+1]), textureCoords.get(textureIndexes[i+2]));
-                        Vertex vertex1 = new Vertex(vertexCoords.get(coordinateIndexes[0]));
-                        Vertex vertex2 = new Vertex(vertexCoords.get(coordinateIndexes[i + 1]));
-                        Vertex vertex3 = new Vertex(vertexCoords.get(coordinateIndexes[i + 2]));
-
+                    
+                            vertex1 = new Vertex(vertexCoords.get(coordinateIndexes[0]), vertexNormals.get(normalIndexes[0]), textureCoords.get(textureIndexes[0]));
+                            vertex2 = new Vertex(vertexCoords.get(coordinateIndexes[i+1]), vertexNormals.get(normalIndexes[i+1]), textureCoords.get(textureIndexes[i+1]));
+                            vertex3 = new Vertex(vertexCoords.get(coordinateIndexes[i+2]), vertexNormals.get(normalIndexes[i+2]), textureCoords.get(textureIndexes[i+2]));
+                        }
+                        else
+                        {
+                            System.out.println(normalIndexes.length);
+                            System.out.println(vertexNormals.size());
+                            if (normalIndexes.length == 0 && vertexNormals.size() == 0)
+                            {
+                                Vector3 normal = Vector3.crossProduct(Vector3.subtract(vertexCoords.get(coordinateIndexes[i+1]), vertexCoords.get(coordinateIndexes[0])), Vector3.subtract(vertexCoords.get(coordinateIndexes[i+2]), vertexCoords.get(coordinateIndexes[0]))).getNormalized();
+                                vertex1 = new Vertex(vertexCoords.get(coordinateIndexes[0]), normal);
+                                vertex2 = new Vertex(vertexCoords.get(coordinateIndexes[i+1]), normal);
+                                vertex3 = new Vertex(vertexCoords.get(coordinateIndexes[i+2]), normal);
+                            }
+                            else
+                            {
+                                vertex1 = new Vertex(vertexCoords.get(coordinateIndexes[0]), vertexNormals.get(normalIndexes[0]));
+                                vertex2 = new Vertex(vertexCoords.get(coordinateIndexes[i+1]), vertexNormals.get(normalIndexes[i+1]));
+                                vertex3 = new Vertex(vertexCoords.get(coordinateIndexes[i+2]), vertexNormals.get(normalIndexes[i+2]));
+                            }
+                        }
+                        
                             //TODO: make vertex objects 
                         triangles.add(new Triangle(this, vertex1, vertex2, vertex3, color));
                     } 
