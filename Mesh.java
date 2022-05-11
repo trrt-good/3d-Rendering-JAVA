@@ -183,7 +183,6 @@ public class Mesh
         Matrix3x3 offsetRotationMatrix = Matrix3x3.eulerRotation(offsetOrientation);
         //vertices are temporarily stored before they are conbined into triangles and added into the main
         //triangle list.
-        ArrayList<Vector3> vertexCoords = new ArrayList<Vector3>();
         ArrayList<Vector2> textureCoords = new ArrayList<Vector2>();
         Scanner scanner;
         String line = "";
@@ -220,7 +219,7 @@ public class Mesh
                     vertexCoordinate = Vector3.multiply(vertexCoordinate, scale);
 
                     //adds the Vector3 to the array of vertices
-                    vertexCoords.add(vertexCoordinate);
+                    vertices.add(vertexCoordinate);
                 }
 
                 //vt means Vector3 texture coordinates.
@@ -254,16 +253,16 @@ public class Mesh
                     for (int i = 0; i < coordinateIndexes.length - 2; i ++)
                     {   
                         if (texture == null)
-                            triangles.add(new Triangle(this, vertexCoords.get(coordinateIndexes[0]), vertexCoords.get(coordinateIndexes[i+1]), vertexCoords.get(coordinateIndexes[i+2]), color));
+                            triangles.add(new Triangle(this, vertices.get(coordinateIndexes[0]), vertices.get(coordinateIndexes[i+1]), vertices.get(coordinateIndexes[i+2]), color));
                         else
                             triangles.add
                             (
                                 new Triangle
                                 (
                                     this, 
-                                    vertexCoords.get(coordinateIndexes[0]), 
-                                    vertexCoords.get(coordinateIndexes[i+1]), 
-                                    vertexCoords.get(coordinateIndexes[i+2]), 
+                                    vertices.get(coordinateIndexes[0]), 
+                                    vertices.get(coordinateIndexes[i+1]), 
+                                    vertices.get(coordinateIndexes[i+2]), 
                                     textureCoords.get(textureIndexes[0]),
                                     textureCoords.get(textureIndexes[i+1]),
                                     textureCoords.get(textureIndexes[i+2])
