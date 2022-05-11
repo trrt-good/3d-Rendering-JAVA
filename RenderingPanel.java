@@ -5,7 +5,7 @@ import org.junit.jupiter.params.shadow.com.univocity.parsers.conversions.Validat
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Vector;
+
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.Dimension;
@@ -253,16 +253,14 @@ public class RenderingPanel extends JPanel implements Runnable
         for (int i = 0; i < vertices.size(); i ++)
         {
             Vector3 worldPoint = new Vector3(vertices.get(i).getWordCoords());
-            Vector3 vertexNormal = new Vector3(vertices.get(i).getNormal());
             vertices.get(i).setCamDistance(Vector3.subtract(worldPoint, camPos).getMagnitude());
             double distanceToCam = vertices.get(i).getCamDistance();
-
             if 
             (
-                distanceToCam < camera.getFarClipDistancee() //is the point within the camera's render distance?
-                && distanceToCam > camera.getNearClipDistance() //is the point far enough from the camera?
+                distanceToCam < camera.getFarClipDistancee() //is the triangle within the camera's render distance?
+                && distanceToCam > camera.getNearClipDistance() //is the triangle far enough from the camera?
                 && Vector3.dotProduct(Vector3.subtract(worldPoint, camPos), camDirection) > 0 //is the triangle on the side that the camera is facing?
-                && (Vector3.dotProduct(vertexNormal, camDirection) < 0) //is the triangle facing away? 
+                && (Vector3.dotProduct(triangle.getPlane().normal, camDirection) < 0 || !triangle.getMesh().backFaceCulling()) //is the triangle facing away? 
             )
 
             
@@ -283,7 +281,7 @@ public class RenderingPanel extends JPanel implements Runnable
             distanceToTriangle < camera.getFarClipDistancee() //is the triangle within the camera's render distance?
             && distanceToTriangle > camera.getNearClipDistance() //is the triangle far enough from the camera?
             && Vector3.dotProduct(Vector3.subtract(triangleCenter, camPos), camDirection) > 0 //is the triangle on the side that the camera is facing?
-            && (Vector3.dotProduct(triangle.getPlane().normal, Vector3.subtract(triangleCenter, camPos)) < 0 || !triangle.getMesh().backFaceCulling()) //is the triangle facing away? 
+            && (Vector3.dotProduct(triangle.getPlane().normal, camDirection) < 0 || !triangle.getMesh().backFaceCulling()) //is the triangle facing away? 
         )
         {
             //create local variables: 
