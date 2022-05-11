@@ -345,6 +345,7 @@ public class RenderingPanel extends JPanel implements Runnable
     {
         Point tempPoint = new Point();
         int rgb = convertToIntRGB(triangleColor);
+        Vector3 barycentricCoords = new Vector3();
 
         //sorts the three points by height using a very simple bubble sort algorithm
         if (p1.getY() > p2.getY())
@@ -380,12 +381,13 @@ public class RenderingPanel extends JPanel implements Runnable
         //Top part of triangle: 
         if (p2.y-p1.y != 0 && p3.y-p1.y != 0)
         {
-            //conditionals to account for the cases where the slope of a line of the triangle is undefined vertical.
+            //conditionals to account for the cases where the slope of a line of the triangle is undefined/vertical.
             if (p2.x - p1.x == 0)
             {
                 edge1 = Math.max(0, Math.min(renderImage.getWidth(), p1.x));
                 for (yScanLine = p1.y; yScanLine < p2.y && yScanLine < renderImage.getHeight(); yScanLine ++)
                 {
+                    
                     if (yScanLine >= 0)
                     {
                         edge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-p1.y)/((double)(p3.y-p1.y)/(p3.x-p1.x)) + p1.x)));
