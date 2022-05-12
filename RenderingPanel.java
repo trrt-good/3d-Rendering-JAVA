@@ -1,3 +1,4 @@
+import javax.lang.model.util.ElementScanner6;
 import javax.swing.JPanel;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -392,6 +393,7 @@ public class RenderingPanel extends JPanel implements Runnable
         Vector3[] edge2Weights = new Vector3[Math.abs(p1.y-p3.y) + 1];
         Vector3[] edge3Weights = new Vector3[Math.abs(p2.y-p3.y) + 1];
 
+        //if edge 2 is on the right of edge 1 then it doesnt work. 
         for (double i = 0; i < edge1Weights.length; i++)
         {
             edge1Weights[(int)i] = new Vector3(1 - i/edge1Weights.length, i/edge1Weights.length, 0);
@@ -451,8 +453,10 @@ public class RenderingPanel extends JPanel implements Runnable
                         scanlineEdge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((relativeScanLine)/((double)(p2.y-p1.y)/(p2.x-p1.x)) + p1.x)));
                         scanlineEdge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((relativeScanLine)/((double)(p3.y-p1.y)/(p3.x-p1.x)) + p1.x)));
                         int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
-                        scanlineEdge1Weight = edge1Weights[relativeScanLine];
-                        scanlineEdge2Weight = edge2Weights[relativeScanLine];
+
+                        scanlineEdge2Weight = edge1Weights[relativeScanLine];
+                        scanlineEdge1Weight = edge2Weights[relativeScanLine];
+
 
                         for (int i = 0; i < pixelData.length; i ++)
                         {
@@ -510,12 +514,13 @@ public class RenderingPanel extends JPanel implements Runnable
                         scanlineEdge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-p3.y)/((double)(p3.y-p2.y)/(p3.x-p2.x)) + p3.x)));
                         scanlineEdge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-p3.y)/((double)(p3.y-p1.y)/(p3.x-p1.x)) + p3.x)));
                         int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
+
                         scanlineEdge2Weight = edge2Weights[relativeScanLine];
-                        scanlineEdge1Weight = edge3Weights[yScanLine-p2.y];
+                        scanlineEdge1Weight = edge3Weights[yScanLine-p2.y];    
 
                         for (int i = 0; i < pixelData.length; i ++)
                         {
-                            Vector3 barycentricCoord = Vector3.multiply(Vector3.add(Vector3.multiply(scanlineEdge1Weight, pixelData.length-i), Vector3.multiply(scanlineEdge2Weight, i)), 1.0/pixelData.length);
+                            Vector3 barycentricCoord = Vector3.multiply(Vector3.add(Vector3.multiply(scanlineEdge1Weight, i), Vector3.multiply(scanlineEdge2Weight, pixelData.length-i)), 1.0/pixelData.length);
                             pixelData[i] = convertToIntRGB(new Color((int)(barycentricCoord.x*255), (int)(barycentricCoord.y*255), (int)(barycentricCoord.z*255)));
                         }
 
