@@ -32,19 +32,19 @@ public class GraphicsManager
             new Transform(new Vector3())
         );
 
-        jet = new GameObject
-        (
-            "High Poly Jet",
-            new Mesh("jet.obj", new Color(100, 100, 100), new Vector3(), new EulerAngle(0, 0, 0), 100, true, true), 
-            new Transform(new Vector3())
-        );
+        // jet = new GameObject
+        // (
+        //     "High Poly Jet",
+        //     new Mesh("jet.obj", new Color(100, 100, 100), new Vector3(), new EulerAngle(0, 0, 0), 100, true, true), 
+        //     new Transform(new Vector3())
+        // );
 
-        sphere = new GameObject
-        (
-            "shere", 
-            new Mesh("sphere.obj", new Color(100, 100, 100), new Vector3(0, 0, 0), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 100, true, true), 
-            new Transform(new Vector3())
-        );
+        // sphere = new GameObject
+        // (
+        //     "shere", 
+        //     new Mesh("sphere.obj", new Color(100, 100, 100), new Vector3(0, 0, 0), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 100, true, true), 
+        //     new Transform(new Vector3())
+        // );
 
         System.out.println("Creating graphics... ");
         long start = System.nanoTime();

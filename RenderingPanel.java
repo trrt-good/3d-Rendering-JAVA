@@ -346,38 +346,42 @@ public class RenderingPanel extends JPanel implements Runnable
         Point tempPoint = new Point();
         int rgb = convertToIntRGB(triangleColor);
 
+        Point high = p1;
+        Point middle = p2;
+        Point low = p3;
+
         //-1 means p2 is on the left of line p1 -> p3
         // 1 means p2 is on the right of line p1 -> p3
         int type = 0;
 
         //sorts the three points by height using a very simple bubble sort algorithm
-        if (p1.getY() > p2.getY())
+        if (high.getY() > middle.getY())
         {
-            tempPoint = p1;
-            p1 = p2;
-            p2 = tempPoint;
+            tempPoint = high;
+            high = middle;
+            middle = tempPoint;
         }
-        if (p2.getY() > p3.getY())
+        if (middle.getY() > low.getY())
         {
-            tempPoint = p2;
-            p2 = p3;
-            p3 = tempPoint;
+            tempPoint = middle;
+            middle = low;
+            low = tempPoint;
         }
-        if (p1.getY() > p2.getY())
+        if (high.getY() > middle.getY())
         {
-            tempPoint = p1;
-            p1 = p2;
-            p2 = tempPoint;
+            tempPoint = high;
+            high = middle;
+            middle = tempPoint;
         }
-        if (p2.getY() > p3.getY())
+        if (middle.getY() > low.getY())
         {
-            tempPoint = p2;
-            p2 = p3;
-            p3 = tempPoint;
+            tempPoint = middle;
+            middle = low;
+            low = tempPoint;
         } 
 
 
-        type = ((p2.y/((double)(p3.y-p1.y)/(p3.x-p1.x)) + p1.x) < p2.x)? -1 : 1;
+        type = ((middle.y/((double)(low.y-high.y)/(low.x-high.x)) + high.x) < middle.x)? -1 : 1;
 
         //the y-level of the horizontal line being drawn
         int yScanLine;
@@ -408,33 +412,33 @@ public class RenderingPanel extends JPanel implements Runnable
         }
 
         //Top part of triangle: 
-        if (p2.y-p1.y != 0 && p3.y-p1.y != 0)
+        if (middle.y-high.y != 0 && low.y-high.y != 0)
         {
             //conditionals to account for the cases where the slope of a line of the triangle is undefined/vertical.
-            if (p2.x - p1.x == 0)
+            if (middle.x - high.x == 0)
             {
-                scanlineEdge1 = Math.max(0, Math.min(renderImage.getWidth(), p1.x));
-                for (yScanLine = p1.y; yScanLine < p2.y && yScanLine < renderImage.getHeight(); yScanLine ++)
+                scanlineEdge1 = Math.max(0, Math.min(renderImage.getWidth(), high.x));
+                for (yScanLine = high.y; yScanLine < middle.y && yScanLine < renderImage.getHeight(); yScanLine ++)
                 {
                     if (yScanLine >= 0)
                     {
-                        int relativeScanLine = yScanLine-p1.y;
-                        scanlineEdge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((relativeScanLine)/((double)(p3.y-p1.y)/(p3.x-p1.x)) + p1.x)));
+                        int relativeScanLine = yScanLine-high.y;
+                        scanlineEdge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((relativeScanLine)/((double)(low.y-high.y)/(low.x-high.x)) + high.x)));
                         int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
                         Arrays.fill(pixelData, rgb);
                         drawHorizontalLine(Math.min(scanlineEdge1, scanlineEdge2), Math.max(scanlineEdge1, scanlineEdge2), yScanLine, pixelData);                    
                     }
                 }
             }
-            else if (p3.x-p1.x == 0)
+            else if (low.x-high.x == 0)
             {
-                scanlineEdge2 = Math.max(0, Math.min(renderImage.getWidth(), p1.x));
-                for (yScanLine = p1.y; yScanLine < p2.y && yScanLine < renderImage.getHeight(); yScanLine ++)
+                scanlineEdge2 = Math.max(0, Math.min(renderImage.getWidth(), high.x));
+                for (yScanLine = high.y; yScanLine < middle.y && yScanLine < renderImage.getHeight(); yScanLine ++)
                 {
                     if (yScanLine >= 0)
                     {
-                        int relativeScanLine = yScanLine-p1.y;
-                        scanlineEdge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((relativeScanLine)/((double)(p2.y-p1.y)/(p2.x-p1.x)) + p1.x)));
+                        int relativeScanLine = yScanLine-high.y;
+                        scanlineEdge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((relativeScanLine)/((double)(middle.y-high.y)/(middle.x-high.x)) + high.x)));
                         int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
                         Arrays.fill(pixelData, rgb);
                         drawHorizontalLine(Math.min(scanlineEdge1, scanlineEdge2), Math.max(scanlineEdge1, scanlineEdge2), yScanLine, pixelData);                    
@@ -443,16 +447,34 @@ public class RenderingPanel extends JPanel implements Runnable
             }
             else
             {
-                for (yScanLine = p1.y; yScanLine < p2.y && yScanLine < renderImage.getHeight(); yScanLine ++)
+                for (yScanLine = high.y; yScanLine < middle.y && yScanLine < renderImage.getHeight(); yScanLine ++)
                 {
                     if (yScanLine >= 0)
                     {
-                        int relativeScanLine = yScanLine-p1.y;
-                        scanlineEdge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((relativeScanLine)/((double)(p2.y-p1.y)/(p2.x-p1.x)) + p1.x)));
-                        scanlineEdge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((relativeScanLine)/((double)(p3.y-p1.y)/(p3.x-p1.x)) + p1.x)));
+                        if (p1.y == high.y)
+                        {
+                            scanlineEdge1Weight = edge1Weights[yScanLine-p1.y];
+                            scanlineEdge2Weight = edge2Weights[yScanLine-p1.y];
+                        }
+                        else if (p2.y == high.y)
+                        {
+                            scanlineEdge1Weight = edge1Weights[edge1Weights.length-(yScanLine-p2.y)-1];
+                            scanlineEdge2Weight = edge3Weights[yScanLine-p2.y];
+                        }
+                        else if (p3.y == high.y)
+                        {
+                            scanlineEdge1Weight = edge2Weights[edge2Weights.length - (yScanLine-p3.y) -1];
+                            scanlineEdge2Weight = edge3Weights[edge3Weights.length - (yScanLine-p3.y) -1];                        
+                        }
+                        else
+                        {
+                            scanlineEdge1Weight = new Vector3();
+                            scanlineEdge2Weight = new Vector3();
+                        }
+
+                        scanlineEdge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-high.y)/((double)(middle.y-high.y)/(middle.x-high.x)) + high.x)));
+                        scanlineEdge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-high.y)/((double)(low.y-high.y)/(low.x-high.x)) + high.x)));
                         int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
-                        scanlineEdge1Weight = edge1Weights[relativeScanLine];
-                        scanlineEdge2Weight = edge2Weights[relativeScanLine];
 
                         for (int i = 0; i < pixelData.length; i ++)
                         {
@@ -467,33 +489,33 @@ public class RenderingPanel extends JPanel implements Runnable
         }
 
         //bottom part of triangle: 
-        if (p3.y-p2.y != 0 && p3.y-p1.y != 0)
+        if (low.y-middle.y != 0 && low.y-high.y != 0)
         {
             //conditionals to account for the cases where the slope of a line of the triangle is vertical.
-            if (p3.x-p2.x == 0)
+            if (low.x-middle.x == 0)
             {
-                scanlineEdge1 = Math.max(0, Math.min(renderImage.getWidth(), p2.x));
-                for (yScanLine = p2.y; yScanLine < p3.y && yScanLine < renderImage.getHeight(); yScanLine ++)
+                scanlineEdge1 = Math.max(0, Math.min(renderImage.getWidth(), middle.x));
+                for (yScanLine = middle.y; yScanLine < low.y && yScanLine < renderImage.getHeight(); yScanLine ++)
                 {
                     if (yScanLine >= 0)
                     {
-                        int relativeScanLine = yScanLine-p2.y;
-                        scanlineEdge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-p3.y)/((double)(p3.y-p1.y)/(p3.x-p1.x)) + p3.x)));
+                        int relativeScanLine = yScanLine-middle.y;
+                        scanlineEdge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-low.y)/((double)(low.y-high.y)/(low.x-high.x)) + low.x)));
                         int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
                         Arrays.fill(pixelData, rgb);
                         drawHorizontalLine(Math.min(scanlineEdge1, scanlineEdge2), Math.max(scanlineEdge1, scanlineEdge2), yScanLine, pixelData);                    
                     }
                 }
             }
-            else if (p3.x - p1.x == 0)
+            else if (low.x - high.x == 0)
             {
-                scanlineEdge2 = Math.max(0, Math.min(renderImage.getWidth(), p3.x));
-                for (yScanLine = p2.y; yScanLine < p3.y && yScanLine < renderImage.getHeight(); yScanLine ++)
+                scanlineEdge2 = Math.max(0, Math.min(renderImage.getWidth(), low.x));
+                for (yScanLine = middle.y; yScanLine < low.y && yScanLine < renderImage.getHeight(); yScanLine ++)
                 {
                     if (yScanLine >= 0)
                     {
-                        int relativeScanLine = yScanLine-p2.y;
-                        scanlineEdge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-p3.y)/((double)(p3.y-p2.y)/(p3.x-p2.x)) + p3.x)));
+                        int relativeScanLine = yScanLine-middle.y;
+                        scanlineEdge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-low.y)/((double)(low.y-middle.y)/(low.x-middle.x)) + low.x)));
                         int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
                         Arrays.fill(pixelData, rgb);
                         drawHorizontalLine(Math.min(scanlineEdge1, scanlineEdge2), Math.max(scanlineEdge1, scanlineEdge2), yScanLine, pixelData);                    
@@ -502,24 +524,31 @@ public class RenderingPanel extends JPanel implements Runnable
             }
             else
             {
-                for (yScanLine = p2.y; yScanLine < p3.y && yScanLine < renderImage.getHeight(); yScanLine ++)
+                for (yScanLine = middle.y; yScanLine < low.y && yScanLine < renderImage.getHeight(); yScanLine ++)
                 {
                     if (yScanLine >= 0)
                     {
-                        int relativeScanLine = yScanLine-p1.y;
-                        scanlineEdge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-p3.y)/((double)(p3.y-p2.y)/(p3.x-p2.x)) + p3.x)));
-                        scanlineEdge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-p3.y)/((double)(p3.y-p1.y)/(p3.x-p1.x)) + p3.x)));
-                        int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
-                        scanlineEdge2Weight = edge2Weights[relativeScanLine];
-                        scanlineEdge1Weight = edge3Weights[yScanLine-p2.y];
+                        int relativeScanLine = 0;
+                        int otherScanLine = 0;
 
-                        for (int i = 0; i < pixelData.length; i ++)
-                        {
-                            Vector3 barycentricCoord = Vector3.multiply(Vector3.add(Vector3.multiply(scanlineEdge1Weight, pixelData.length-i), Vector3.multiply(scanlineEdge2Weight, i)), 1.0/pixelData.length);
-                            pixelData[i] = convertToIntRGB(new Color((int)(barycentricCoord.x*255), (int)(barycentricCoord.y*255), (int)(barycentricCoord.z*255)));
-                        }
+                        // if (p1.y == high.y && p3.y == low.y)
+                        // {
+                        //     relativeScanLine = yScanLine-p1.y;
+                        //     otherScanLine = yScanLine-p2.y;
+                        // }
+                        // scanlineEdge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-low.y)/((double)(low.y-middle.y)/(low.x-middle.x)) + low.x)));
+                        // scanlineEdge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-low.y)/((double)(low.y-high.y)/(low.x-high.x)) + low.x)));
+                        // int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
+                        // scanlineEdge2Weight = edge2Weights[relativeScanLine];
+                        // scanlineEdge1Weight = edge3Weights[otherScanLine];
 
-                        drawHorizontalLine(Math.min(scanlineEdge1, scanlineEdge2), Math.max(scanlineEdge1, scanlineEdge2), yScanLine, pixelData);    
+                        // for (int i = 0; i < pixelData.length; i ++)
+                        // {
+                        //     Vector3 barycentricCoord = Vector3.multiply(Vector3.add(Vector3.multiply(scanlineEdge1Weight, pixelData.length-i), Vector3.multiply(scanlineEdge2Weight, i)), 1.0/pixelData.length);
+                        //     pixelData[i] = convertToIntRGB(new Color((int)(barycentricCoord.x*255), (int)(barycentricCoord.y*255), (int)(barycentricCoord.z*255)));
+                        // }
+
+                        // drawHorizontalLine(Math.min(scanlineEdge1, scanlineEdge2), Math.max(scanlineEdge1, scanlineEdge2), yScanLine, pixelData);    
                     }
                 }
             }
