@@ -417,20 +417,22 @@ public class RenderingPanel extends JPanel implements Runnable
         double[][] leftEdgeWeights = new double[low.y-high.y + 1][3];
         double[][] rightEdgeWeights = new double[low.y-high.y + 1][3];
 
-        //
-        if (type == 1)
+        
+        if (type == -1)
         {
-            for (double i = 0; i < leftEdgeWeights.length - (middle.y - high.y); i++)
+            int midLowDistance = leftEdgeWeights.length - (low.y - middle.y);
+            int topMidDistance = leftEdgeWeights.length - (middle.y-high.y)-1;
+            for (double i = 0; i < topMidDistance; i++)
             {
-                leftEdgeWeights[(int)i][highIndex] = 1 - i/leftEdgeWeights.length;
-                leftEdgeWeights[(int)i][middleIndex] = i/leftEdgeWeights.length;
+                leftEdgeWeights[(int)i][highIndex] = 1 - i/topMidDistance;
+                leftEdgeWeights[(int)i][middleIndex] = i/topMidDistance;
                 leftEdgeWeights[(int)i][lowIndex] = 0;
             }
-            for (double i = leftEdgeWeights.length - (middle.y - high.y); i < leftEdgeWeights.length; i++)
+            for (double i = 0; i < midLowDistance; i++)
             {
-                leftEdgeWeights[(int)i][highIndex] = 0;
-                leftEdgeWeights[(int)i][middleIndex] = 1 - i/leftEdgeWeights.length;
-                leftEdgeWeights[(int)i][lowIndex] = i/leftEdgeWeights.length;
+                leftEdgeWeights[(int)i + topMidDistance][highIndex] = 0;
+                leftEdgeWeights[(int)i + topMidDistance][middleIndex] = 1 - i/midLowDistance;
+                leftEdgeWeights[(int)i + topMidDistance][lowIndex] = i/midLowDistance;
             }
 
             for (double i = 0; i < rightEdgeWeights.length; i++)
@@ -442,6 +444,9 @@ public class RenderingPanel extends JPanel implements Runnable
         }
         else
         {
+            int midLowDistance = leftEdgeWeights.length - (low.y - middle.y);
+            int topMidDistance = leftEdgeWeights.length - (middle.y-high.y)-1;
+
             for (double i = 0; i < leftEdgeWeights.length; i++)
             {
                 leftEdgeWeights[(int)i][highIndex] = 1 - i/leftEdgeWeights.length;
@@ -449,22 +454,19 @@ public class RenderingPanel extends JPanel implements Runnable
                 leftEdgeWeights[(int)i][lowIndex] = i/leftEdgeWeights.length;
             }
 
-            for (double i = 0; i < rightEdgeWeights.length - (middle.y - high.y); i++)
+            for (double i = 0; i < topMidDistance; i++)
             {
-                rightEdgeWeights[(int)i][highIndex] = 1 - i/rightEdgeWeights.length;
-                rightEdgeWeights[(int)i][middleIndex] = i/rightEdgeWeights.length;
+                rightEdgeWeights[(int)i][highIndex] = 1 - i/topMidDistance;
+                rightEdgeWeights[(int)i][middleIndex] = i/topMidDistance;
                 rightEdgeWeights[(int)i][lowIndex] = 0;            
             }
-            for (double i = rightEdgeWeights.length - (middle.y - high.y); i < rightEdgeWeights.length; i++)
+            for (double i = 0; i < midLowDistance; i++)
             {
-                rightEdgeWeights[(int)i][highIndex] = 0;
-                rightEdgeWeights[(int)i][middleIndex] = 1 - i/rightEdgeWeights.length;
-                rightEdgeWeights[(int)i][lowIndex] = i/rightEdgeWeights.length;
+                rightEdgeWeights[(int)i + topMidDistance][highIndex] = 0;
+                rightEdgeWeights[(int)i + topMidDistance][middleIndex] = 1 - i/midLowDistance;
+                rightEdgeWeights[(int)i + topMidDistance][lowIndex] = i/midLowDistance;
             }
         }
-
-
-        
 
         //Top part of triangle: 
         if (middle.y-high.y != 0 && low.y-high.y != 0)
@@ -506,8 +508,8 @@ public class RenderingPanel extends JPanel implements Runnable
                 {
                     if (yScanLine >= 0)
                     {
-                        scanlineEdge2Weight = leftEdgeWeights[leftEdgeWeights.length-(yScanLine-high.y)-1];
-                        scanlineEdge1Weight = rightEdgeWeights[rightEdgeWeights.length-(yScanLine-high.y)-1];
+                        scanlineEdge1Weight = leftEdgeWeights[leftEdgeWeights.length-(yScanLine-high.y)-1];
+                        scanlineEdge2Weight = rightEdgeWeights[rightEdgeWeights.length-(yScanLine-high.y)-1];
 
                         scanlineEdge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-high.y)/((double)(middle.y-high.y)/(middle.x-high.x)) + high.x)));
                         scanlineEdge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-high.y)/((double)(low.y-high.y)/(low.x-high.x)) + high.x)));
