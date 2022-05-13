@@ -402,7 +402,11 @@ public class RenderingPanel extends JPanel implements Runnable
             lowIndex = tempIndex;
         } 
 
-        type = ((middle.y/((double)(low.y-high.y)/(low.x-high.x)) + high.x) < middle.x)? -1 : 1;
+        if (low.y-high.y != 0)
+        {
+            type = (((middle.y-high.y)*(low.x-high.x))/(low.y-high.y) + high.x > middle.x)? -1 : 1;
+        }
+        System.out.println(type);
 
         //the y-level of the horizontal line being drawn
         int yScanLine;
@@ -417,7 +421,6 @@ public class RenderingPanel extends JPanel implements Runnable
         double[][] leftEdgeWeights = new double[low.y-high.y + 1][3];
         double[][] rightEdgeWeights = new double[low.y-high.y + 1][3];
 
-        
         if (type == -1)
         {
             int midLowDistance = leftEdgeWeights.length - (low.y - middle.y);
@@ -449,22 +452,22 @@ public class RenderingPanel extends JPanel implements Runnable
 
             for (double i = 0; i < leftEdgeWeights.length; i++)
             {
-                leftEdgeWeights[(int)i][highIndex] = 1 - i/leftEdgeWeights.length;
-                leftEdgeWeights[(int)i][middleIndex] = 0;
-                leftEdgeWeights[(int)i][lowIndex] = i/leftEdgeWeights.length;
+                leftEdgeWeights[(int)i][middleIndex] = 1 - i/leftEdgeWeights.length;
+                leftEdgeWeights[(int)i][lowIndex] = 0;
+                leftEdgeWeights[(int)i][highIndex] = i/leftEdgeWeights.length;
             }
 
             for (double i = 0; i < topMidDistance; i++)
             {
-                rightEdgeWeights[(int)i][highIndex] = 1 - i/topMidDistance;
-                rightEdgeWeights[(int)i][middleIndex] = i/topMidDistance;
-                rightEdgeWeights[(int)i][lowIndex] = 0;            
+                rightEdgeWeights[(int)i][middleIndex] = 1 - i/topMidDistance;
+                rightEdgeWeights[(int)i][lowIndex] = i/topMidDistance;
+                rightEdgeWeights[(int)i][highIndex] = 0;            
             }
             for (double i = 0; i < midLowDistance; i++)
             {
-                rightEdgeWeights[(int)i + topMidDistance][highIndex] = 0;
-                rightEdgeWeights[(int)i + topMidDistance][middleIndex] = 1 - i/midLowDistance;
-                rightEdgeWeights[(int)i + topMidDistance][lowIndex] = i/midLowDistance;
+                rightEdgeWeights[(int)i + topMidDistance][middleIndex] = 0;
+                rightEdgeWeights[(int)i + topMidDistance][lowIndex] = 1 - i/midLowDistance;
+                rightEdgeWeights[(int)i + topMidDistance][highIndex] = i/midLowDistance;
             }
         }
 
