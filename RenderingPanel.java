@@ -345,11 +345,16 @@ public class RenderingPanel extends JPanel implements Runnable
     private void paintTriangle(Point p1, Point p2, Point p3, Color triangleColor)
     {
         Point tempPoint = new Point();
+        int tempIndex = 0;
         int rgb = convertToIntRGB(triangleColor);
 
         Point high = p1;
         Point middle = p2;
         Point low = p3;
+
+        int highIndex = 0;
+        int middleIndex = 1;
+        int lowIndex = 2;        
 
         //-1 means p2 is on the left of line p1 -> p3
         // 1 means p2 is on the right of line p1 -> p3
@@ -361,26 +366,41 @@ public class RenderingPanel extends JPanel implements Runnable
             tempPoint = high;
             high = middle;
             middle = tempPoint;
+
+            tempIndex = highIndex;
+            highIndex = middleIndex;
+            middleIndex = tempIndex;
         }
         if (middle.getY() > low.getY())
         {
             tempPoint = middle;
             middle = low;
             low = tempPoint;
+
+            tempIndex = middleIndex;
+            middleIndex = lowIndex;
+            lowIndex = tempIndex;
         }
         if (high.getY() > middle.getY())
         {
             tempPoint = high;
             high = middle;
             middle = tempPoint;
+
+            tempIndex = highIndex;
+            highIndex = middleIndex;
+            middleIndex = tempIndex;
         }
         if (middle.getY() > low.getY())
         {
             tempPoint = middle;
             middle = low;
             low = tempPoint;
-        } 
 
+            tempIndex = middleIndex;
+            middleIndex = lowIndex;
+            lowIndex = tempIndex;
+        } 
 
         type = ((middle.y/((double)(low.y-high.y)/(low.x-high.x)) + high.x) < middle.x)? -1 : 1;
 
@@ -389,29 +409,62 @@ public class RenderingPanel extends JPanel implements Runnable
         //the left or right bounds of the line being drawn
         int scanlineEdge1, scanlineEdge2;
 
-        Vector3 scanlineEdge1Weight;
-        Vector3 scanlineEdge2Weight;
+        double[] scanlineEdge1Weight;
+        double[] scanlineEdge2Weight;
 
         //x in the vector represents p1 weight, y is p2 weight, z is p3 weight
-        Vector3[] edge1Weights = new Vector3[Math.abs(p1.y-p2.y) + 1];
-        Vector3[] edge2Weights = new Vector3[Math.abs(p1.y-p3.y) + 1];
-        Vector3[] edge3Weights = new Vector3[Math.abs(p2.y-p3.y) + 1];
 
-        //if edge 2 is on the right of edge 1 then it doesnt work. 
-        for (double i = 0; i < edge1Weights.length; i++)
+        double[][] leftEdgeWeights = new double[low.y-high.y + 1][3];
+        double[][] rightEdgeWeights = new double[low.y-high.y + 1][3];
+
+        //
+        if (type == 1)
         {
-            edge1Weights[(int)i] = new Vector3(1 - i/edge1Weights.length, i/edge1Weights.length, 0);
+            for (double i = 0; i < leftEdgeWeights.length - (middle.y - high.y); i++)
+            {
+                leftEdgeWeights[(int)i][highIndex] = 1 - i/leftEdgeWeights.length;
+                leftEdgeWeights[(int)i][middleIndex] = i/leftEdgeWeights.length;
+                leftEdgeWeights[(int)i][lowIndex] = 0;
+            }
+            for (double i = leftEdgeWeights.length - (middle.y - high.y); i < leftEdgeWeights.length; i++)
+            {
+                leftEdgeWeights[(int)i][highIndex] = 0;
+                leftEdgeWeights[(int)i][middleIndex] = 1 - i/leftEdgeWeights.length;
+                leftEdgeWeights[(int)i][lowIndex] = i/leftEdgeWeights.length;
+            }
+
+            for (double i = 0; i < rightEdgeWeights.length; i++)
+            {
+                rightEdgeWeights[(int)i][highIndex] = 1 - i/rightEdgeWeights.length;
+                rightEdgeWeights[(int)i][middleIndex] = 0;
+                rightEdgeWeights[(int)i][lowIndex] = i/rightEdgeWeights.length;
+            }
+        }
+        else
+        {
+            for (double i = 0; i < leftEdgeWeights.length; i++)
+            {
+                leftEdgeWeights[(int)i][highIndex] = 1 - i/leftEdgeWeights.length;
+                leftEdgeWeights[(int)i][middleIndex] = 0;
+                leftEdgeWeights[(int)i][lowIndex] = i/leftEdgeWeights.length;
+            }
+
+            for (double i = 0; i < rightEdgeWeights.length - (middle.y - high.y); i++)
+            {
+                rightEdgeWeights[(int)i][highIndex] = 1 - i/rightEdgeWeights.length;
+                rightEdgeWeights[(int)i][middleIndex] = i/rightEdgeWeights.length;
+                rightEdgeWeights[(int)i][lowIndex] = 0;            
+            }
+            for (double i = rightEdgeWeights.length - (middle.y - high.y); i < rightEdgeWeights.length; i++)
+            {
+                rightEdgeWeights[(int)i][highIndex] = 0;
+                rightEdgeWeights[(int)i][middleIndex] = 1 - i/rightEdgeWeights.length;
+                rightEdgeWeights[(int)i][lowIndex] = i/rightEdgeWeights.length;
+            }
         }
 
-        for (double i = 0; i < edge2Weights.length; i++)
-        {
-            edge2Weights[(int)i] = new Vector3(1 - i/edge2Weights.length, 0, i/edge2Weights.length);
-        }
 
-        for (double i = 0; i < edge3Weights.length; i++)
-        {
-            edge3Weights[(int)i] = new Vector3(0, 1 - i/edge3Weights.length, i/edge3Weights.length);
-        }
+        
 
         //Top part of triangle: 
         if (middle.y-high.y != 0 && low.y-high.y != 0)
@@ -453,26 +506,8 @@ public class RenderingPanel extends JPanel implements Runnable
                 {
                     if (yScanLine >= 0)
                     {
-                        if (p1.y == high.y)
-                        {
-                            scanlineEdge1Weight = edge1Weights[yScanLine-p1.y];
-                            scanlineEdge2Weight = edge2Weights[yScanLine-p1.y];
-                        }
-                        else if (p2.y == high.y)
-                        {
-                            scanlineEdge1Weight = edge1Weights[edge1Weights.length-(yScanLine-p2.y)-1];
-                            scanlineEdge2Weight = edge3Weights[yScanLine-p2.y];
-                        }
-                        else if (p3.y == high.y)
-                        {
-                            scanlineEdge1Weight = edge2Weights[edge2Weights.length - (yScanLine-p3.y) -1];
-                            scanlineEdge2Weight = edge3Weights[edge3Weights.length - (yScanLine-p3.y) -1];                        
-                        }
-                        else
-                        {
-                            scanlineEdge1Weight = new Vector3();
-                            scanlineEdge2Weight = new Vector3();
-                        }
+                        scanlineEdge2Weight = leftEdgeWeights[leftEdgeWeights.length-(yScanLine-high.y)-1];
+                        scanlineEdge1Weight = rightEdgeWeights[rightEdgeWeights.length-(yScanLine-high.y)-1];
 
                         scanlineEdge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-high.y)/((double)(middle.y-high.y)/(middle.x-high.x)) + high.x)));
                         scanlineEdge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-high.y)/((double)(low.y-high.y)/(low.x-high.x)) + high.x)));
@@ -480,8 +515,13 @@ public class RenderingPanel extends JPanel implements Runnable
 
                         for (int i = 0; i < pixelData.length; i ++)
                         {
-                            Vector3 barycentricCoord = Vector3.multiply(Vector3.add(Vector3.multiply(scanlineEdge1Weight, pixelData.length-i), Vector3.multiply(scanlineEdge2Weight, i)), 1.0/pixelData.length);
-                            pixelData[i] = convertToIntRGB(new Color((int)(barycentricCoord.x*255), (int)(barycentricCoord.y*255), (int)(barycentricCoord.z*255)));
+                            double[] barycentricCoord = new double[]
+                            {
+                                (scanlineEdge1Weight[0]*(pixelData.length-i) + scanlineEdge2Weight[0]*i)/pixelData.length,
+                                (scanlineEdge1Weight[1]*(pixelData.length-i) + scanlineEdge2Weight[1]*i)/pixelData.length,
+                                (scanlineEdge1Weight[2]*(pixelData.length-i) + scanlineEdge2Weight[2]*i)/pixelData.length,                                
+                            };
+                            pixelData[i] = convertToIntRGB(new Color((int)(barycentricCoord[0]*255), (int)(barycentricCoord[1]*255), (int)(barycentricCoord[2]*255)));
                         }
 
                         drawHorizontalLine(Math.min(scanlineEdge1, scanlineEdge2), Math.max(scanlineEdge1, scanlineEdge2), yScanLine, pixelData);    
@@ -530,27 +570,25 @@ public class RenderingPanel extends JPanel implements Runnable
                 {
                     if (yScanLine >= 0)
                     {
-                        int relativeScanLine = 0;
-                        int otherScanLine = 0;
+                        scanlineEdge1Weight = leftEdgeWeights[leftEdgeWeights.length-(yScanLine-high.y)-1];
+                        scanlineEdge2Weight = rightEdgeWeights[rightEdgeWeights.length-(yScanLine-high.y)-1];
 
-                        // if (p1.y == high.y && p3.y == low.y)
-                        // {
-                        //     relativeScanLine = yScanLine-p1.y;
-                        //     otherScanLine = yScanLine-p2.y;
-                        // }
-                        // scanlineEdge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-low.y)/((double)(low.y-middle.y)/(low.x-middle.x)) + low.x)));
-                        // scanlineEdge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-low.y)/((double)(low.y-high.y)/(low.x-high.x)) + low.x)));
-                        // int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
-                        // scanlineEdge2Weight = edge2Weights[relativeScanLine];
-                        // scanlineEdge1Weight = edge3Weights[otherScanLine];
+                        scanlineEdge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-low.y)/((double)(low.y-middle.y)/(low.x-middle.x)) + low.x)));
+                        scanlineEdge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-low.y)/((double)(low.y-high.y)/(low.x-high.x)) + low.x)));
+                        int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
 
-                        // for (int i = 0; i < pixelData.length; i ++)
-                        // {
-                        //     Vector3 barycentricCoord = Vector3.multiply(Vector3.add(Vector3.multiply(scanlineEdge1Weight, pixelData.length-i), Vector3.multiply(scanlineEdge2Weight, i)), 1.0/pixelData.length);
-                        //     pixelData[i] = convertToIntRGB(new Color((int)(barycentricCoord.x*255), (int)(barycentricCoord.y*255), (int)(barycentricCoord.z*255)));
-                        // }
+                        for (int i = 0; i < pixelData.length; i ++)
+                        {
+                            double[] barycentricCoord = new double[]
+                            {
+                                (scanlineEdge1Weight[0]*(pixelData.length-i) + scanlineEdge2Weight[0]*i)/pixelData.length,
+                                (scanlineEdge1Weight[1]*(pixelData.length-i) + scanlineEdge2Weight[1]*i)/pixelData.length,
+                                (scanlineEdge1Weight[2]*(pixelData.length-i) + scanlineEdge2Weight[2]*i)/pixelData.length,                                
+                            };
+                            pixelData[i] = convertToIntRGB(new Color((int)(barycentricCoord[0]*255), (int)(barycentricCoord[1]*255), (int)(barycentricCoord[2]*255)));
+                        }
 
-                        // drawHorizontalLine(Math.min(scanlineEdge1, scanlineEdge2), Math.max(scanlineEdge1, scanlineEdge2), yScanLine, pixelData);    
+                        drawHorizontalLine(Math.min(scanlineEdge1, scanlineEdge2), Math.max(scanlineEdge1, scanlineEdge2), yScanLine, pixelData);    
                     }
                 }
             }
