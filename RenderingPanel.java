@@ -470,9 +470,6 @@ public class RenderingPanel extends JPanel implements Runnable
             }
         }
 
-        System.out.println(highIndex + " " + middleIndex + " " + lowIndex);
-        System.out.println(type);
-
         //Top part of triangle: 
         if (middle.y-high.y != 0 && low.y-high.y != 0)
         {

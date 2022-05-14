@@ -70,8 +70,8 @@ public class GraphicsManager
 
         Camera cam = new Camera(new Vector3(0, 0, 0), 10000, 10, 60);
         renderingPanel.setCamera(cam);
-        renderingPanel.addMesh(triangleTest.getMesh());
-        cam.setOrbitControls(renderingPanel, triangleTest, 1000, 10);
+        renderingPanel.addMesh(cat.getMesh());
+        cam.setOrbitControls(renderingPanel, cat, 1000, 10);
         //cam.setFreeControls(renderingPanel, 200, 10);
         renderingPanel.setLighting(new Lighting(new Vector3(0, -1, 0), 70, 30));
         renderingPanel.setFog(1000, 3000, new Color(190, 210, 245));
