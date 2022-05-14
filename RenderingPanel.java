@@ -406,7 +406,6 @@ public class RenderingPanel extends JPanel implements Runnable
         {
             type = (((middle.y-high.y)*(low.x-high.x))/(low.y-high.y) + high.x > middle.x)? -1 : 1;
         }
-        System.out.println(type);
 
         //the y-level of the horizontal line being drawn
         int yScanLine;
@@ -452,24 +451,27 @@ public class RenderingPanel extends JPanel implements Runnable
 
             for (double i = 0; i < leftEdgeWeights.length; i++)
             {
-                leftEdgeWeights[(int)i][middleIndex] = 1 - i/leftEdgeWeights.length;
-                leftEdgeWeights[(int)i][lowIndex] = 0;
-                leftEdgeWeights[(int)i][highIndex] = i/leftEdgeWeights.length;
+                leftEdgeWeights[(int)i][lowIndex] = 1 - i/leftEdgeWeights.length;
+                leftEdgeWeights[(int)i][highIndex] = 0;
+                leftEdgeWeights[(int)i][middleIndex] = i/leftEdgeWeights.length;
             }
 
             for (double i = 0; i < topMidDistance; i++)
             {
-                rightEdgeWeights[(int)i][middleIndex] = 1 - i/topMidDistance;
-                rightEdgeWeights[(int)i][lowIndex] = i/topMidDistance;
-                rightEdgeWeights[(int)i][highIndex] = 0;            
+                rightEdgeWeights[(int)i][lowIndex] = 1 - i/topMidDistance;
+                rightEdgeWeights[(int)i][highIndex] = i/topMidDistance;
+                rightEdgeWeights[(int)i][middleIndex] = 0;
             }
             for (double i = 0; i < midLowDistance; i++)
             {
-                rightEdgeWeights[(int)i + topMidDistance][middleIndex] = 0;
-                rightEdgeWeights[(int)i + topMidDistance][lowIndex] = 1 - i/midLowDistance;
-                rightEdgeWeights[(int)i + topMidDistance][highIndex] = i/midLowDistance;
+                rightEdgeWeights[(int)i + topMidDistance][lowIndex] = 0;
+                rightEdgeWeights[(int)i + topMidDistance][highIndex] = 1 - i/midLowDistance;
+                rightEdgeWeights[(int)i + topMidDistance][middleIndex] = i/midLowDistance;
             }
         }
+
+        System.out.println(highIndex + " " + middleIndex + " " + lowIndex);
+        System.out.println(type);
 
         //Top part of triangle: 
         if (middle.y-high.y != 0 && low.y-high.y != 0)
