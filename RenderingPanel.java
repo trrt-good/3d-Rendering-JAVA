@@ -246,88 +246,152 @@ public class RenderingPanel extends JPanel implements Runnable
     {
         Vector3 triangleCenter = triangle.getCenter();
         double distanceToTriangle = Vector3.subtract(triangleCenter, camPos).getMagnitude();  
-        if 
-        (
-            distanceToTriangle < camera.getFarClipDistancee() //is the triangle within the camera's render distance?
-            && distanceToTriangle > camera.getNearClipDistance() //is the triangle far enough from the camera?
-            && Vector3.dotProduct(Vector3.subtract(triangleCenter, camPos), camDirection) > 0 //is the triangle on the side that the camera is facing?
-            && (Vector3.dotProduct(triangle.getPlane().normal, camDirection) < 0 || !triangle.getMesh().backFaceCulling()) //is the triangle facing away? 
-        )
+
+        if (Vector3.dotProduct(triangle.getPlane().normal, Vector3.subtract(triangleCenter, camPos).getNormalized()) > 0 && Vector3.dotProduct(Vector3.subtract(triangleCenter, camPos), camDirection) <= 0 && distanceToTriangle >= camera.getFarClipDistancee())
+            return;
+        
+        Vector3 triangleVertex1 = new Vector3(triangle.vertex1);
+        Vector3 triangleVertex2 = new Vector3(triangle.vertex2);
+        Vector3 triangleVertex3 = new Vector3(triangle.vertex3);
+
+        // if (distanceToTriangle < camera.getNearClipDistance()*1.2)
+        // {
+        //     Plane nearClipPlane = new Plane(Vector3.add(camPos, Vector3.multiply(camDirection, camera.getNearClipDistance())), camDirection);
+        //     boolean v1TooClose = false;
+        //     boolean v2TooClose = false;
+        //     boolean v3TooClose = false;
+    
+        //     if (Vector3.dotProduct(nearClipPlane.normal, Vector3.subtract(triangleVertex1, nearClipPlane.pointOnPlane)) < 0)
+        //         v1TooClose = true;
+        //     if (Vector3.dotProduct(nearClipPlane.normal, Vector3.subtract(triangleVertex2, nearClipPlane.pointOnPlane)) < 0)
+        //         v2TooClose = true;
+        //     if (Vector3.dotProduct(nearClipPlane.normal, Vector3.subtract(triangleVertex3, nearClipPlane.pointOnPlane)) < 0)
+        //         v3TooClose = true;
+    
+        //     if (v1TooClose && v2TooClose && v3TooClose)
+        //         return;
+    
+        //     clipping: 
+        //     {
+        //         if (v1TooClose)
+        //         {
+        //             if (v2TooClose)
+        //             {
+        //                 triangleVertex1 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex1, triangleVertex3), triangleVertex3, nearClipPlane);
+        //                 triangleVertex2 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex2, triangleVertex3), triangleVertex3, nearClipPlane);
+                        
+        //                 break clipping;
+        //             }
+        //             else if (v3TooClose)
+        //             {
+        //                 triangleVertex1 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex1, triangleVertex2), triangleVertex2, nearClipPlane);
+        //                 triangleVertex3 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex3, triangleVertex2), triangleVertex2, nearClipPlane);
+        //                 break clipping;
+        //             }
+        //             else 
+        //             {
+        //                 Vector3 tempV = triangleVertex1;
+        //                 triangleVertex1 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex1, triangleVertex2), triangleVertex2, nearClipPlane);
+        //                 Triangle newTriangle = new Triangle(triangle.getMesh(), triangleVertex1, triangleVertex3, Vector3.getIntersectionPoint(Vector3.subtract(tempV, triangleVertex3), triangleVertex3, nearClipPlane), triangle.getColorWithLighting());
+        //                 calculateTriangle(newTriangle);
+        //                 break clipping;
+        //             }
+        //         }
+        //         else if (v2TooClose)
+        //         {
+        //             if (v3TooClose)
+        //             {
+        //                 triangleVertex2 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex2, triangleVertex1), triangleVertex1, nearClipPlane);
+        //                 triangleVertex3 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex3, triangleVertex1), triangleVertex1, nearClipPlane);
+        //                 break clipping;
+        //             }
+        //             else 
+        //             {
+        //                 Vector3 tempV = triangleVertex2;
+        //                 triangleVertex2 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex2, triangleVertex1), triangleVertex1, nearClipPlane);
+        //                 Triangle newTriangle = new Triangle(triangle.getMesh(), triangleVertex3, triangleVertex2, Vector3.getIntersectionPoint(Vector3.subtract(tempV, triangleVertex3), triangleVertex3, nearClipPlane), triangle.getColorWithLighting());
+        //                 calculateTriangle(newTriangle);
+        //                 break clipping;
+        //             }
+        //         }
+        //         if (v3TooClose)
+        //         {
+        //             Vector3 tempV = new Vector3(triangleVertex3);
+        //             triangleVertex3 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex3, triangleVertex2), triangleVertex2, nearClipPlane);
+        //             Triangle newTriangle = new Triangle(triangle.getMesh(), triangleVertex3, triangleVertex1, Vector3.getIntersectionPoint(Vector3.subtract(tempV, triangleVertex1), triangleVertex1, nearClipPlane), triangle.getColorWithLighting());
+        //             calculateTriangle(newTriangle);
+        //         }
+        //     }
+        // }
+        //create local variables: 
+
+        //the screen coords of the triangle, to be determined by the rest of the method.
+        Point p1ScreenCoords = new Point();
+        Point p2ScreenCoords = new Point();
+        Point p3ScreenCoords = new Point();
+        //boolean default false, but set true if just one of the verticies is within the camera's fov. 
+        boolean shouldDrawTriangle = false;
+
+        triangleVertex1 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex1, camPos), camPos, renderPlane);
+        Vector3 camCenterPoint = Vector3.getIntersectionPoint(camDirection, camPos, renderPlane);
+        Vector3 rotatedPoint = Vector3.applyMatrix(pointRotationMatrix, Vector3.subtract(triangleVertex1, camCenterPoint));
+        if ((Math.abs(rotatedPoint.x) < renderPlaneWidth/2*1.2 && Math.abs(rotatedPoint.y) < renderPlaneWidth*((double)getHeight()/(double)getWidth())/2*1.2))
+            shouldDrawTriangle = true;
+        p1ScreenCoords.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
+        p1ScreenCoords.y = (int)(getHeight()/2 - rotatedPoint.y*pixelsPerUnit);
+
+        triangleVertex2 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex2, camPos), camPos, renderPlane);
+        rotatedPoint = Vector3.applyMatrix(pointRotationMatrix, Vector3.subtract(triangleVertex2, camCenterPoint));
+        if ((Math.abs(rotatedPoint.x) < renderPlaneWidth/2*1.2 && Math.abs(rotatedPoint.y) < renderPlaneWidth*((double)getHeight()/getWidth())/2*1.2))
+            shouldDrawTriangle = true;
+        p2ScreenCoords.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
+        p2ScreenCoords.y = (int)(getHeight()/2 - rotatedPoint.y*pixelsPerUnit);
+
+        triangleVertex3 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex3, camPos), camPos, renderPlane);
+        rotatedPoint = Vector3.applyMatrix(pointRotationMatrix, Vector3.subtract(triangleVertex3, camCenterPoint));
+        if ((Math.abs(rotatedPoint.x) < renderPlaneWidth/2*1.2 && Math.abs(rotatedPoint.y) < renderPlaneWidth*((double)getHeight()/getWidth())/2*1.2))
+            shouldDrawTriangle = true;
+        p3ScreenCoords.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
+        p3ScreenCoords.y = (int)(getHeight()/2 - rotatedPoint.y*pixelsPerUnit);
+
+        if (shouldDrawTriangle)
         {
-            //create local variables: 
-
-            //the screen coords of the triangle, to be determined by the rest of the method.
-            Point p1ScreenCoords = new Point();
-            Point p2ScreenCoords = new Point();
-            Point p3ScreenCoords = new Point();
-            //boolean default false, but set true if just one of the verticies is within the camera's fov. 
-            boolean shouldDrawTriangle = false;
-            Vector3 triangleVertex1 = new Vector3(triangle.vertex1);
-            Vector3 triangleVertex2 = new Vector3(triangle.vertex2);
-            Vector3 triangleVertex3 = new Vector3(triangle.vertex3);
-
-            triangleVertex1 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex1, camPos), camPos, renderPlane);
-            Vector3 camCenterPoint = Vector3.getIntersectionPoint(camDirection, camPos, renderPlane);
-            Vector3 rotatedPoint = Vector3.applyMatrix(pointRotationMatrix, Vector3.subtract(triangleVertex1, camCenterPoint));
-            if ((Math.abs(rotatedPoint.x) < renderPlaneWidth/2*1.2 && Math.abs(rotatedPoint.y) < renderPlaneWidth*((double)getHeight()/(double)getWidth())/2*1.2))
-                shouldDrawTriangle = true;
-            p1ScreenCoords.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
-            p1ScreenCoords.y = (int)(getHeight()/2 - rotatedPoint.y*pixelsPerUnit);
-    
-            triangleVertex2 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex2, camPos), camPos, renderPlane);
-            rotatedPoint = Vector3.applyMatrix(pointRotationMatrix, Vector3.subtract(triangleVertex2, camCenterPoint));
-            if ((Math.abs(rotatedPoint.x) < renderPlaneWidth/2*1.2 && Math.abs(rotatedPoint.y) < renderPlaneWidth*((double)getHeight()/getWidth())/2*1.2))
-                shouldDrawTriangle = true;
-            p2ScreenCoords.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
-            p2ScreenCoords.y = (int)(getHeight()/2 - rotatedPoint.y*pixelsPerUnit);
-    
-            triangleVertex3 = new Vector3(triangle.vertex3);
-            triangleVertex3 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex3, camPos), camPos, renderPlane);
-            rotatedPoint = Vector3.applyMatrix(pointRotationMatrix, Vector3.subtract(triangleVertex3, camCenterPoint));
-            if ((Math.abs(rotatedPoint.x) < renderPlaneWidth/2*1.2 && Math.abs(rotatedPoint.y) < renderPlaneWidth*((double)getHeight()/getWidth())/2*1.2))
-                shouldDrawTriangle = true;
-            p3ScreenCoords.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
-            p3ScreenCoords.y = (int)(getHeight()/2 - rotatedPoint.y*pixelsPerUnit);
-
-            if (shouldDrawTriangle)
+            Color colorUsed;
+            if (triangle.getMesh() != null && triangle.getMesh().isShaded())
             {
-                Color colorUsed;
-                if (triangle.getMesh() != null && triangle.getMesh().isShaded())
+                Color litColor = triangle.getColorWithLighting();
+                if (fogEnabled && distanceToTriangle > fogStartDistance)
                 {
-                    Color litColor = triangle.getColorWithLighting();
-                    if (fogEnabled && distanceToTriangle > fogStartDistance)
+                    Color triangleColor;
+                    if (distanceToTriangle > fullFogDistance)
+                        triangleColor = fogColor;
+                    else
                     {
-                        Color triangleColor;
-                        if (distanceToTriangle > fullFogDistance)
-                            triangleColor = fogColor;
-                        else
-                        {
-                            //skews the triangle's color closer to the fog color as a function of distance. 
-                            double fogAmt = (distanceToTriangle-fogStartDistance)/(fullFogDistance-fogStartDistance);
-                            int red = litColor.getRed() + (int)((fogColor.getRed()-litColor.getRed())*fogAmt*fogAmt);
-                            int green = litColor.getGreen() + (int)((fogColor.getGreen()-litColor.getGreen())*fogAmt*fogAmt);
-                            int blue = litColor.getBlue() + (int)((fogColor.getBlue()-litColor.getBlue())*fogAmt*fogAmt);
+                        //skews the triangle's color closer to the fog color as a function of distance. 
+                        double fogAmt = (distanceToTriangle-fogStartDistance)/(fullFogDistance-fogStartDistance);
+                        int red = litColor.getRed() + (int)((fogColor.getRed()-litColor.getRed())*fogAmt*fogAmt);
+                        int green = litColor.getGreen() + (int)((fogColor.getGreen()-litColor.getGreen())*fogAmt*fogAmt);
+                        int blue = litColor.getBlue() + (int)((fogColor.getBlue()-litColor.getBlue())*fogAmt*fogAmt);
 
-                            //clamps color values to between 0 and 255
-                            red = Math.max(0, Math.min(255, red));
-                            green = Math.max(0, Math.min(255, green));
-                            blue = Math.max(0, Math.min(255, blue));
-                            triangleColor = new Color(red, green, blue);
-                        }
-                        colorUsed = triangleColor;
+                        //clamps color values to between 0 and 255
+                        red = Math.max(0, Math.min(255, red));
+                        green = Math.max(0, Math.min(255, green));
+                        blue = Math.max(0, Math.min(255, blue));
+                        triangleColor = new Color(red, green, blue);
                     }
-                    else 
-                        colorUsed = litColor;
-                }   
-                else 
-                    colorUsed = triangle.getBaseColor();
-                if (colorUsed == null)
-                {
-                    colorUsed = Color.MAGENTA;
+                    colorUsed = triangleColor;
                 }
-                //adds the 2d triangle object into the triangle2d array.
-                drawQeue.add(new Triangle2D(p1ScreenCoords, p2ScreenCoords, p3ScreenCoords, colorUsed, distanceToTriangle));
+                else 
+                    colorUsed = litColor;
+            }   
+            else 
+                colorUsed = triangle.getBaseColor();
+            if (colorUsed == null)
+            {
+                colorUsed = Color.MAGENTA;
             }
+            //adds the 2d triangle object into the triangle2d array.
+            drawQeue.add(new Triangle2D(p1ScreenCoords, p2ScreenCoords, p3ScreenCoords, colorUsed, distanceToTriangle));
         }
     }
 
@@ -412,63 +476,63 @@ public class RenderingPanel extends JPanel implements Runnable
         //the left or right bounds of the line being drawn
         int scanlineEdge1, scanlineEdge2;
 
-        double[] scanlineEdge1Weight;
-        double[] scanlineEdge2Weight;
+        // double[] scanlineEdge1Weight;
+        // double[] scanlineEdge2Weight;
 
-        //x in the vector represents p1 weight, y is p2 weight, z is p3 weight
+        // //x in the vector represents p1 weight, y is p2 weight, z is p3 weight
 
-        double[][] leftEdgeWeights = new double[low.y-high.y + 1][3];
-        double[][] rightEdgeWeights = new double[low.y-high.y + 1][3];
+        // double[][] leftEdgeWeights = new double[low.y-high.y + 1][3];
+        // double[][] rightEdgeWeights = new double[low.y-high.y + 1][3];
 
-        if (type == -1)
-        {
-            int midLowDistance = leftEdgeWeights.length - (low.y - middle.y);
-            int topMidDistance = leftEdgeWeights.length - (middle.y-high.y)-1;
-            for (double i = 0; i < topMidDistance; i++)
-            {
-                leftEdgeWeights[(int)i][highIndex] = 1 - i/topMidDistance;
-                leftEdgeWeights[(int)i][middleIndex] = i/topMidDistance;
-                leftEdgeWeights[(int)i][lowIndex] = 0;
-            }
-            for (double i = 0; i < midLowDistance; i++)
-            {
-                leftEdgeWeights[(int)i + topMidDistance][highIndex] = 0;
-                leftEdgeWeights[(int)i + topMidDistance][middleIndex] = 1 - i/midLowDistance;
-                leftEdgeWeights[(int)i + topMidDistance][lowIndex] = i/midLowDistance;
-            }
+        // if (type == -1)
+        // {
+        //     int midLowDistance = leftEdgeWeights.length - (low.y - middle.y);
+        //     int topMidDistance = leftEdgeWeights.length - (middle.y-high.y)-1;
+        //     for (double i = 0; i < topMidDistance; i++)
+        //     {
+        //         leftEdgeWeights[(int)i][highIndex] = 1 - i/topMidDistance;
+        //         leftEdgeWeights[(int)i][middleIndex] = i/topMidDistance;
+        //         leftEdgeWeights[(int)i][lowIndex] = 0;
+        //     }
+        //     for (double i = 0; i < midLowDistance; i++)
+        //     {
+        //         leftEdgeWeights[(int)i + topMidDistance][highIndex] = 0;
+        //         leftEdgeWeights[(int)i + topMidDistance][middleIndex] = 1 - i/midLowDistance;
+        //         leftEdgeWeights[(int)i + topMidDistance][lowIndex] = i/midLowDistance;
+        //     }
 
-            for (double i = 0; i < rightEdgeWeights.length; i++)
-            {
-                rightEdgeWeights[(int)i][highIndex] = 1 - i/rightEdgeWeights.length;
-                rightEdgeWeights[(int)i][middleIndex] = 0;
-                rightEdgeWeights[(int)i][lowIndex] = i/rightEdgeWeights.length;
-            }
-        }
-        else
-        {
-            int midLowDistance = leftEdgeWeights.length - (low.y - middle.y);
-            int topMidDistance = leftEdgeWeights.length - (middle.y-high.y)-1;
+        //     for (double i = 0; i < rightEdgeWeights.length; i++)
+        //     {
+        //         rightEdgeWeights[(int)i][highIndex] = 1 - i/rightEdgeWeights.length;
+        //         rightEdgeWeights[(int)i][middleIndex] = 0;
+        //         rightEdgeWeights[(int)i][lowIndex] = i/rightEdgeWeights.length;
+        //     }
+        // }
+        // else
+        // {
+        //     int midLowDistance = leftEdgeWeights.length - (low.y - middle.y);
+        //     int topMidDistance = leftEdgeWeights.length - (middle.y-high.y)-1;
 
-            for (double i = 0; i < leftEdgeWeights.length; i++)
-            {
-                leftEdgeWeights[(int)i][lowIndex] = 1 - i/leftEdgeWeights.length;
-                leftEdgeWeights[(int)i][highIndex] = 0;
-                leftEdgeWeights[(int)i][middleIndex] = i/leftEdgeWeights.length;
-            }
+        //     for (double i = 0; i < leftEdgeWeights.length; i++)
+        //     {
+        //         leftEdgeWeights[(int)i][lowIndex] = 1 - i/leftEdgeWeights.length;
+        //         leftEdgeWeights[(int)i][highIndex] = 0;
+        //         leftEdgeWeights[(int)i][middleIndex] = i/leftEdgeWeights.length;
+        //     }
 
-            for (double i = 0; i < topMidDistance; i++)
-            {
-                rightEdgeWeights[(int)i][lowIndex] = 1 - i/topMidDistance;
-                rightEdgeWeights[(int)i][highIndex] = i/topMidDistance;
-                rightEdgeWeights[(int)i][middleIndex] = 0;
-            }
-            for (double i = 0; i < midLowDistance; i++)
-            {
-                rightEdgeWeights[(int)i + topMidDistance][lowIndex] = 0;
-                rightEdgeWeights[(int)i + topMidDistance][highIndex] = 1 - i/midLowDistance;
-                rightEdgeWeights[(int)i + topMidDistance][middleIndex] = i/midLowDistance;
-            }
-        }
+        //     for (double i = 0; i < topMidDistance; i++)
+        //     {
+        //         rightEdgeWeights[(int)i][lowIndex] = 1 - i/topMidDistance;
+        //         rightEdgeWeights[(int)i][highIndex] = i/topMidDistance;
+        //         rightEdgeWeights[(int)i][middleIndex] = 0;
+        //     }
+        //     for (double i = 0; i < midLowDistance; i++)
+        //     {
+        //         rightEdgeWeights[(int)i + topMidDistance][lowIndex] = 0;
+        //         rightEdgeWeights[(int)i + topMidDistance][highIndex] = 1 - i/midLowDistance;
+        //         rightEdgeWeights[(int)i + topMidDistance][middleIndex] = i/midLowDistance;
+        //     }
+        // }
 
         //Top part of triangle: 
         if (middle.y-high.y != 0 && low.y-high.y != 0)
@@ -510,24 +574,26 @@ public class RenderingPanel extends JPanel implements Runnable
                 {
                     if (yScanLine >= 0)
                     {
-                        scanlineEdge1Weight = leftEdgeWeights[leftEdgeWeights.length-(yScanLine-high.y)-1];
-                        scanlineEdge2Weight = rightEdgeWeights[rightEdgeWeights.length-(yScanLine-high.y)-1];
-
                         scanlineEdge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-high.y)/((double)(middle.y-high.y)/(middle.x-high.x)) + high.x)));
                         scanlineEdge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-high.y)/((double)(low.y-high.y)/(low.x-high.x)) + high.x)));
+
+                        // scanlineEdge1Weight = leftEdgeWeights[leftEdgeWeights.length-(yScanLine-high.y)-1];
+                        // scanlineEdge2Weight = rightEdgeWeights[rightEdgeWeights.length-(yScanLine-high.y)-1];
+
+                        // int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
+
+                        // for (int i = 0; i < pixelData.length; i ++)
+                        // {
+                        //     double[] barycentricCoord = new double[]
+                        //     {
+                        //         (scanlineEdge1Weight[0]*(pixelData.length-i) + scanlineEdge2Weight[0]*i)/pixelData.length,
+                        //         (scanlineEdge1Weight[1]*(pixelData.length-i) + scanlineEdge2Weight[1]*i)/pixelData.length,
+                        //         (scanlineEdge1Weight[2]*(pixelData.length-i) + scanlineEdge2Weight[2]*i)/pixelData.length,                                
+                        //     };
+                        //     pixelData[i] = convertToIntRGB(new Color((int)(barycentricCoord[0]*255), (int)(barycentricCoord[1]*255), (int)(barycentricCoord[2]*255)));
+                        // }
                         int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
-
-                        for (int i = 0; i < pixelData.length; i ++)
-                        {
-                            double[] barycentricCoord = new double[]
-                            {
-                                (scanlineEdge1Weight[0]*(pixelData.length-i) + scanlineEdge2Weight[0]*i)/pixelData.length,
-                                (scanlineEdge1Weight[1]*(pixelData.length-i) + scanlineEdge2Weight[1]*i)/pixelData.length,
-                                (scanlineEdge1Weight[2]*(pixelData.length-i) + scanlineEdge2Weight[2]*i)/pixelData.length,                                
-                            };
-                            pixelData[i] = convertToIntRGB(new Color((int)(barycentricCoord[0]*255), (int)(barycentricCoord[1]*255), (int)(barycentricCoord[2]*255)));
-                        }
-
+                        Arrays.fill(pixelData, rgb);
                         drawHorizontalLine(Math.min(scanlineEdge1, scanlineEdge2), Math.max(scanlineEdge1, scanlineEdge2), yScanLine, pixelData);    
                     }
                 }
@@ -574,24 +640,27 @@ public class RenderingPanel extends JPanel implements Runnable
                 {
                     if (yScanLine >= 0)
                     {
-                        scanlineEdge1Weight = leftEdgeWeights[leftEdgeWeights.length-(yScanLine-high.y)-1];
-                        scanlineEdge2Weight = rightEdgeWeights[rightEdgeWeights.length-(yScanLine-high.y)-1];
-
                         scanlineEdge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-low.y)/((double)(low.y-middle.y)/(low.x-middle.x)) + low.x)));
                         scanlineEdge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-low.y)/((double)(low.y-high.y)/(low.x-high.x)) + low.x)));
+
+
+                        // scanlineEdge1Weight = leftEdgeWeights[leftEdgeWeights.length-(yScanLine-high.y)-1];
+                        // scanlineEdge2Weight = rightEdgeWeights[rightEdgeWeights.length-(yScanLine-high.y)-1];
+
+                        // int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
+
+                        // for (int i = 0; i < pixelData.length; i ++)
+                        // {
+                        //     double[] barycentricCoord = new double[]
+                        //     {
+                        //         (scanlineEdge1Weight[0]*(pixelData.length-i) + scanlineEdge2Weight[0]*i)/pixelData.length,
+                        //         (scanlineEdge1Weight[1]*(pixelData.length-i) + scanlineEdge2Weight[1]*i)/pixelData.length,
+                        //         (scanlineEdge1Weight[2]*(pixelData.length-i) + scanlineEdge2Weight[2]*i)/pixelData.length,                                
+                        //     };
+                        //     pixelData[i] = convertToIntRGB(new Color((int)(barycentricCoord[0]*255), (int)(barycentricCoord[1]*255), (int)(barycentricCoord[2]*255)));
+                        // }
                         int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
-
-                        for (int i = 0; i < pixelData.length; i ++)
-                        {
-                            double[] barycentricCoord = new double[]
-                            {
-                                (scanlineEdge1Weight[0]*(pixelData.length-i) + scanlineEdge2Weight[0]*i)/pixelData.length,
-                                (scanlineEdge1Weight[1]*(pixelData.length-i) + scanlineEdge2Weight[1]*i)/pixelData.length,
-                                (scanlineEdge1Weight[2]*(pixelData.length-i) + scanlineEdge2Weight[2]*i)/pixelData.length,                                
-                            };
-                            pixelData[i] = convertToIntRGB(new Color((int)(barycentricCoord[0]*255), (int)(barycentricCoord[1]*255), (int)(barycentricCoord[2]*255)));
-                        }
-
+                        Arrays.fill(pixelData, rgb);
                         drawHorizontalLine(Math.min(scanlineEdge1, scanlineEdge2), Math.max(scanlineEdge1, scanlineEdge2), yScanLine, pixelData);    
                     }
                 }
@@ -634,6 +703,7 @@ public class RenderingPanel extends JPanel implements Runnable
             p3 = p3In;
             color = colorIn;
             triangle3DDistance = triangle3DDistanceIn;
+
         }
 
         //the compareTo method allows java.util.Collections to compare two Triangle2D 
@@ -641,7 +711,18 @@ public class RenderingPanel extends JPanel implements Runnable
         //very fast sorting algorithm to sort triangles by distance. 
         public int compareTo(Triangle2D o) 
         {
-            return (o.triangle3DDistance > triangle3DDistance)? 1 : ((o.triangle3DDistance < triangle3DDistance)? -1 : 0);
+            int num = 0;
+            if (o.triangle3DDistance-triangle3DDistance < 0)
+                num = -1;
+            else if (o.triangle3DDistance-triangle3DDistance > 0)
+                num = 1;
+            return num;
+        }
+
+        private int fastfloor(double x) 
+        {
+            int xi = (int) x;
+            return x < xi ? xi - 1 : xi;
         }
     }
 }   

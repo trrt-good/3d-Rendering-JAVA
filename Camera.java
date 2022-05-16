@@ -29,7 +29,7 @@ public class Camera
 
     public Camera(Vector3 positionIn, double farClipDistanceIn, double nearClipDistanceIn, double fovIn)
     {
-        renderPlaneDistance = 10;
+        renderPlaneDistance = 50;
         hAngle = 0;
         vAngle = 0;
         position = positionIn;
@@ -61,8 +61,8 @@ public class Camera
 
         private double distance; //distacne from the object
 
-        private int maxAngle = 80; //the maximum angle the camera can go up to
-        private int minAngle = -80; //the minimum angle the camera can go down to.
+        private int maxAngle = 90; //the maximum angle the camera can go up to
+        private int minAngle = -90; //the minimum angle the camera can go down to.
 
         private GameObject focusObj; //the game object that the camera is focused on. 
         private double sensitivity; //how fast should the camera pan?

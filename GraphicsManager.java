@@ -29,7 +29,7 @@ public class GraphicsManager
         triangleTest = new GameObject
         (
             "test",
-            new Mesh("testing.obj", new Color(100, 100, 100), new Vector3(0, -100, 0), new EulerAngle(0, 0, 0), 1, true, true), 
+            new Mesh("testing.obj", new Color(100, 100, 100), new Vector3(0, -50, 0), new EulerAngle(0, 0, 0), 10, true, true), 
             new Transform(new Vector3())
         );
 
@@ -68,14 +68,14 @@ public class GraphicsManager
         renderingPanel.setVisible(true);
         //renderingPanel.setFPSlimit(150);
 
-        Camera cam = new Camera(new Vector3(0, 0, 0), 10000, 10, 60);
+        Camera cam = new Camera(new Vector3(0, 0, 0), 10000, 500, 60);
         renderingPanel.setCamera(cam);
-        renderingPanel.addMesh(cat.getMesh());
-        cam.setOrbitControls(renderingPanel, cat, 1000, 10);
+        renderingPanel.addMesh(triangleTest.getMesh());
+        cam.setOrbitControls(renderingPanel, triangleTest, 1000, 10);
         //cam.setFreeControls(renderingPanel, 200, 10);
         renderingPanel.setLighting(new Lighting(new Vector3(0, -1, 0), 70, 30));
         renderingPanel.setFog(1000, 3000, new Color(190, 210, 245));
-        
+        renderingPanel.setFPSlimit(60);
         renderingPanel.start();
         System.out.println("finished creating graphics in " + (System.nanoTime()-start)/1000000 + "ms");
     }

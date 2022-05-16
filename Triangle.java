@@ -29,6 +29,7 @@ public class Triangle
         vertex2 = v2;
         vertex3 = v3;
         color = Color.MAGENTA;
+        colorWithLighting = Color.MAGENTA;
         parentMesh = parentMeshIn;
     }
 
@@ -38,6 +39,7 @@ public class Triangle
         vertex2 = v2;
         vertex3 = v3;
         color = colorIn;
+        colorWithLighting = colorIn;
         parentMesh = parentMeshIn;
     }
 
