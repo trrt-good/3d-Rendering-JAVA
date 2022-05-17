@@ -25,6 +25,8 @@ public class RenderingPanel extends JPanel implements Runnable
     private ArrayList<Triangle2D> drawQeue;
     private Matrix3x3 pointRotationMatrix;
     private double pixelsPerUnit;
+    private Vector3 camCenterPoint;
+
 
     //Threads:
     private Thread renderingThread;
@@ -166,6 +168,7 @@ public class RenderingPanel extends JPanel implements Runnable
         renderPlaneWidth = camera.getRenderPlaneWidth();
         camPos = camera.getPosition();
         camDirection = camera.getDirectionVector();
+        camCenterPoint = Vector3.add(Vector3.multiply(camDirection, camera.getRenderPlaneDistance()), camPos);
         renderPlane = new Plane(Vector3.add(Vector3.multiply(camDirection, camera.getRenderPlaneDistance()), camPos), camDirection);
         pointRotationMatrix = Matrix3x3.multiply(Matrix3x3.rotationMatrixAxisX(camera.getVorientation()*0.017453292519943295), Matrix3x3.rotationMatrixAxisY(-camera.getHorientation()*0.017453292519943295));
         
@@ -254,75 +257,75 @@ public class RenderingPanel extends JPanel implements Runnable
         Vector3 triangleVertex2 = new Vector3(triangle.vertex2);
         Vector3 triangleVertex3 = new Vector3(triangle.vertex3);
 
-        // if (distanceToTriangle < camera.getNearClipDistance()*1.2)
-        // {
-        //     Plane nearClipPlane = new Plane(Vector3.add(camPos, Vector3.multiply(camDirection, camera.getNearClipDistance())), camDirection);
-        //     boolean v1TooClose = false;
-        //     boolean v2TooClose = false;
-        //     boolean v3TooClose = false;
+        if (distanceToTriangle < camera.getNearClipDistance()*1.2)
+        {
+            Plane nearClipPlane = new Plane(Vector3.add(camPos, Vector3.multiply(camDirection, camera.getNearClipDistance())), camDirection);
+            boolean v1TooClose = false;
+            boolean v2TooClose = false;
+            boolean v3TooClose = false;
     
-        //     if (Vector3.dotProduct(nearClipPlane.normal, Vector3.subtract(triangleVertex1, nearClipPlane.pointOnPlane)) < 0)
-        //         v1TooClose = true;
-        //     if (Vector3.dotProduct(nearClipPlane.normal, Vector3.subtract(triangleVertex2, nearClipPlane.pointOnPlane)) < 0)
-        //         v2TooClose = true;
-        //     if (Vector3.dotProduct(nearClipPlane.normal, Vector3.subtract(triangleVertex3, nearClipPlane.pointOnPlane)) < 0)
-        //         v3TooClose = true;
+            if (Vector3.dotProduct(nearClipPlane.normal, Vector3.subtract(triangleVertex1, nearClipPlane.pointOnPlane)) < 0)
+                v1TooClose = true;
+            if (Vector3.dotProduct(nearClipPlane.normal, Vector3.subtract(triangleVertex2, nearClipPlane.pointOnPlane)) < 0)
+                v2TooClose = true;
+            if (Vector3.dotProduct(nearClipPlane.normal, Vector3.subtract(triangleVertex3, nearClipPlane.pointOnPlane)) < 0)
+                v3TooClose = true;
     
-        //     if (v1TooClose && v2TooClose && v3TooClose)
-        //         return;
+            if (v1TooClose && v2TooClose && v3TooClose)
+                return;
     
-        //     clipping: 
-        //     {
-        //         if (v1TooClose)
-        //         {
-        //             if (v2TooClose)
-        //             {
-        //                 triangleVertex1 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex1, triangleVertex3), triangleVertex3, nearClipPlane);
-        //                 triangleVertex2 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex2, triangleVertex3), triangleVertex3, nearClipPlane);
+            clipping: 
+            {
+                if (v1TooClose)
+                {
+                    if (v2TooClose)
+                    {
+                        triangleVertex1 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex1, triangleVertex3), triangleVertex3, nearClipPlane);
+                        triangleVertex2 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex2, triangleVertex3), triangleVertex3, nearClipPlane);
                         
-        //                 break clipping;
-        //             }
-        //             else if (v3TooClose)
-        //             {
-        //                 triangleVertex1 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex1, triangleVertex2), triangleVertex2, nearClipPlane);
-        //                 triangleVertex3 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex3, triangleVertex2), triangleVertex2, nearClipPlane);
-        //                 break clipping;
-        //             }
-        //             else 
-        //             {
-        //                 Vector3 tempV = triangleVertex1;
-        //                 triangleVertex1 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex1, triangleVertex2), triangleVertex2, nearClipPlane);
-        //                 Triangle newTriangle = new Triangle(triangle.getMesh(), triangleVertex1, triangleVertex3, Vector3.getIntersectionPoint(Vector3.subtract(tempV, triangleVertex3), triangleVertex3, nearClipPlane), triangle.getColorWithLighting());
-        //                 calculateTriangle(newTriangle);
-        //                 break clipping;
-        //             }
-        //         }
-        //         else if (v2TooClose)
-        //         {
-        //             if (v3TooClose)
-        //             {
-        //                 triangleVertex2 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex2, triangleVertex1), triangleVertex1, nearClipPlane);
-        //                 triangleVertex3 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex3, triangleVertex1), triangleVertex1, nearClipPlane);
-        //                 break clipping;
-        //             }
-        //             else 
-        //             {
-        //                 Vector3 tempV = triangleVertex2;
-        //                 triangleVertex2 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex2, triangleVertex1), triangleVertex1, nearClipPlane);
-        //                 Triangle newTriangle = new Triangle(triangle.getMesh(), triangleVertex3, triangleVertex2, Vector3.getIntersectionPoint(Vector3.subtract(tempV, triangleVertex3), triangleVertex3, nearClipPlane), triangle.getColorWithLighting());
-        //                 calculateTriangle(newTriangle);
-        //                 break clipping;
-        //             }
-        //         }
-        //         if (v3TooClose)
-        //         {
-        //             Vector3 tempV = new Vector3(triangleVertex3);
-        //             triangleVertex3 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex3, triangleVertex2), triangleVertex2, nearClipPlane);
-        //             Triangle newTriangle = new Triangle(triangle.getMesh(), triangleVertex3, triangleVertex1, Vector3.getIntersectionPoint(Vector3.subtract(tempV, triangleVertex1), triangleVertex1, nearClipPlane), triangle.getColorWithLighting());
-        //             calculateTriangle(newTriangle);
-        //         }
-        //     }
-        // }
+                        break clipping;
+                    }
+                    else if (v3TooClose)
+                    {
+                        triangleVertex1 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex1, triangleVertex2), triangleVertex2, nearClipPlane);
+                        triangleVertex3 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex3, triangleVertex2), triangleVertex2, nearClipPlane);
+                        break clipping;
+                    }
+                    else 
+                    {
+                        Vector3 tempV = triangleVertex1;
+                        triangleVertex1 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex1, triangleVertex2), triangleVertex2, nearClipPlane);
+                        Triangle newTriangle = new Triangle(triangle.getMesh(), triangleVertex1, triangleVertex3, Vector3.getIntersectionPoint(Vector3.subtract(tempV, triangleVertex3), triangleVertex3, nearClipPlane), triangle.getColorWithLighting());
+                        calculateTriangle(newTriangle);
+                        break clipping;
+                    }
+                }
+                else if (v2TooClose)
+                {
+                    if (v3TooClose)
+                    {
+                        triangleVertex2 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex2, triangleVertex1), triangleVertex1, nearClipPlane);
+                        triangleVertex3 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex3, triangleVertex1), triangleVertex1, nearClipPlane);
+                        break clipping;
+                    }
+                    else 
+                    {
+                        Vector3 tempV = triangleVertex2;
+                        triangleVertex2 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex2, triangleVertex1), triangleVertex1, nearClipPlane);
+                        Triangle newTriangle = new Triangle(triangle.getMesh(), triangleVertex3, triangleVertex2, Vector3.getIntersectionPoint(Vector3.subtract(tempV, triangleVertex3), triangleVertex3, nearClipPlane), triangle.getColorWithLighting());
+                        calculateTriangle(newTriangle);
+                        break clipping;
+                    }
+                }
+                if (v3TooClose)
+                {
+                    Vector3 tempV = new Vector3(triangleVertex3);
+                    triangleVertex3 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex3, triangleVertex2), triangleVertex2, nearClipPlane);
+                    Triangle newTriangle = new Triangle(triangle.getMesh(), triangleVertex3, triangleVertex1, Vector3.getIntersectionPoint(Vector3.subtract(tempV, triangleVertex1), triangleVertex1, nearClipPlane), triangle.getColorWithLighting());
+                    calculateTriangle(newTriangle);
+                }
+            }
+        }
         //create local variables: 
 
         //the screen coords of the triangle, to be determined by the rest of the method.
@@ -333,7 +336,6 @@ public class RenderingPanel extends JPanel implements Runnable
         boolean shouldDrawTriangle = false;
 
         triangleVertex1 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex1, camPos), camPos, renderPlane);
-        Vector3 camCenterPoint = Vector3.getIntersectionPoint(camDirection, camPos, renderPlane);
         Vector3 rotatedPoint = Vector3.applyMatrix(pointRotationMatrix, Vector3.subtract(triangleVertex1, camCenterPoint));
         if ((Math.abs(rotatedPoint.x) < renderPlaneWidth/2*1.2 && Math.abs(rotatedPoint.y) < renderPlaneWidth*((double)getHeight()/(double)getWidth())/2*1.2))
             shouldDrawTriangle = true;
