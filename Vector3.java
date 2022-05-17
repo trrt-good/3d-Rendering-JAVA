@@ -2,10 +2,29 @@
 //The Vector3 class also contains many static methods for 3d math.  
 public class Vector3 
 {
-    public double x; //while looking north (0, 0, 1), the x-axis would run to the left and right or east/west
-    public double y; //the y axis is vertical 
-    public double z; //the "depth" axis which runs north/south
+    /**
+     * The {@code x} component of the {@code Vector3} in 3d cartesian coordinate space.
+     */
+    public double x;
 
+    /**
+     * The {@code y} component of the {@code Vector3} in 3d cartensian coordinate space.
+     * Represents the vertical axis.
+     */
+    public double y;
+
+    /**
+     * The {@code z} component of the {@code Vector3} in 3d cartesian coordinate space.
+     * Represents the "depth" axis. 
+     */
+    public double z; 
+
+    /**
+     * Creates a {@code Vector3} object with the specified {@code x}, {@code y} and {@code z} components 
+     * @param xIn the {@code x} component of the {@code Vector3} object being made
+     * @param yIn the {@code y} component of the {@code Vector3} object being made
+     * @param zIn the {@code z} component of the {@code Vector3} object being made
+     */
     public Vector3(double xIn, double yIn, double zIn)
     {
         x = xIn;
@@ -13,6 +32,11 @@ public class Vector3
         z = zIn;
     }
 
+    /**
+     * Creates a {@code Vector3} object with identical {@code x}, {@code y} and {@code z} components
+     * as the specified vector
+     * @param vector the vector to be cloned 
+     */
     public Vector3(Vector3 vector)
     {
         x = vector.x;
@@ -20,6 +44,9 @@ public class Vector3
         z = vector.z;
     }
 
+    /**
+     * Creates a vector with values (0, 0, 0)
+     */
     public Vector3()
     {
         x = 0;
@@ -27,7 +54,10 @@ public class Vector3
         z = 0;
     }
 
-    //returns the magnitude of the vector
+    /**
+     * @return the exact magnitude of the vector as a scalar value
+     * @see #getSqrMagnitude()
+     */
     public double getMagnitude()
     {
         return Math.sqrt(x*x+z*z + y*y);
@@ -38,12 +68,33 @@ public class Vector3
     //magnitude with another value, because squaring the value 
     //that you are comparing with is faster than the getMagnitude()
     //method which contains the slow Math.sqrt function.
+    /**
+     * A (much) faster alternative to the {@link #getMagnitude} method. 
+     * This returns the squared magnitude of the vector, which is recommended 
+     * for checking if the magnitude is over a certain value, as the other 
+     * value can just be squared, and the resulting comparison will be just as
+     * accurate and much faster than using {@link #getMagnitude}. Example 
+     * where a is a {@code double} value and vector is a {@code Vector3} object:<pre>
+     *   if (vector.getSqrMagnitude > a*a)
+     *      return true;</pre>
+     *
+     * <p id="fail-fast">
+     * 
+     * @return the squared magnitude of the vector
+     */
     public double getSqrMagnitude()
     {
         return x*x+z*z + y*y;
     }
 
+
     //returns the normalized vector. 
+    /**
+     * Returns the vector normalized with a magnitude of 1. Note that this
+     * doesn't change the {@code x}, {@code y} or {@code z} components. It 
+     * simply returns a normalized version of the vector
+     * @return returns the normalized vector
+     */
     public Vector3 getNormalized()
     {
         if (getSqrMagnitude() != 1)
@@ -55,7 +106,13 @@ public class Vector3
             return this;
     }
     
-    //adds the specified vector to itself, as well as returning the result.
+    /**
+     * adds the specified vector to itself, then returns itself as the result
+     * after the operation. This does change the {@code x}, {@code y} and {@code z} components
+     * of the vector. 
+     * @param vectorIn the vector to be added
+     * @return the vector after the operation. 
+     */
     public Vector3 add(Vector3 vectorIn)
     {
         x+= vectorIn.x;
@@ -64,7 +121,12 @@ public class Vector3
         return this;
     }
 
-    //multiplies itself by the value, as well as returning the result.
+    /**
+     * multiplies itself by the specified scalar multiplier. Then returns itself.
+     * There is no divide method so simply multiply by the reciprocal instead. 
+     * @param multiplier the scalar multiplier
+     * @return the product
+     */
     public Vector3 multiply(double multiplier)
     {
         x*=multiplier;
@@ -73,11 +135,19 @@ public class Vector3
         return this;
     }
 
+    /**
+     * Returns a {@code Vector3} object with with value (x*x, y*y, z*z)
+     * where x y and z are the components of the origonal vector.
+     * @return the sqaured vector.
+     */
     public Vector3 getSquare()
     {
         return new Vector3(x*x, y*y, z*z);
     }
 
+    /**
+     * 
+     */
     //formats the vector into a string for printing. 
     public String toString()
     {
