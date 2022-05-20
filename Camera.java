@@ -211,6 +211,12 @@ public class Camera
             prevY = e.getY();
         }
 
+        public void setFocusObj(GameObject obj)
+        {
+            orbitController.focusObj = obj;
+        }
+
+
         public void keyReleased(KeyEvent e) {}
         public void mouseClicked(MouseEvent e) {}
 
