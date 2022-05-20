@@ -348,129 +348,121 @@ public class RenderingPanel extends JPanel implements Runnable
     private void paintTriangle(Point p1, Point p2, Point p3, Color triangleColor)
     {
         Point tempPoint = new Point();
-        //int tempIndex = 0;
         int rgb = convertToIntRGB(triangleColor);
 
         Point high = p1;
         Point middle = p2;
         Point low = p3;
 
-        // int highIndex = 0;
-        // int middleIndex = 1;
-        // int lowIndex = 2;        
-        // int type = 0;
-
-        //sorts the three points by height using a very simple bubble sort algorithm
-        if (high.getY() > middle.getY())
+        //note that the highest point will actually have the lower y value because 0,0 in the screen
+        //is the top left corner. 
+        if (p1.y >= p2.y || p2.y >= p3.y) //checks if the sequence isnt p1, p2, p3
         {
-            tempPoint = high;
-            high = middle;
-            middle = tempPoint;
-
-            // tempIndex = highIndex;
-            // highIndex = middleIndex;
-            // middleIndex = tempIndex;
+            if (p1.y < p2.y)
+            {
+                if (p3.y < p2.y)
+                {
+                    middle = p3;
+                    low = p2;
+                }
+                else
+                {
+                    high = p3;
+                    middle = p1;
+                    low = p2;
+                }
+            }
+            else
+            {
+                if (p2.y < p3.y)
+                {
+                    high = p2;
+                    if (p1.y < p3.y)
+                    {
+                        middle = p1;
+                    }
+                    else
+                    {
+                        middle = p3;
+                        low = p1;
+                    }
+                }
+                else
+                {
+                    high = p3;
+                    middle = p2;
+                    low = p1;
+                }
+            }
         }
-        if (middle.getY() > low.getY())
-        {
-            tempPoint = middle;
-            middle = low;
-            low = tempPoint;
 
-            // tempIndex = middleIndex;
-            // middleIndex = lowIndex;
-            // lowIndex = tempIndex;
-        }
-        if (high.getY() > middle.getY())
-        {
-            tempPoint = high;
-            high = middle;
-            middle = tempPoint;
-
-            // tempIndex = highIndex;
-            // highIndex = middleIndex;
-            // middleIndex = tempIndex;
-        }
-        if (middle.getY() > low.getY())
-        {
-            tempPoint = middle;
-            middle = low;
-            low = tempPoint;
-
-            // tempIndex = middleIndex;
-            // middleIndex = lowIndex;
-            // lowIndex = tempIndex;
-        } 
-
-        // if (low.y-high.y != 0)
+        // if( p1.y > p2.y )
         // {
-        //     type = (((middle.y-high.y)*(low.x-high.x))/(low.y-high.y) + high.x > middle.x)? -1 : 1;
+        //     if( p1.y > p3.y && p2.y < p3.y)
+        //     {
+        //         middle = p3;
+        //         low = p2;
+        //     }
+        //     else
+        //     {
+        //         middle = p1;
+        //         high = p2;
+        //     }
         // }
+        // else
+        // {
+        //     if( p2.y > p3.y )
+        //     {
+        //         high = p2;
+        //         if( p1.y > p3.y )
+        //         {
+        //             middle = p2;
+        //         }
+        //         else
+        //         {
+        //             middle = p3;
+        //             low = p1;
+        //         }
+        //     }
+        //     else
+        //     {
+        //         high = p3;
+        //         low = p1;
+        //     }
+        // }
+           
+
+        // //sorts the three points by height using a very simple bubble sort algorithm
+        // if (high.getY() > middle.getY())
+        // {
+            
+        //     tempPoint = high;
+        //     high = middle;
+        //     middle = tempPoint;
+        // }
+        // if (middle.getY() > low.getY())
+        // {
+        //     tempPoint = middle;
+        //     middle = low;
+        //     low = tempPoint;
+        // }
+        // if (high.getY() > middle.getY())
+        // {
+        //     tempPoint = high;
+        //     high = middle;
+        //     middle = tempPoint;
+        // }
+        // if (middle.getY() > low.getY())
+        // {
+        //     tempPoint = middle;
+        //     middle = low;
+        //     low = tempPoint;
+        // } 
 
         //the y-level of the horizontal line being drawn
         int yScanLine;
         //the left or right bounds of the line being drawn
         int scanlineEdge1, scanlineEdge2;
-
-        //the comments are a barycentric coordinate attempt:
-
-        // double[] scanlineEdge1Weight;
-        // double[] scanlineEdge2Weight;
-
-        // //x in the vector represents p1 weight, y is p2 weight, z is p3 weight
-
-        // double[][] leftEdgeWeights = new double[low.y-high.y + 1][3];
-        // double[][] rightEdgeWeights = new double[low.y-high.y + 1][3];
-
-        // if (type == -1)
-        // {
-        //     int midLowDistance = leftEdgeWeights.length - (low.y - middle.y);
-        //     int topMidDistance = leftEdgeWeights.length - (middle.y-high.y)-1;
-        //     for (double i = 0; i < topMidDistance; i++)
-        //     {
-        //         leftEdgeWeights[(int)i][highIndex] = 1 - i/topMidDistance;
-        //         leftEdgeWeights[(int)i][middleIndex] = i/topMidDistance;
-        //         leftEdgeWeights[(int)i][lowIndex] = 0;
-        //     }
-        //     for (double i = 0; i < midLowDistance; i++)
-        //     {
-        //         leftEdgeWeights[(int)i + topMidDistance][highIndex] = 0;
-        //         leftEdgeWeights[(int)i + topMidDistance][middleIndex] = 1 - i/midLowDistance;
-        //         leftEdgeWeights[(int)i + topMidDistance][lowIndex] = i/midLowDistance;
-        //     }
-
-        //     for (double i = 0; i < rightEdgeWeights.length; i++)
-        //     {
-        //         rightEdgeWeights[(int)i][highIndex] = 1 - i/rightEdgeWeights.length;
-        //         rightEdgeWeights[(int)i][middleIndex] = 0;
-        //         rightEdgeWeights[(int)i][lowIndex] = i/rightEdgeWeights.length;
-        //     }
-        // }
-        // else
-        // {
-        //     int midLowDistance = leftEdgeWeights.length - (low.y - middle.y);
-        //     int topMidDistance = leftEdgeWeights.length - (middle.y-high.y)-1;
-
-        //     for (double i = 0; i < leftEdgeWeights.length; i++)
-        //     {
-        //         leftEdgeWeights[(int)i][lowIndex] = 1 - i/leftEdgeWeights.length;
-        //         leftEdgeWeights[(int)i][highIndex] = 0;
-        //         leftEdgeWeights[(int)i][middleIndex] = i/leftEdgeWeights.length;
-        //     }
-
-        //     for (double i = 0; i < topMidDistance; i++)
-        //     {
-        //         rightEdgeWeights[(int)i][lowIndex] = 1 - i/topMidDistance;
-        //         rightEdgeWeights[(int)i][highIndex] = i/topMidDistance;
-        //         rightEdgeWeights[(int)i][middleIndex] = 0;
-        //     }
-        //     for (double i = 0; i < midLowDistance; i++)
-        //     {
-        //         rightEdgeWeights[(int)i + topMidDistance][lowIndex] = 0;
-        //         rightEdgeWeights[(int)i + topMidDistance][highIndex] = 1 - i/midLowDistance;
-        //         rightEdgeWeights[(int)i + topMidDistance][middleIndex] = i/midLowDistance;
-        //     }
-        // }
 
         //Top part of triangle: 
         if (middle.y-high.y != 0 && low.y-high.y != 0)
