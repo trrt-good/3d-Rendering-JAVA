@@ -1,3 +1,4 @@
+package src;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.StringTokenizer;
@@ -9,6 +10,13 @@ import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 
 import javax.imageio.ImageIO;
+
+import src.graphics.Lighting;
+import src.primitives.EulerAngle;
+import src.primitives.Matrix3x3;
+import src.primitives.Triangle;
+import src.primitives.Vector2;
+import src.primitives.Vector3;
 
 //a class for storing groups of triangles in a mesh.
 public class Mesh 

@@ -1,3 +1,4 @@
+package src.primitives;
 //An object which represents 3d points or directions
 //The Vector3 class also contains many static methods for 3d math.  
 public class Vector3 
@@ -63,11 +64,6 @@ public class Vector3
         return Math.sqrt(x*x+z*z + y*y);
     }
 
-    //returns the squared magnitude of the vector (faster)
-    //recomended for cases where you are only comparing the 
-    //magnitude with another value, because squaring the value 
-    //that you are comparing with is faster than the getMagnitude()
-    //method which contains the slow Math.sqrt function.
     /**
      * A (much) faster alternative to the {@link #getMagnitude} method. 
      * This returns the squared magnitude of the vector, which is recommended 

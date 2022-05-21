@@ -1,3 +1,9 @@
+package src;
+
+import src.primitives.EulerAngle;
+import src.primitives.Matrix3x3;
+import src.primitives.Vector3;
+
 public class Transform 
 {
     private GameObject gameObject; //the gameobject that this transform is attached to

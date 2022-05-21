@@ -1,3 +1,4 @@
+package src.primitives;
 public class Vector2 
 {
     public double x;

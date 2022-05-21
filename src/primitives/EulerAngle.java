@@ -1,3 +1,4 @@
+package src.primitives;
 //all rotations using euler angles are intrinsic and applied in order y-x-z.  
 public class EulerAngle 
 {

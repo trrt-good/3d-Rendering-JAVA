@@ -1,8 +1,17 @@
-import javax.lang.model.util.ElementScanner6;
+package src.graphics;
 import javax.swing.JPanel;
+
+import src.GameObject;
+import src.TimingHelper;
+import src.primitives.Matrix3x3;
+import src.primitives.Plane;
+import src.primitives.Triangle;
+import src.primitives.Vector3;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 
 import java.awt.Color;
 import java.awt.Point;
@@ -11,11 +20,14 @@ import java.awt.Graphics;
 
 import java.awt.image.BufferedImage;
 
+/**
+ * A 
+ */
 public class RenderingPanel extends JPanel implements Runnable
 {
     //collection of all the objects that the rendering panel will render
-    private ArrayList<Mesh> meshes = new ArrayList<Mesh>(); 
-    private ArrayList<Triangle> triangles = new ArrayList<Triangle>(); 
+    private ArrayList<GameObject> gameObjects = new ArrayList<GameObject>(); 
+    private HashMap<String, Integer> gameObjectIndices = new HashMap<String, Integer>();
 
     //for rendering:
     private BufferedImage renderImage;
@@ -47,7 +59,9 @@ public class RenderingPanel extends JPanel implements Runnable
     private double fogStartDistance;
     private double fullFogDistance;
     private boolean fogEnabled = false;
-    private Color fogColor;
+    private byte fogR;
+    private byte fogG;
+    private byte fogB;
 
     //used to help with optimizations:
     private TimingHelper totalFrameTime = new TimingHelper("totalFrameTime");
@@ -65,8 +79,7 @@ public class RenderingPanel extends JPanel implements Runnable
         //innitialize fields 
         camera = null;
         lightingObject = null;
-        meshes = new ArrayList<Mesh>();
-        triangles = new ArrayList<Triangle>();
+        gameObjects = new ArrayList<GameObject>();
         drawQeue = new ArrayList<Triangle2D>();
         camDirection = new Vector3();   
         camPos = new Vector3();
@@ -86,15 +99,20 @@ public class RenderingPanel extends JPanel implements Runnable
         totalFrameTime.stopClock();
         totalFrameTime.startClock();
         //makes sure that there are triangles to render in the first place, and that the camera exists.
-        if (meshes.size() > 0 && camera != null)
+        if (gameObjects.size() > 0 && camera != null)
         {
             computeTriangles();
             sortTriangles();
             drawBufferedImage();
             g.drawImage(renderImage, 0, 0, this);
+            //fps counter 
+            g.drawString("fps: " + (int)(1000/totalFrameTime.getDeltaTime()), 30, 30);
         }
-        //fps counter 
-        g.drawString("fps: " + (int)(1000/totalFrameTime.getDeltaTime()), 30, 30);
+        else
+        {
+            g.drawString((camera == null)? "NO CAMERA" : "NO GAMEOBJECTS", getWidth()/2, getHeight()/2);
+        }
+        
     }
 
     public void setFPSlimit(int limit)
@@ -111,22 +129,34 @@ public class RenderingPanel extends JPanel implements Runnable
             return;
         }
         lightingObject = lighting;
-        lightingObject.update(meshes);
+        lightingObject.update(gameObjects);
     }
 
     //adds a mesh to be rendered, as well as updating it's lighting
-    public void addMesh(Mesh mesh)
+    public void addGameObject(GameObject gameObject)
     {
-        if (mesh != null)
+        if (gameObject != null && gameObject.getName() != null)
         {
-            meshes.add(mesh);
+            gameObjectIndices.put(gameObject.getName(), gameObjects.size());
+            gameObjects.add(gameObject);
             if (lightingObject != null)
-                lightingObject.update(meshes);
-            triangles.addAll(mesh.getTriangles());
+                lightingObject.update(gameObjects);
         }
         else
         {
-            System.err.println("WARNING at: RenderingPanel/addMesh() method: \n\tmesh is null, triangles not added");
+            System.err.println("WARNING at: RenderingPanel/addMesh() method: \n\tGameObject or it's name is null. Object not added");
+        }
+    }
+
+    public void removeGameObject(String name)
+    {
+        if (gameObjectIndices.containsKey(name))
+        {
+            gameObjects.remove((int)gameObjectIndices.get(name));
+        }
+        else
+        {
+            System.err.println("WARNING at: RenderingPanel/removeGameObject() method: \n\tCould not find the specified name. No GameObjects removed");
         }
     }
 
@@ -143,11 +173,13 @@ public class RenderingPanel extends JPanel implements Runnable
         renderPlane = new Plane(Vector3.add(Vector3.multiply(camDirection, camera.getRenderPlaneDistance()), camera.getPosition()), camDirection);;
     }
 
-    public void setFog(double fogStartDistanceIn, double fullFogDistanceIn, Color fogColorIn)
+    public void setFog(double fogStartDistanceIn, double fullFogDistanceIn, byte r, byte g, byte b)
     {
         fogStartDistance = fogStartDistanceIn;
         fullFogDistance = fullFogDistanceIn;
-        fogColor = fogColorIn;
+        fogR = r;
+        fogR = g;
+        fogR = b;
         fogEnabled = true;
     }
 
@@ -173,9 +205,12 @@ public class RenderingPanel extends JPanel implements Runnable
         pointRotationMatrix = Matrix3x3.multiply(Matrix3x3.rotationMatrixAxisX(camera.getVorientation()*0.017453292519943295), Matrix3x3.rotationMatrixAxisY(-camera.getHorientation()*0.017453292519943295));
         
         drawQeue.clear();
-        for (int i = 0; i < triangles.size(); i ++)
+        for (int i = 0; i < gameObjects.size(); i ++)
         {
-            calculateTriangle(triangles.get(i));
+            for (int j = 0; j < gameObjects.get(i).getMesh().getTriangles().size(); j++)
+            {
+                calculateTriangle(gameObjects.get(i).getMesh().getTriangles().get(j));
+            }
         }
 
         trianglesCalculateTime.stopClock();
@@ -249,6 +284,7 @@ public class RenderingPanel extends JPanel implements Runnable
     {
         Vector3 triangleCenter = triangle.getCenter();
         double distanceToTriangle = Vector3.subtract(triangleCenter, camPos).getMagnitude();  
+        
 
         if 
         (
@@ -258,11 +294,11 @@ public class RenderingPanel extends JPanel implements Runnable
             || distanceToTriangle <= camera.getNearClipDistance() //is the triangle too close?
         )
             return;
-        
+
         Vector3 triangleVertex1 = new Vector3(triangle.vertex1);
         Vector3 triangleVertex2 = new Vector3(triangle.vertex2);
         Vector3 triangleVertex3 = new Vector3(triangle.vertex3);
-    
+
         //create local variables: 
 
         //the screen coords of the triangle, to be determined by the rest of the method.
@@ -295,43 +331,42 @@ public class RenderingPanel extends JPanel implements Runnable
 
         if (shouldDrawTriangle)
         {
-            Color colorUsed;
+            int colorUsed = 16711935;
             if (triangle.getMesh() != null && triangle.getMesh().isShaded())
             {
                 Color litColor = triangle.getColorWithLighting();
                 if (fogEnabled && distanceToTriangle > fogStartDistance)
                 {
-                    Color triangleColor;
                     if (distanceToTriangle > fullFogDistance)
-                        triangleColor = fogColor;
+                    {
+                        colorUsed = convertToIntRGB(fogR, fogG, fogB);
+                    }
                     else
                     {
                         //skews the triangle's color closer to the fog color as a function of distance. 
                         double fogAmt = (distanceToTriangle-fogStartDistance)/(fullFogDistance-fogStartDistance);
-                        int red = litColor.getRed() + (int)((fogColor.getRed()-litColor.getRed())*fogAmt*fogAmt);
-                        int green = litColor.getGreen() + (int)((fogColor.getGreen()-litColor.getGreen())*fogAmt*fogAmt);
-                        int blue = litColor.getBlue() + (int)((fogColor.getBlue()-litColor.getBlue())*fogAmt*fogAmt);
+                        int red = Math.min(225, litColor.getRed() + (byte)((fogR-litColor.getRed())*fogAmt*fogAmt));
+                        int green = Math.min(225, litColor.getGreen() + (byte)((fogG-litColor.getGreen())*fogAmt*fogAmt));
+                        int blue = Math.min(225, litColor.getBlue() + (byte)((fogB-litColor.getBlue())*fogAmt*fogAmt));
 
-                        //clamps color values to between 0 and 255
-                        red = Math.max(0, Math.min(255, red));
-                        green = Math.max(0, Math.min(255, green));
-                        blue = Math.max(0, Math.min(255, blue));
-                        triangleColor = new Color(red, green, blue);
+                        colorUsed = convertToIntRGB(red, green, blue);
                     }
-                    colorUsed = triangleColor;
                 }
                 else 
-                    colorUsed = litColor;
+                    colorUsed = convertToIntRGB(litColor);
             }   
             else 
-                colorUsed = triangle.getBaseColor();
-            if (colorUsed == null)
-            {
-                colorUsed = Color.MAGENTA;
-            }
+                colorUsed = convertToIntRGB(triangle.getBaseColor());
+
             //adds the 2d triangle object into the triangle2d array.
             drawQeue.add(new Triangle2D(p1ScreenCoords, p2ScreenCoords, p3ScreenCoords, colorUsed, distanceToTriangle));
         }
+    }
+
+    //returns the integer rgb value of a color, which is used for buffered images. 
+    private int convertToIntRGB(int r, int g, int b)
+    {
+        return 65536 * r + 256 * g + b;
     }
 
     //returns the integer rgb value of a color, which is used for buffered images. 
@@ -345,11 +380,8 @@ public class RenderingPanel extends JPanel implements Runnable
     //edge of the triangle to the other (using a simple slope-intercept equation), first 
     //drawing the upper part and then the lower part of the triangle. 
     //This method is much faster at drawing triangles than Graphics' fillPolygon() method.
-    private void paintTriangle(Point p1, Point p2, Point p3, Color triangleColor)
+    private void paintTriangle(Point p1, Point p2, Point p3, int rgb)
     {
-        Point tempPoint = new Point();
-        int rgb = convertToIntRGB(triangleColor);
-
         Point high = p1;
         Point middle = p2;
         Point low = p3;
@@ -360,15 +392,15 @@ public class RenderingPanel extends JPanel implements Runnable
         {
             if (p1.y < p2.y)
             {
-                if (p3.y < p2.y)
+                if (p3.y < p1.y)
                 {
-                    middle = p3;
+                    high = p3;
+                    middle = p1;
                     low = p2;
                 }
                 else
                 {
-                    high = p3;
-                    middle = p1;
+                    middle = p3;
                     low = p2;
                 }
             }
@@ -390,74 +422,10 @@ public class RenderingPanel extends JPanel implements Runnable
                 else
                 {
                     high = p3;
-                    middle = p2;
                     low = p1;
                 }
             }
         }
-
-        // if( p1.y > p2.y )
-        // {
-        //     if( p1.y > p3.y && p2.y < p3.y)
-        //     {
-        //         middle = p3;
-        //         low = p2;
-        //     }
-        //     else
-        //     {
-        //         middle = p1;
-        //         high = p2;
-        //     }
-        // }
-        // else
-        // {
-        //     if( p2.y > p3.y )
-        //     {
-        //         high = p2;
-        //         if( p1.y > p3.y )
-        //         {
-        //             middle = p2;
-        //         }
-        //         else
-        //         {
-        //             middle = p3;
-        //             low = p1;
-        //         }
-        //     }
-        //     else
-        //     {
-        //         high = p3;
-        //         low = p1;
-        //     }
-        // }
-           
-
-        // //sorts the three points by height using a very simple bubble sort algorithm
-        // if (high.getY() > middle.getY())
-        // {
-            
-        //     tempPoint = high;
-        //     high = middle;
-        //     middle = tempPoint;
-        // }
-        // if (middle.getY() > low.getY())
-        // {
-        //     tempPoint = middle;
-        //     middle = low;
-        //     low = tempPoint;
-        // }
-        // if (high.getY() > middle.getY())
-        // {
-        //     tempPoint = high;
-        //     high = middle;
-        //     middle = tempPoint;
-        // }
-        // if (middle.getY() > low.getY())
-        // {
-        //     tempPoint = middle;
-        //     middle = low;
-        //     low = tempPoint;
-        // } 
 
         //the y-level of the horizontal line being drawn
         int yScanLine;
@@ -475,8 +443,7 @@ public class RenderingPanel extends JPanel implements Runnable
                 {
                     if (yScanLine >= 0)
                     {
-                        int relativeScanLine = yScanLine-high.y;
-                        scanlineEdge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((relativeScanLine)/((double)(low.y-high.y)/(low.x-high.x)) + high.x)));
+                        scanlineEdge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-high.y)/((double)(low.y-high.y)/(low.x-high.x)) + high.x)));
                         int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
                         Arrays.fill(pixelData, rgb);
                         drawHorizontalLine(Math.min(scanlineEdge1, scanlineEdge2), Math.max(scanlineEdge1, scanlineEdge2), yScanLine, pixelData);                    
@@ -490,8 +457,7 @@ public class RenderingPanel extends JPanel implements Runnable
                 {
                     if (yScanLine >= 0)
                     {
-                        int relativeScanLine = yScanLine-high.y;
-                        scanlineEdge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((relativeScanLine)/((double)(middle.y-high.y)/(middle.x-high.x)) + high.x)));
+                        scanlineEdge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-high.y)/((double)(middle.y-high.y)/(middle.x-high.x)) + high.x)));
                         int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
                         Arrays.fill(pixelData, rgb);
                         drawHorizontalLine(Math.min(scanlineEdge1, scanlineEdge2), Math.max(scanlineEdge1, scanlineEdge2), yScanLine, pixelData);                    
@@ -507,21 +473,6 @@ public class RenderingPanel extends JPanel implements Runnable
                         scanlineEdge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-high.y)/((double)(middle.y-high.y)/(middle.x-high.x)) + high.x)));
                         scanlineEdge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-high.y)/((double)(low.y-high.y)/(low.x-high.x)) + high.x)));
 
-                        // scanlineEdge1Weight = leftEdgeWeights[leftEdgeWeights.length-(yScanLine-high.y)-1];
-                        // scanlineEdge2Weight = rightEdgeWeights[rightEdgeWeights.length-(yScanLine-high.y)-1];
-
-                        // int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
-
-                        // for (int i = 0; i < pixelData.length; i ++)
-                        // {
-                        //     double[] barycentricCoord = new double[]
-                        //     {
-                        //         (scanlineEdge1Weight[0]*(pixelData.length-i) + scanlineEdge2Weight[0]*i)/pixelData.length,
-                        //         (scanlineEdge1Weight[1]*(pixelData.length-i) + scanlineEdge2Weight[1]*i)/pixelData.length,
-                        //         (scanlineEdge1Weight[2]*(pixelData.length-i) + scanlineEdge2Weight[2]*i)/pixelData.length,                                
-                        //     };
-                        //     pixelData[i] = convertToIntRGB(new Color((int)(barycentricCoord[0]*255), (int)(barycentricCoord[1]*255), (int)(barycentricCoord[2]*255)));
-                        // }
                         int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
                         Arrays.fill(pixelData, rgb);
                         drawHorizontalLine(Math.min(scanlineEdge1, scanlineEdge2), Math.max(scanlineEdge1, scanlineEdge2), yScanLine, pixelData);    
@@ -541,7 +492,6 @@ public class RenderingPanel extends JPanel implements Runnable
                 {
                     if (yScanLine >= 0)
                     {
-                        int relativeScanLine = yScanLine-middle.y;
                         scanlineEdge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-low.y)/((double)(low.y-high.y)/(low.x-high.x)) + low.x)));
                         int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
                         Arrays.fill(pixelData, rgb);
@@ -556,7 +506,6 @@ public class RenderingPanel extends JPanel implements Runnable
                 {
                     if (yScanLine >= 0)
                     {
-                        int relativeScanLine = yScanLine-middle.y;
                         scanlineEdge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-low.y)/((double)(low.y-middle.y)/(low.x-middle.x)) + low.x)));
                         int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
                         Arrays.fill(pixelData, rgb);
@@ -573,22 +522,6 @@ public class RenderingPanel extends JPanel implements Runnable
                         scanlineEdge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-low.y)/((double)(low.y-middle.y)/(low.x-middle.x)) + low.x)));
                         scanlineEdge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-low.y)/((double)(low.y-high.y)/(low.x-high.x)) + low.x)));
 
-
-                        // scanlineEdge1Weight = leftEdgeWeights[leftEdgeWeights.length-(yScanLine-high.y)-1];
-                        // scanlineEdge2Weight = rightEdgeWeights[rightEdgeWeights.length-(yScanLine-high.y)-1];
-
-                        // int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
-
-                        // for (int i = 0; i < pixelData.length; i ++)
-                        // {
-                        //     double[] barycentricCoord = new double[]
-                        //     {
-                        //         (scanlineEdge1Weight[0]*(pixelData.length-i) + scanlineEdge2Weight[0]*i)/pixelData.length,
-                        //         (scanlineEdge1Weight[1]*(pixelData.length-i) + scanlineEdge2Weight[1]*i)/pixelData.length,
-                        //         (scanlineEdge1Weight[2]*(pixelData.length-i) + scanlineEdge2Weight[2]*i)/pixelData.length,                                
-                        //     };
-                        //     pixelData[i] = convertToIntRGB(new Color((int)(barycentricCoord[0]*255), (int)(barycentricCoord[1]*255), (int)(barycentricCoord[2]*255)));
-                        // }
                         int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
                         Arrays.fill(pixelData, rgb);
                         drawHorizontalLine(Math.min(scanlineEdge1, scanlineEdge2), Math.max(scanlineEdge1, scanlineEdge2), yScanLine, pixelData);    
@@ -597,8 +530,6 @@ public class RenderingPanel extends JPanel implements Runnable
             }
         }
     }
-
-
 
     //draws a horizontal line with the given constraints and the specified integer rgb color.
     private void drawHorizontalLine(int startOFLineX, int endOfLineX, int levelY, int[] pixelColorData)
@@ -616,7 +547,7 @@ public class RenderingPanel extends JPanel implements Runnable
         public Point p3;
 
         //the color
-        public Color color;
+        public int color;
 
         //the distance from this triangle's corresponding 3d triangle to the camera. 
         //for the sole purpose of sorting triangles by distance, but rather than wasting 
@@ -626,14 +557,13 @@ public class RenderingPanel extends JPanel implements Runnable
         private double triangle3DDistance;
 
         //overloaded constructor. 
-        public Triangle2D(Point p1In, Point p2In, Point p3In, Color colorIn, double triangle3DDistanceIn)
+        public Triangle2D(Point p1In, Point p2In, Point p3In, int colorIn, double triangle3DDistanceIn)
         {
             p1 = p1In;
             p2 = p2In;
             p3 = p3In;
             color = colorIn;
             triangle3DDistance = triangle3DDistanceIn;
-
         }
 
         //the compareTo method allows java.util.Collections to compare two Triangle2D 
@@ -657,66 +587,3 @@ public class RenderingPanel extends JPanel implements Runnable
     }
 }   
 
-// if (Vector3.dotProduct(nearClipPlane.normal, Vector3.subtract(triangleVertex1, nearClipPlane.pointOnPlane)) < 0)
-//     v1TooClose = true;
-// if (Vector3.dotProduct(nearClipPlane.normal, Vector3.subtract(triangleVertex2, nearClipPlane.pointOnPlane)) < 0)
-//     v2TooClose = true;
-// if (Vector3.dotProduct(nearClipPlane.normal, Vector3.subtract(triangleVertex3, nearClipPlane.pointOnPlane)) < 0)
-//     v3TooClose = true;
-
-// if (v1TooClose && v2TooClose && v3TooClose)
-//     return;
-    
-
-// clipping: 
-// {
-//     if (v1TooClose)
-//     {
-//         if (v2TooClose)
-//         {
-//             triangleVertex1 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex1, triangleVertex3), triangleVertex3, nearClipPlane);
-//             triangleVertex2 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex2, triangleVertex3), triangleVertex3, nearClipPlane);
-            
-//             break clipping;
-//         }
-//         else if (v3TooClose)
-//         {
-//             triangleVertex1 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex1, triangleVertex2), triangleVertex2, nearClipPlane);
-//             triangleVertex3 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex3, triangleVertex2), triangleVertex2, nearClipPlane);
-//             break clipping;
-//         }
-//         else 
-//         {
-//             Vector3 tempV = triangleVertex1;
-//             triangleVertex1 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex1, triangleVertex2), triangleVertex2, nearClipPlane);
-//             Triangle newTriangle = new Triangle(triangle.getMesh(), triangleVertex1, triangleVertex3, Vector3.getIntersectionPoint(Vector3.subtract(tempV, triangleVertex3), triangleVertex3, nearClipPlane), triangle.getColorWithLighting());
-//             calculateTriangle(newTriangle);
-//             break clipping;
-//         }
-//     }
-//     else if (v2TooClose)
-//     {
-//         if (v3TooClose)
-//         {
-//             triangleVertex2 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex2, triangleVertex1), triangleVertex1, nearClipPlane);
-//             triangleVertex3 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex3, triangleVertex1), triangleVertex1, nearClipPlane);
-//             break clipping;
-//         }
-//         else 
-//         {
-//             Vector3 tempV = triangleVertex2;
-//             triangleVertex2 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex2, triangleVertex1), triangleVertex1, nearClipPlane);
-//             Triangle newTriangle = new Triangle(triangle.getMesh(), triangleVertex3, triangleVertex2, Vector3.getIntersectionPoint(Vector3.subtract(tempV, triangleVertex3), triangleVertex3, nearClipPlane), triangle.getColorWithLighting());
-//             calculateTriangle(newTriangle);
-//             break clipping;
-//         }
-//     }
-//     if (v3TooClose)
-//     {
-//         Vector3 tempV = new Vector3(triangleVertex3);
-//         triangleVertex3 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex3, triangleVertex2), triangleVertex2, nearClipPlane);
-//         Triangle newTriangle = new Triangle(triangle.getMesh(), triangleVertex3, triangleVertex1, Vector3.getIntersectionPoint(Vector3.subtract(tempV, triangleVertex1), triangleVertex1, nearClipPlane), triangle.getColorWithLighting());
-//         calculateTriangle(newTriangle);
-//     }
-// }
-// }

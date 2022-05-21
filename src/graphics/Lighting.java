@@ -1,4 +1,8 @@
+package src.graphics;
 import java.util.ArrayList;
+
+import src.GameObject;
+import src.primitives.Vector3;
 public class Lighting
 {
     //direction that the light faces. 
@@ -18,10 +22,10 @@ public class Lighting
     }
 
     //goes through the specified meshes and updates all their lighting's 
-    public void update(ArrayList<Mesh> meshes)
+    public void update(ArrayList<GameObject> objects)
     {
-        for (int i = 0; i < meshes.size(); i++)
-            meshes.get(i).calculateLighting(this);
+        for (int i = 0; i < objects.size(); i++)
+            objects.get(i).getMesh().calculateLighting(this);
     }
 }
 

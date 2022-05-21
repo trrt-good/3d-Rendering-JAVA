@@ -1,5 +1,9 @@
+package src.primitives;
 import java.awt.Color;
 import java.awt.image.Raster;
+
+import src.Mesh;
+import src.graphics.Lighting;
 public class Triangle 
 {
     //3d verticies of the triangle. 
@@ -58,6 +62,7 @@ public class Triangle
         double maxY = Math.max(t1.y, Math.max(t2.y, t3.y));
         triangleTexture = parentMesh.getTextureRaster().createCompatibleWritableRaster((int)minX, (int)minY, (int)(maxX-minX) + 1, (int)(maxY-minY) + 1);
         color = calculateTextureColor();
+        colorWithLighting = color;
     }
     public Mesh getMesh()
     {

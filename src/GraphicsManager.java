@@ -1,4 +1,11 @@
+package src;
 import javax.swing.JFrame;
+
+import src.graphics.Camera;
+import src.graphics.Lighting;
+import src.graphics.RenderingPanel;
+import src.primitives.EulerAngle;
+import src.primitives.Vector3;
 
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -19,12 +26,12 @@ public class GraphicsManager
 
     public static void startGraphics(String name)
     {
-        // cat = new GameObject
-        // (
-        //     "cat",
-        //     new Mesh("cat.obj", new Color(100, 100, 100), new Vector3(0, -100, 0), new EulerAngle(0, 0, 0), 1, true, true), 
-        //     new Transform(new Vector3())
-        // );
+        cat = new GameObject
+        (
+            "cat",
+            new Mesh("cat.obj", new Color(100, 100, 100), new Vector3(0, -100, 0), new EulerAngle(0, 0, 0), 1, true, true), 
+            new Transform(new Vector3())
+        );
 
         // triangleTest = new GameObject
         // (
@@ -33,19 +40,19 @@ public class GraphicsManager
         //     new Transform(new Vector3())
         // );
 
-        // car = new GameObject
-        // (
-        //     "car", 
-        //     new Mesh("car.obj", "carTexture.png", new Vector3(0, 0, 0), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 10, true, true), 
-        //     new Transform(new Vector3())
-        // );
-
-        jet = new GameObject
+        car = new GameObject
         (
-            "High Poly Jet",
-            new Mesh("jet.obj", new Color(100, 100, 100), new Vector3(), new EulerAngle(0, 0, 0), 100, true, true), 
+            "car", 
+            new Mesh("car.obj", "carTexture.png", new Vector3(0, 0, 0), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 10, true, true), 
             new Transform(new Vector3())
         );
+
+        // jet = new GameObject
+        // (
+        //     "High Poly Jet",
+        //     new Mesh("jet.obj", new Color(100, 100, 100), new Vector3(), new EulerAngle(0, 0, 0), 100, true, true), 
+        //     new Transform(new Vector3())
+        // );
 
         // sphere = new GameObject
         // (
@@ -70,12 +77,13 @@ public class GraphicsManager
 
         Camera cam = new Camera(new Vector3(0, 0, 0), 10000, 500, 60);
         renderingPanel.setCamera(cam);
-        renderingPanel.addMesh(jet.getMesh());
-        cam.setOrbitControls(renderingPanel, jet, 1000, 10);
+        renderingPanel.addGameObject(car);
+        renderingPanel.addGameObject(cat);
+        cam.setOrbitControls(renderingPanel, car, 1000, 10);
         //cam.setFreeControls(renderingPanel, 200, 10);
         renderingPanel.setLighting(new Lighting(new Vector3(0, -1, 0), 70, 30));
-        renderingPanel.setFog(1000, 3000, new Color(190, 210, 245));
-        renderingPanel.setFPSlimit(60);
+        renderingPanel.setFog(1000, 3000, (byte)190, (byte)210, (byte)245);
+        renderingPanel.setFPSlimit(150);
         renderingPanel.start();
         System.out.println("finished creating graphics in " + (System.nanoTime()-start)/1000000 + "ms");
     }

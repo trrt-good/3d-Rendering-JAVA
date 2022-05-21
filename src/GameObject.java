@@ -1,3 +1,4 @@
+package src;
 public class GameObject 
 {  
     //the mesh of the object
