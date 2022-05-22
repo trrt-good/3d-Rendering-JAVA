@@ -2,7 +2,7 @@ package src.primitives;
 import java.awt.Color;
 import java.awt.image.Raster;
 
-import src.Mesh;
+import src.gameObject.Mesh;
 import src.graphics.Lighting;
 public class Triangle 
 {

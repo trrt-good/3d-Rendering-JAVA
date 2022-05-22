@@ -88,8 +88,8 @@ public class Matrix3x3
     public static Matrix3x3 rotationMatrixAxisX(double angle)
     {
         //local variables to mitigate preforming the same slow trig function multiple times. 
-        double cosAngle = Math.cos(angle); 
         double sinAngle = Math.sin(angle); 
+        double cosAngle = Math.sqrt(1-sinAngle*sinAngle); //same as math.cos function
 
         /*  | cos -sin   0  |
             | sin  cos   0  |
@@ -106,8 +106,8 @@ public class Matrix3x3
     public static Matrix3x3 rotationMatrixAxisY(double angle)
     {
         //local variables to mitigate preforming the same slow trig function multiple times. 
-        double cosAngle = Math.cos(angle); 
         double sinAngle = Math.sin(angle); 
+        double cosAngle = Math.sqrt(1-sinAngle*sinAngle); //same as math.cos function
 
         /*  | cos   0   sin |
             |  0    1    0  |
@@ -124,8 +124,8 @@ public class Matrix3x3
     public static Matrix3x3 rotationMatrixAxisZ(double angle)
     {
         //local variables to mitigate preforming the same slow trig function multiple times. 
-        double cosAngle = Math.cos(angle); 
         double sinAngle = Math.sin(angle); 
+        double cosAngle = Math.sqrt(1-sinAngle*sinAngle); //same as math.cos function
 
     /*  | cos -sin   0  |
         | sin  cos   0  |
@@ -145,35 +145,15 @@ public class Matrix3x3
         axis = axis.getNormalized();
 
         //local variables to mitigate preforming the same slow trig function multiple times. 
-        double cos = Math.cos(angle); 
-        double cos1 = 1-cos;
         double sin = Math.sin(angle); 
+        double cos = Math.sqrt(1-sin*sin); //same as math.cos function
+        double cos1 = 1-cos;
 
         return new Matrix3x3
         (
             cos+axis.x*axis.x*cos1, axis.x*axis.y*cos1-axis.z*sin, axis.x*axis.z*cos1+axis.y*sin, 
             axis.y*axis.x*cos1+axis.z*sin, cos+axis.y*axis.y*cos1, axis.y*axis.z*cos1-axis.x*sin, 
             axis.z*axis.x*cos1-axis.y*sin, axis.z*axis.y*cos1+axis.x*sin, cos+axis.z*axis.z*cos1
-        );
-    }
-
-    // https://en.wikipedia.org/wiki/Rotation_matrix
-    // incentric rotation y-x-z order, however note that this program uses the y axis 
-    // as vertical, so yaw is rotation about the y-axis and roll is about the z axis.
-    public static Matrix3x3 eulerRotation(EulerAngle angle)
-    {
-        double cos_a = Math.cos(angle.z);
-        double sin_a = Math.sin(angle.z);
-        double cos_B = Math.cos(angle.y);
-        double sin_B = Math.sin(angle.y);
-        double cos_y = Math.cos(angle.x);
-        double sin_y = Math.sin(angle.x);
-
-        return new Matrix3x3
-        (
-            cos_a*cos_B, cos_a*sin_B*sin_y-sin_a*cos_y, cos_a*sin_B*cos_y+sin_a*sin_y, 
-            sin_a*cos_B, sin_a*sin_B*sin_y+cos_a*cos_y, sin_a*sin_B*cos_y-cos_a*sin_y, 
-            -sin_B, cos_B*sin_y, cos_B*cos_y
         );
     }
 

@@ -1,12 +1,13 @@
 package src.graphics;
 import javax.swing.JPanel;
 
-import src.GameObject;
-import src.TimingHelper;
+import src.gameObject.GameObject;
 import src.primitives.Matrix3x3;
 import src.primitives.Plane;
+import src.primitives.Quaternion;
 import src.primitives.Triangle;
 import src.primitives.Vector3;
+import src.testing.TimingHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,6 +37,7 @@ public class RenderingPanel extends JPanel implements Runnable
     private int[] blankImagePixelColorData;
     private ArrayList<Triangle2D> drawQeue;
     private Matrix3x3 pointRotationMatrix;
+    private Quaternion pointRotationQuaternion;
     private double pixelsPerUnit;
     private Vector3 camCenterPoint;
 
@@ -59,9 +61,9 @@ public class RenderingPanel extends JPanel implements Runnable
     private double fogStartDistance;
     private double fullFogDistance;
     private boolean fogEnabled = false;
-    private byte fogR;
-    private byte fogG;
-    private byte fogB;
+    private int fogR;
+    private int fogG;
+    private int fogB;
 
     //used to help with optimizations:
     private TimingHelper totalFrameTime = new TimingHelper("totalFrameTime");
@@ -81,8 +83,8 @@ public class RenderingPanel extends JPanel implements Runnable
         lightingObject = null;
         gameObjects = new ArrayList<GameObject>();
         drawQeue = new ArrayList<Triangle2D>();
-        camDirection = new Vector3();   
-        camPos = new Vector3();
+        camDirection = Vector3.zero();   
+        camPos = Vector3.zero();
         fps = -1;
         
         //creates the buffered image which will be used to render triangles. 
@@ -173,13 +175,13 @@ public class RenderingPanel extends JPanel implements Runnable
         renderPlane = new Plane(Vector3.add(Vector3.multiply(camDirection, camera.getRenderPlaneDistance()), camera.getPosition()), camDirection);;
     }
 
-    public void setFog(double fogStartDistanceIn, double fullFogDistanceIn, byte r, byte g, byte b)
+    public void setFog(double fogStartDistanceIn, double fullFogDistanceIn, int r, int g, int b)
     {
         fogStartDistance = fogStartDistanceIn;
         fullFogDistance = fullFogDistanceIn;
         fogR = r;
-        fogR = g;
-        fogR = b;
+        fogG = g;
+        fogB = b;
         fogEnabled = true;
     }
 
@@ -202,18 +204,34 @@ public class RenderingPanel extends JPanel implements Runnable
         camDirection = camera.getDirectionVector();
         camCenterPoint = Vector3.add(Vector3.multiply(camDirection, camera.getRenderPlaneDistance()), camPos);
         renderPlane = new Plane(Vector3.add(Vector3.multiply(camDirection, camera.getRenderPlaneDistance()), camPos), camDirection);
-        pointRotationMatrix = Matrix3x3.multiply(Matrix3x3.rotationMatrixAxisX(camera.getVorientation()*0.017453292519943295), Matrix3x3.rotationMatrixAxisY(-camera.getHorientation()*0.017453292519943295));
+        pointRotationQuaternion = createRotationQuaternion(camera.getVorientation(), -camera.getHorientation());
         
         drawQeue.clear();
         for (int i = 0; i < gameObjects.size(); i ++)
         {
-            for (int j = 0; j < gameObjects.get(i).getMesh().getTriangles().size(); j++)
+            if (gameObjects.get(i).getMesh() != null)
             {
-                calculateTriangle(gameObjects.get(i).getMesh().getTriangles().get(j));
+                for (int j = 0; j < gameObjects.get(i).getMesh().getTriangles().size(); j++)
+                {
+                    calculateTriangle(gameObjects.get(i).getMesh().getTriangles().get(j));
+                }
             }
         }
 
         trianglesCalculateTime.stopClock();
+    }
+
+    public Quaternion createRotationQuaternion(double pitch, double yaw)
+    {
+        //x axis rotation first
+        pitch = Math.sin(pitch/2);
+        double w1 = Math.sqrt(1-pitch*pitch);
+
+        //y axis rotation
+        yaw = Math.sin(yaw/2);
+        double w2 = Math.sqrt(1-yaw*yaw);
+
+        return new Quaternion(w1*w2, w2*pitch, w1*yaw, pitch*yaw);  
     }
 
     public void sortTriangles()
@@ -285,7 +303,6 @@ public class RenderingPanel extends JPanel implements Runnable
         Vector3 triangleCenter = triangle.getCenter();
         double distanceToTriangle = Vector3.subtract(triangleCenter, camPos).getMagnitude();  
         
-
         if 
         (
             Vector3.dotProduct(triangle.getPlane().normal, Vector3.subtract(triangleCenter, camPos)) > 0 //is the triangle facing away?
@@ -309,21 +326,21 @@ public class RenderingPanel extends JPanel implements Runnable
         boolean shouldDrawTriangle = false;
 
         triangleVertex1 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex1, camPos), camPos, renderPlane);
-        Vector3 rotatedPoint = Vector3.applyMatrix(pointRotationMatrix, Vector3.subtract(triangleVertex1, camCenterPoint));
+        Vector3 rotatedPoint = Vector3.rotate(Vector3.subtract(triangleVertex1, camCenterPoint), pointRotationQuaternion);
         if ((Math.abs(rotatedPoint.x) < renderPlaneWidth/2*1.2 && Math.abs(rotatedPoint.y) < renderPlaneWidth*((double)getHeight()/(double)getWidth())/2*1.2))
             shouldDrawTriangle = true;
         p1ScreenCoords.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
         p1ScreenCoords.y = (int)(getHeight()/2 - rotatedPoint.y*pixelsPerUnit);
 
         triangleVertex2 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex2, camPos), camPos, renderPlane);
-        rotatedPoint = Vector3.applyMatrix(pointRotationMatrix, Vector3.subtract(triangleVertex2, camCenterPoint));
+        rotatedPoint = Vector3.rotate(Vector3.subtract(triangleVertex2, camCenterPoint), pointRotationQuaternion);
         if ((Math.abs(rotatedPoint.x) < renderPlaneWidth/2*1.2 && Math.abs(rotatedPoint.y) < renderPlaneWidth*((double)getHeight()/getWidth())/2*1.2))
             shouldDrawTriangle = true;
         p2ScreenCoords.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
         p2ScreenCoords.y = (int)(getHeight()/2 - rotatedPoint.y*pixelsPerUnit);
 
         triangleVertex3 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex3, camPos), camPos, renderPlane);
-        rotatedPoint = Vector3.applyMatrix(pointRotationMatrix, Vector3.subtract(triangleVertex3, camCenterPoint));
+        rotatedPoint = Vector3.rotate(Vector3.subtract(triangleVertex3, camCenterPoint), pointRotationQuaternion);
         if ((Math.abs(rotatedPoint.x) < renderPlaneWidth/2*1.2 && Math.abs(rotatedPoint.y) < renderPlaneWidth*((double)getHeight()/getWidth())/2*1.2))
             shouldDrawTriangle = true;
         p3ScreenCoords.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
@@ -345,9 +362,9 @@ public class RenderingPanel extends JPanel implements Runnable
                     {
                         //skews the triangle's color closer to the fog color as a function of distance. 
                         double fogAmt = (distanceToTriangle-fogStartDistance)/(fullFogDistance-fogStartDistance);
-                        int red = Math.min(225, litColor.getRed() + (byte)((fogR-litColor.getRed())*fogAmt*fogAmt));
-                        int green = Math.min(225, litColor.getGreen() + (byte)((fogG-litColor.getGreen())*fogAmt*fogAmt));
-                        int blue = Math.min(225, litColor.getBlue() + (byte)((fogB-litColor.getBlue())*fogAmt*fogAmt));
+                        int red = (int)Math.max(0, Math.min(225, litColor.getRed() + (fogR-litColor.getRed())*fogAmt*fogAmt));
+                        int green = (int)Math.max(0, Math.min(225, litColor.getGreen() + (fogG-litColor.getGreen())*fogAmt*fogAmt));
+                        int blue = (int)Math.max(0, Math.min(225, litColor.getBlue() + (fogB-litColor.getBlue())*fogAmt*fogAmt));
 
                         colorUsed = convertToIntRGB(red, green, blue);
                     }

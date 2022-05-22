@@ -1,4 +1,7 @@
-package src;
+package src.gameObject;
+
+import src.primitives.Vector3;
+
 public class GameObject 
 {  
     //the mesh of the object
@@ -10,12 +13,11 @@ public class GameObject
     //name
     private String name;
 
-    public GameObject(String nameIn, Mesh meshIn, Transform transformIn)
+    public GameObject(String nameIn, Mesh meshIn, Vector3 transformPos)
     {
         mesh = meshIn;
         name = nameIn;
-        transformIn.setGameObject(this);
-        transform = transformIn;
+        transform = new Transform((transformPos == null)? new Vector3(0, 0, 0) : transformPos);
     }
     
     //#region getter methods 

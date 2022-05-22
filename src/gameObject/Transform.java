@@ -1,8 +1,7 @@
-package src;
-
-import src.primitives.EulerAngle;
+package src.gameObject;
 import src.primitives.Matrix3x3;
 import src.primitives.Vector3;
+import src.primitives.Quaternion;
 
 public class Transform 
 {
@@ -19,30 +18,28 @@ public class Transform
     //the upwards vector of the transform in world space. This is always the y-axis in local transform space. 
     private Vector3 up; 
 
-    //the rotation of the transform, x = pitch, y = yaw, z = roll. x value represents rotation about
-    //the right vector, y represents rotation about up vector and z represents rotation about the 
-    //forward vector.
-    private EulerAngle rotation;
+    //the quaternion rotation of the transform
+    private Quaternion rotation;
 
     //default rotation always 0, 0, 0
     public Transform(Vector3 positionIn)
     {
         position = positionIn;
-        rotation = new EulerAngle();
+        rotation = new Quaternion(1, 0, 0, 0);
         forward = new Vector3(0, 0, 1);
         right = new Vector3(1, 0, 0);
         up = new Vector3(0, 1, 0);
     }
 
-    public void lookTowards(Vector3 direction)
+    public void lookTowards(Vector3 point)
     {
-        if (direction.x != 0 && direction.y != 0 && direction.z != 0)
-        {
-            direction = transformToLocal(direction);
-            setYaw(rotation.y + ((direction.x < 0)? -Math.atan(direction.z/direction.x)-Math.PI/2 : Math.PI/2-Math.atan(direction.z/direction.x)));
+        // if (point.x != 0 && point.y != 0 && point.z != 0)
+        // {
+        //     point = transformToLocal(point);
+        //     setYaw(rotation.y + ((point.x < 0)? -Math.atan(point.z/point.x)-Math.PI/2 : Math.PI/2-Math.atan(point.z/point.x)));
     
-            setPitch(rotation.x + Math.atan(direction.y/Math.sqrt(direction.x*direction.x + direction.z*direction.z)));
-        }
+        //     setPitch(rotation.x + Math.atan(point.y/Math.sqrt(point.x*point.x + point.z*point.z)));
+        // }
     }
 
     public void setPosition(Vector3 positionIn)
@@ -57,37 +54,13 @@ public class Transform
         position = Vector3.add(position, amount);
     }
 
-    //following three methods:
-    //sets the specified rotation around a local axis, as well as updating
-    //the orientation of an attached mesh. 
-    public void setPitch(double angle)
+    public void rotate(Quaternion q)
     {
-        Matrix3x3 rotationMatrix = Matrix3x3.axisAngleMatrix(right, angle-rotation.x);
-        up = Vector3.applyMatrix(rotationMatrix, up);
-        forward = Vector3.applyMatrix(rotationMatrix, forward);
-        if (gameObject.getMesh() != null)
-            gameObject.getMesh().rotate(rotationMatrix, position);
-        rotation.x = angle;
-    }
-
-    public void setYaw(double angle)
-    {
-        Matrix3x3 rotationMatrix = Matrix3x3.axisAngleMatrix(up, angle-rotation.y);
-        forward = Vector3.applyMatrix(rotationMatrix, forward);
-        right = Vector3.applyMatrix(rotationMatrix, right);
-        if (gameObject.getMesh() != null)
-            gameObject.getMesh().rotate(rotationMatrix, position);
-        rotation.y = angle;
-    }
-    
-    public void setRoll(double angle)
-    {
-        Matrix3x3 rotationMatrix = Matrix3x3.axisAngleMatrix(forward, angle-rotation.z);
-        up = Vector3.applyMatrix(rotationMatrix, up);
-        right = Vector3.applyMatrix(rotationMatrix, right);
-        if (gameObject.getMesh() != null)
-            gameObject.getMesh().rotate(rotationMatrix, position);
-        rotation.z = angle;
+        rotation = Quaternion.multiply(rotation, q);
+        gameObject.getMesh().rotate(q, position);
+        forward.rotate(q);
+        right.rotate(q);
+        up.rotate(q);
     }
 
     //returns the world-space equivilant of "point" in local space. 

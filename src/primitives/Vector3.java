@@ -2,7 +2,11 @@ package src.primitives;
 //An object which represents 3d points or directions
 //The Vector3 class also contains many static methods for 3d math.  
 public class Vector3 
-{
+{    
+    public static final Vector3 UP = new Vector3(0, 1, 0);
+    public static final Vector3 RIGHT = new Vector3(1, 0, 0);
+    public static final Vector3 FORWARD = new Vector3(0, 0, 1);
+
     /**
      * The {@code x} component of the {@code Vector3} in 3d cartesian coordinate space.
      */
@@ -43,16 +47,6 @@ public class Vector3
         x = vector.x;
         y = vector.y;
         z = vector.z;
-    }
-
-    /**
-     * Creates a vector with values (0, 0, 0)
-     */
-    public Vector3()
-    {
-        x = 0;
-        y = 0;
-        z = 0;
     }
 
     /**
@@ -103,13 +97,13 @@ public class Vector3
     }
     
     /**
-     * adds the specified vector to itself, then returns itself as the result
+     * adds the specified vector to itself, and also returns itself as the result
      * after the operation. This does change the {@code x}, {@code y} and {@code z} components
      * of the vector. 
      * @param vectorIn the vector to be added
      * @return the vector after the operation. 
      */
-    public Vector3 add(Vector3 vectorIn)
+    public Vector3 translate(Vector3 vectorIn)
     {
         x+= vectorIn.x;
         y+= vectorIn.y;
@@ -123,11 +117,23 @@ public class Vector3
      * @param multiplier the scalar multiplier
      * @return the product
      */
-    public Vector3 multiply(double multiplier)
+    public Vector3 scale(double multiplier)
     {
         x*=multiplier;
         y*=multiplier;
         z*=multiplier;
+        return this;
+    }
+
+    /**
+     * rotates itself by the specified quaterion and also returns itself 
+     * as a result. 
+     * @param q the quaternion representing the rotation
+     * @return the resulting vector3 after the rotation
+     */
+    public Vector3 rotate(Quaternion q)
+    {
+        set(Vector3.rotate(this, q));
         return this;
     }
 
@@ -158,6 +164,11 @@ public class Vector3
     }
 
 //============================= static methods ===============================
+
+    public static Vector3 zero()
+    {
+        return new Vector3(0, 0, 0);
+    }
 
     //returns the dot product of two vectors.
     public static double dotProduct(Vector3 a, Vector3 b)
@@ -318,5 +329,11 @@ public class Vector3
         vector.x*matrix.R2C1 + vector.y*matrix.R2C2 + vector.z*matrix.R2C3,
         vector.x*matrix.R3C1 + vector.y*matrix.R3C2 + vector.z*matrix.R3C3
         );
+    }
+
+    public static Vector3 rotate(Vector3 vector, Quaternion rotation)
+    {
+        Quaternion q = Quaternion.multiply(Quaternion.multiply(rotation, new Quaternion(0, vector.x, vector.y, vector.z)), rotation.getInverse());
+        return new Vector3(q.x, q.y, q.z);
     }
 }

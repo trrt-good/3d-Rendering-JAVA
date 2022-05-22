@@ -8,7 +8,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelListener;
 import javax.swing.JPanel;
 
-import src.GameObject;
+import src.gameObject.GameObject;
 import src.primitives.Vector3;
 
 public class Camera
@@ -39,20 +39,20 @@ public class Camera
         position = positionIn;
         farClipDistance = farClipDistanceIn;
         nearClipDistance = nearClipDistanceIn;
-        directionVector = Vector3.angleToVector(hAngle*0.017453292519943295, vAngle*0.017453292519943295);
+        directionVector = Vector3.angleToVector(hAngle, vAngle);
         setFov(fovIn);
     }
 
     //sets the v and h angles to look at the specified position.
     public void lookAt(Vector3 pos)
     {
-        hAngle = (pos.x-position.x < 0)? -Math.toDegrees(Math.atan((pos.z-position.z)/(pos.x-position.x)))-90 : 90-Math.toDegrees(Math.atan((pos.z-position.z)/(pos.x-position.x)));
+        hAngle = (pos.x-position.x < 0)? -Math.atan((pos.z-position.z)/(pos.x-position.x))-Math.PI/2 : Math.PI/2-Math.atan((pos.z-position.z)/(pos.x-position.x));
 
-        vAngle = Math.toDegrees(Math.atan((pos.y-position.y)/(Math.sqrt((pos.x-position.x)*(pos.x-position.x) + (pos.z-position.z)*(pos.z-position.z)))));
+        vAngle = Math.atan((pos.y-position.y)/(Math.sqrt((pos.x-position.x)*(pos.x-position.x) + (pos.z-position.z)*(pos.z-position.z))));
         
-        hAngle%=360;
-        vAngle%=360;
-        directionVector = Vector3.angleToVector(hAngle*0.017453292519943295, vAngle*0.017453292519943295);
+        hAngle%=Math.PI;
+        vAngle%=Math.PI;
+        directionVector = Vector3.angleToVector(hAngle, vAngle);
     }
 
     //camera controller which orbits a specified GameObject. panning the camera will cause it to 
@@ -65,8 +65,8 @@ public class Camera
 
         private double distance; //distacne from the object
 
-        private int maxAngle = 90; //the maximum angle the camera can go up to
-        private int minAngle = -90; //the minimum angle the camera can go down to.
+        private double maxAngle = Math.PI/2-0.1; //the maximum angle the camera can go up to
+        private double minAngle = -Math.PI/2+0.1; //the minimum angle the camera can go down to.
 
         private GameObject focusObj; //the game object that the camera is focused on. 
         private double sensitivity; //how fast should the camera pan?
@@ -75,7 +75,7 @@ public class Camera
         private int prevY = 0;
 
         private Vector3 difference;
-        private Vector3 directionUnit = new Vector3();
+        private Vector3 directionUnit = Vector3.zero();
         
         public OrbitCamController(GameObject focusObjectIn, double startDistanceIn, double sensitivityIn)
         {
@@ -102,9 +102,9 @@ public class Camera
         {
             directionUnit = Vector3.rotateAroundYaxis(directionUnit, (e.getX()-prevX)/(2000/sensitivity));
             if (vAngle > -maxAngle && (e.getY()-prevY)/(200/sensitivity) > 0)
-                directionUnit = Vector3.rotateAroundYaxis(Vector3.rotateAroundXaxis(Vector3.rotateAroundYaxis(directionUnit, -hAngle*0.017453292519943295), (e.getY()-prevY)/(2000/sensitivity)), hAngle*0.017453292519943295);
+                directionUnit = Vector3.rotateAroundYaxis(Vector3.rotateAroundXaxis(Vector3.rotateAroundYaxis(directionUnit, -hAngle), (e.getY()-prevY)/(2000/sensitivity)), hAngle);
             else if (vAngle < -minAngle && (e.getY()-prevY)/(200/sensitivity) < 0)
-                directionUnit = Vector3.rotateAroundYaxis(Vector3.rotateAroundXaxis(Vector3.rotateAroundYaxis(directionUnit, -hAngle*0.017453292519943295), (e.getY()-prevY)/(2000/sensitivity)), hAngle*0.017453292519943295);
+                directionUnit = Vector3.rotateAroundYaxis(Vector3.rotateAroundXaxis(Vector3.rotateAroundYaxis(directionUnit, -hAngle), (e.getY()-prevY)/(2000/sensitivity)), hAngle);
             difference = Vector3.multiply(directionUnit, distance);
             updatePosition();
             lookAt(focusObj.getTransform().getPosition());
@@ -165,7 +165,7 @@ public class Camera
 
             prevX = e.getX();
             prevY = e.getY();
-            directionVector = Vector3.angleToVector(hAngle*0.017453292519943295, vAngle*0.017453292519943295);
+            directionVector = Vector3.angleToVector(hAngle, vAngle);
         }
 
         //checks for keys
@@ -196,17 +196,17 @@ public class Camera
 
         private void moveForward(double distanceIn)
         {
-            position.add(Vector3.multiply(Vector3.angleToVector(hAngle*0.017453292519943295, vAngle*0.017453292519943295), distanceIn));
+            position.translate(Vector3.multiply(Vector3.angleToVector(hAngle, vAngle), distanceIn));
         }
 
         private void moveLeft(double distanceIn)
         {
-            position.add(Vector3.multiply(Vector3.angleToVector(hAngle*0.017453292519943295-Math.PI/2, 0), distanceIn));
+            position.translate(Vector3.multiply(Vector3.angleToVector(hAngle-Math.PI/2, 0), distanceIn));
         }
 
         private void moveUp(double distanceIn)
         {
-            position.add(Vector3.multiply(Vector3.angleToVector(hAngle*0.017453292519943295, vAngle*0.017453292519943295+Math.PI/2), distanceIn));
+            position.translate(Vector3.multiply(Vector3.angleToVector(hAngle, vAngle+Math.PI/2), distanceIn));
         }
 
         public void mousePressed(MouseEvent e) 
@@ -253,7 +253,7 @@ public class Camera
     //calculates the render plane width, which is a slightly expensive method, so it is only called once. 
     private double calculateRenderPlaneWidth()
     {
-        return Math.tan(fov*0.017453292519943295/2)*renderPlaneDistance*2;
+        return Math.tan(fov/2)*renderPlaneDistance*2;
     }
 
     //#region getter/setter methods
@@ -279,7 +279,7 @@ public class Camera
 
     public void setFov(double fovIn)
     {
-        fov = fovIn;
+        fov = Math.toRadians(fovIn);
         renderPlaneWidth = calculateRenderPlaneWidth();
     }
 

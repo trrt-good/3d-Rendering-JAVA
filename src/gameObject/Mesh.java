@@ -1,4 +1,4 @@
-package src;
+package src.gameObject;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.StringTokenizer;
@@ -12,11 +12,12 @@ import java.awt.image.Raster;
 import javax.imageio.ImageIO;
 
 import src.graphics.Lighting;
-import src.primitives.EulerAngle;
 import src.primitives.Matrix3x3;
+import src.primitives.Quaternion;
 import src.primitives.Triangle;
 import src.primitives.Vector2;
 import src.primitives.Vector3;
+import src.Main;
 
 //a class for storing groups of triangles in a mesh.
 public class Mesh 
@@ -48,7 +49,7 @@ public class Mesh
     private boolean backFaceCull = true;
 
     //overloaded constructor takes in the name of the model, transform offsets, color and the boolean values 
-    public Mesh(String modelFileName, String textureFileName, Vector3 modelOffsetAmount, EulerAngle modelOffsetRotation, double scale, boolean shaded, boolean shouldBackFaceCull)
+    public Mesh(String modelFileName, String textureFileName, Vector3 modelOffsetAmount, Quaternion modelOffsetRotation, double scale, boolean shaded, boolean shouldBackFaceCull)
     {
         long start = System.nanoTime();
         texture = null;
@@ -69,7 +70,7 @@ public class Mesh
         shading = shaded;
         backFaceCull = shouldBackFaceCull;
         baseColor = Color.MAGENTA;
-        totalMovement = new Vector3();
+        totalMovement = Vector3.zero();
         
         if (modelFileName.endsWith(".obj"))
         {
@@ -82,7 +83,7 @@ public class Mesh
         System.out.println("mesh created: " + modelFileName + " in " + (System.nanoTime() - start)/1000000 + "ms\n\t- " + triangles.size() + " triangles");
     }
 
-    public Mesh(String modelFileName, Color color, Vector3 modelOffsetAmount, EulerAngle modelOffsetRotation, double scale, boolean shaded, boolean shouldBackFaceCull)
+    public Mesh(String modelFileName, Color color, Vector3 modelOffsetAmount, Quaternion modelOffsetRotation, double scale, boolean shaded, boolean shouldBackFaceCull)
     {
         long start = System.nanoTime();
         texture = null;
@@ -92,7 +93,7 @@ public class Mesh
         shading = shaded;
         backFaceCull = shouldBackFaceCull;
         baseColor = (color == null)? Color.MAGENTA : color;
-        totalMovement = new Vector3();
+        totalMovement = Vector3.zero();
         
         if (modelFileName.endsWith(".obj"))
         {
@@ -113,11 +114,11 @@ public class Mesh
     }
 
     //rotates each triangle in the mesh according to a rotation matrix, and around the center of rotation.
-    public void rotate(Matrix3x3 rotationMatrix, Vector3 centerOfRotation)
+    public void rotate(Quaternion quaternion, Vector3 centerOfRotation)
     {
         for (int i = 0; i < vertices.size(); i ++)
         {
-            vertices.get(i).set(Vector3.add(Vector3.applyMatrix(rotationMatrix, Vector3.subtract(vertices.get(i), centerOfRotation)), centerOfRotation));
+            vertices.get(i).set(Vector3.add(Vector3.rotate(Vector3.subtract(vertices.get(i), centerOfRotation), quaternion), centerOfRotation));
         }
     }
 
@@ -186,9 +187,9 @@ public class Mesh
     }
 
     //reads a .obj file (a text file) and stores triangles inside the triangle list. 
-    private void createTriangles(String fileName, Vector3 offsetPosition, EulerAngle offsetOrientation, double scale)
+    private void createTriangles(String fileName, Vector3 offsetPosition, Quaternion offsetOrientation, double scale)
     {
-        Matrix3x3 offsetRotationMatrix = Matrix3x3.eulerRotation(offsetOrientation);
+
         //vertices are temporarily stored before they are conbined into triangles and added into the main
         //triangle list.
         ArrayList<Vector2> textureCoords = new ArrayList<Vector2>();
@@ -222,7 +223,7 @@ public class Mesh
                     Vector3 vertexCoordinate = new Vector3(Double.parseDouble(lineTokens.nextToken()), Double.parseDouble(lineTokens.nextToken()), Double.parseDouble(lineTokens.nextToken()));
 
                     //apply transformations to the Vector3 based on offset params
-                    vertexCoordinate = Vector3.applyMatrix(offsetRotationMatrix, vertexCoordinate);
+                    vertexCoordinate = Vector3.rotate(vertexCoordinate, offsetOrientation);
                     vertexCoordinate = Vector3.add(offsetPosition, vertexCoordinate);
                     vertexCoordinate = Vector3.multiply(vertexCoordinate, scale);
 

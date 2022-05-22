@@ -1,7 +1,7 @@
 package src.graphics;
 import java.util.ArrayList;
 
-import src.GameObject;
+import src.gameObject.GameObject;
 import src.primitives.Vector3;
 public class Lighting
 {
@@ -25,7 +25,10 @@ public class Lighting
     public void update(ArrayList<GameObject> objects)
     {
         for (int i = 0; i < objects.size(); i++)
-            objects.get(i).getMesh().calculateLighting(this);
+        {
+            if (objects.get(i).getMesh() != null)
+                objects.get(i).getMesh().calculateLighting(this);
+        }
     }
 }
 
