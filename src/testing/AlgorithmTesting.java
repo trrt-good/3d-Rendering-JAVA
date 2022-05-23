@@ -1,10 +1,11 @@
 package src.testing;
 
 import src.*;
+import org.apache.commons.math3.util.FastMath;
 
 public class AlgorithmTesting
 {
-    public static final long ITERATIONS_PER_TEST = (int)Math.pow(10, 6);
+    public static final long ITERATIONS_PER_TEST = (int)Math.pow(10,4);
 
     public static void main(String[] args) 
     {
@@ -60,9 +61,7 @@ public class AlgorithmTesting
         double max = 0;
         for(long i = 0; i < ITERATIONS_PER_TEST; i++) 
         {
-            double r = Math.random();
-            if (r > max)
-                max = r;
+            Math.asin(FastMath.random()*Math.PI*1000);
         }
 
         start = System.nanoTime() - start;
@@ -76,8 +75,7 @@ public class AlgorithmTesting
         double max = 0;
         for(long i = 0; i < ITERATIONS_PER_TEST; i++) 
         {
-            double r = Math.random();
-            max = Math.max(max, r);
+            FastMath.asin(FastMath.random()*1000);
         }
 
         start = System.nanoTime() - start;
