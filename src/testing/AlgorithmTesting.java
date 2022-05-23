@@ -1,15 +1,14 @@
 package src.testing;
-import java.util.Arrays;
 
-import src.primitives.*;
+import src.*;
+
 public class AlgorithmTesting
 {
-    public static final long ITERATIONS_PER_TEST = (int)Math.pow(2, 2);
-    private static int[] array;
+    public static final long ITERATIONS_PER_TEST = (int)Math.pow(10, 6);
 
     public static void main(String[] args) 
     {
-        runTests(100);
+        runTests(1000);
     }
 
     public static void runTests(int numberOfTests)
@@ -56,69 +55,33 @@ public class AlgorithmTesting
 
     public static long test1()
     {
-        array = new int[100000];
-        for (int i = 0; i < array.length; i ++)
-        {
-            array[i] = (int)(Math.random()*500000);
-        }
-
         long start = System.nanoTime();
         
+        double max = 0;
         for(long i = 0; i < ITERATIONS_PER_TEST; i++) 
         {
-            int counterArraySize = 0;
-            for (int j = 0; j < array.length; j ++)
-            {
-                counterArraySize = Math.max(array[j], counterArraySize);
-            }
-            int[] counterArray = new int[counterArraySize+1];
-            int[] sortedArray = new int[array.length];
-            int counter = 0;
-            for (int j = 0; j < array.length; j ++)
-            {
-                counterArray[array[j]]++;
-            }
-            for (int j = 0; j < counterArray.length; j++)
-            {
-                for (int k = 0; k < counterArray[j]; k++)
-                {
-                    sortedArray[counter] = j;
-                    counter++;
-                }
-            }
+            double r = Math.random();
+            if (r > max)
+                max = r;
         }
+
         start = System.nanoTime() - start;
         return start;
     }
 
     public static long test2()
     {
-        array = new int[100000];
-        for (int i = 0; i < array.length; i ++)
-        {
-            array[i] = (int)(Math.random()*500000);
-        }
         long start = System.nanoTime();
         
+        double max = 0;
         for(long i = 0; i < ITERATIONS_PER_TEST; i++) 
         {
-            Arrays.parallelSort(array);
+            double r = Math.random();
+            max = Math.max(max, r);
         }
+
         start = System.nanoTime() - start;
         return start;
-    }
-
-    public static Quaternion createRotationQuaternion(double pitch, double yaw)
-    {
-        //x axis rotation first
-        pitch = Math.sin(pitch/2);
-        double w1 = Math.sqrt(1-pitch*pitch);
-
-        //y axis rotation
-        yaw = Math.sin(yaw/2);
-        double w2 = Math.sqrt(1-yaw*yaw);
-
-        return new Quaternion(w1*w2, w2*pitch, w1*yaw, pitch*yaw);  
     }
 
     public static String getTime(long nanoseconds)

@@ -12,7 +12,6 @@ import java.awt.image.Raster;
 import javax.imageio.ImageIO;
 
 import src.graphics.Lighting;
-import src.primitives.Matrix3x3;
 import src.primitives.Quaternion;
 import src.primitives.Triangle;
 import src.primitives.Vector2;

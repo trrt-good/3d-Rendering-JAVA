@@ -46,12 +46,12 @@ public class GraphicsManager
             Vector3.zero()
         );
 
-        // jet = new GameObject
-        // (
-        //     "High Poly Jet",
-        //     new Mesh("jet.obj", new Color(100, 100, 100), Vector3.zero(), Quaternion.toQuaternion(0, 0, 0), 100, true, true), 
-        //     Vector3.zero()
-        // );
+        jet = new GameObject
+        (
+            "High Poly Jet",
+            new Mesh("jet.obj", new Color(100, 100, 100), Vector3.zero(), Quaternion.toQuaternion(0, 0, 0), 100, true, true), 
+            Vector3.zero()
+        );
 
         // sphere = new GameObject
         // (
@@ -81,7 +81,7 @@ public class GraphicsManager
         //cam.setFreeControls(renderingPanel, 200, 10);
         renderingPanel.setLighting(new Lighting(new Vector3(0, -1, 0), 70, 30));
         renderingPanel.setFog(1000, 3000, 190, 210, 245);
-        renderingPanel.setFPSlimit(150);
+        //renderingPanel.setFPSlimit(150);
         renderingPanel.start();
         System.out.println("finished creating graphics in " + (System.nanoTime()-start)/1000000 + "ms");
     }
