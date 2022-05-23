@@ -148,9 +148,9 @@ public class Vector3
     }
 
     /**
-     * 
+     * formats the vector into a string for printing. 
+     * Uses the format: 
      */
-    //formats the vector into a string for printing. 
     public String toString()
     {
         return new String(String.format("[%.2f, %.2f, %.2f]", x, y, z));

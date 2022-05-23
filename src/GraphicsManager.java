@@ -39,26 +39,26 @@ public class GraphicsManager
         //     new Transform(Vector3.ZERO)
         // );
 
-        car = new GameObject
-        (
-            "car", 
-            new Mesh("car.obj", "carTexture.png", new Vector3(0, 0, 0), Quaternion.toQuaternion(0, 0, 0), 10, true, true), 
-            Vector3.zero()
-        );
-
-        jet = new GameObject
-        (
-            "High Poly Jet",
-            new Mesh("jet.obj", new Color(100, 100, 100), Vector3.zero(), Quaternion.toQuaternion(0, 0, 0), 100, true, true), 
-            Vector3.zero()
-        );
-
-        // sphere = new GameObject
+        // car = new GameObject
         // (
-        //     "shere", 
-        //     new Mesh("sphere.obj", new Color(100, 100, 100), new Vector3(0, 0, 0), new EulerAngle(0, Math.toRadians(0), Math.toRadians(0)), 100, true, true), 
-        //     new Transform(Vector3.ZERO)
+        //     "car", 
+        //     new Mesh("car.obj", "carTexture.png", new Vector3(0, 0, 0), Quaternion.toQuaternion(0, 0, 0), 10, true, true), 
+        //     Vector3.zero()
         // );
+
+        // jet = new GameObject
+        // (
+        //     "High Poly Jet",
+        //     new Mesh("jet.obj", new Color(100, 100, 100), Vector3.zero(), Quaternion.toQuaternion(0, 0, 0), 100, true, true), 
+        //     Vector3.zero()
+        // );
+
+        sphere = new GameObject
+        (
+            "shere", 
+            new Mesh("sphere.obj", new Color(100, 100, 100), new Vector3(0, 0, 0), Quaternion.toQuaternion(0, 0, 0), 20, true, true), 
+            Vector3.zero()
+        );
 
         System.out.println("Creating graphics... ");
         long start = System.nanoTime();
@@ -74,10 +74,10 @@ public class GraphicsManager
         renderingPanel.setVisible(true);
         //renderingPanel.setFPSlimit(150);
 
-        Camera cam = new Camera(new Vector3(0, 0, 0), 10000, 500, 60);
+        Camera cam = new Camera(new Vector3(0, 0, 0), 10000, 100, 60);
         renderingPanel.setCamera(cam);
-        renderingPanel.addGameObject(cat);
-        cam.setOrbitControls(renderingPanel, cat, 1000, 10);
+        renderingPanel.addGameObject(sphere);
+        cam.setOrbitControls(renderingPanel, sphere, 1000, 10);
         //cam.setFreeControls(renderingPanel, 200, 10);
         renderingPanel.setLighting(new Lighting(new Vector3(0, -1, 0), 70, 30));
         renderingPanel.setFog(1000, 3000, 190, 210, 245);
