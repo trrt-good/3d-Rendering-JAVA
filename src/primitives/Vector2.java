@@ -1,4 +1,8 @@
 package src.primitives;
+/**
+ * an object for representing 2d points or directions with 
+ * double precision. 
+ */
 public class Vector2 
 {
     public double x;

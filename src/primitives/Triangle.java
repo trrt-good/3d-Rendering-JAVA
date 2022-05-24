@@ -1,6 +1,5 @@
 package src.primitives;
 import java.awt.Color;
-import java.awt.image.Raster;
 
 import src.gameObject.Mesh;
 import src.graphics.Lighting;
@@ -21,8 +20,6 @@ public class Triangle
 
     //the mesh the this triangle is a part of (might be null)
     private Mesh parentMesh;
-
-    private Raster triangleTexture;
 
     //the color of the triangle with lighting calculations. 
     private Color colorWithLighting;
@@ -56,11 +53,6 @@ public class Triangle
         textureCoord2 = t2;
         textureCoord3 = t3;
         parentMesh = parentMeshIn;
-        double minX = Math.min(t1.x, Math.min(t2.x, t3.x));
-        double minY = Math.min(t1.y, Math.min(t2.y, t3.y));
-        double maxX = Math.max(t1.x, Math.max(t2.x, t3.x));
-        double maxY = Math.max(t1.y, Math.max(t2.y, t3.y));
-        triangleTexture = parentMesh.getTextureRaster().createCompatibleWritableRaster((int)minX, (int)minY, (int)(maxX-minX) + 1, (int)(maxY-minY) + 1);
         color = calculateTextureColor();
         colorWithLighting = color;
     }

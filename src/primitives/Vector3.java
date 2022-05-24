@@ -131,6 +131,14 @@ public class Vector3
         return Vector3.rotate(this, q);
     }
 
+    /** 
+     * @return a vector with negated x, y and z components 
+     */
+    public Vector3 negate()
+    {
+        return Vector3.negate(this);
+    }
+
     /**
      * Returns a {@code Vector3} object with with value (x*x, y*y, z*z)
      * where x y and z are the components of the origonal vector.
