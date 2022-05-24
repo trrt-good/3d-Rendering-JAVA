@@ -1,8 +1,10 @@
 package src.gameObject;
 
+import java.io.Serializable;
+
 import src.primitives.Vector3;
 
-public class GameObject 
+public class GameObject implements Serializable
 {  
     //the mesh of the object
     private Mesh mesh;
