@@ -2,6 +2,7 @@ package src.graphics;
 import javax.swing.JPanel;
 
 import src.gameObject.GameObject;
+import src.primitives.Matrix3x3;
 import src.primitives.Plane;
 import src.primitives.Quaternion;
 import src.primitives.Triangle;
@@ -80,8 +81,8 @@ public class RenderingPanel extends JPanel implements Runnable
         lightingObject = null;
         gameObjects = new ArrayList<GameObject>();
         sortQeue = null;
-        camDirection = Vector3.zero();   
-        camPos = Vector3.zero();
+        camDirection = Vector3.ZERO;   
+        camPos = Vector3.ZERO;
         fps = -1;
         drawQeue = new ArrayList<Triangle2D>();
         
@@ -581,22 +582,15 @@ public class RenderingPanel extends JPanel implements Runnable
 
     //Triangle2D class stores 2d triangle data before it is painted on the buffered image.
     //implements comparable to optimize sorting. 
-    class Triangle2D implements Comparable<Triangle2D>
+    class Triangle2D
     {
         //three screen coordinate points. 
-        public Point p1;
-        public Point p2;
-        public Point p3;
+        public final Point p1;
+        public final Point p2;
+        public final Point p3;
 
         //the color
-        public int color;
-
-        //the distance from this triangle's corresponding 3d triangle to the camera. 
-        //for the sole purpose of sorting triangles by distance, but rather than wasting 
-        //compute to sort 3d triangles before the program knows wether or not they are 
-        //even in view, the 2d triangles store this value as a way for the algorithm to 
-        //sort triangles by distance later in the pipeline, which is much more efficient. 
-        private double triangle3DDistance;
+        public final int color;
 
         //overloaded constructor. 
         public Triangle2D(Point p1In, Point p2In, Point p3In, int colorIn, double triangle3DDistanceIn)
@@ -605,20 +599,6 @@ public class RenderingPanel extends JPanel implements Runnable
             p2 = p2In;
             p3 = p3In;
             color = colorIn;
-            triangle3DDistance = triangle3DDistanceIn;
-        }
-
-        //the compareTo method allows java.util.Collections to compare two Triangle2D 
-        //objects with eachother. This allows the program to use java.util.Collections'
-        //very fast sorting algorithm to sort triangles by distance. 
-        public int compareTo(Triangle2D o) 
-        {
-            int num = 0;
-            if (o.triangle3DDistance-triangle3DDistance < 0)
-                num = -1;
-            else if (o.triangle3DDistance-triangle3DDistance > 0)
-                num = 1;
-            return num;
         }
     }
 }   

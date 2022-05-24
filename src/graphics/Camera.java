@@ -75,7 +75,7 @@ public class Camera
         private int prevY = 0;
 
         private Vector3 difference;
-        private Vector3 directionUnit = Vector3.zero();
+        private Vector3 directionUnit = Vector3.ZERO;
         
         public OrbitCamController(GameObject focusObjectIn, double startDistanceIn, double sensitivityIn)
         {
@@ -196,17 +196,17 @@ public class Camera
 
         private void moveForward(double distanceIn)
         {
-            position.translate(Vector3.multiply(Vector3.angleToVector(hAngle, vAngle), distanceIn));
+            position = position.add(Vector3.multiply(Vector3.angleToVector(hAngle, vAngle), distanceIn));
         }
 
         private void moveLeft(double distanceIn)
         {
-            position.translate(Vector3.multiply(Vector3.angleToVector(hAngle-Math.PI/2, 0), distanceIn));
+            position = position.add(Vector3.multiply(Vector3.angleToVector(hAngle-Math.PI/2, 0), distanceIn));
         }
 
         private void moveUp(double distanceIn)
         {
-            position.translate(Vector3.multiply(Vector3.angleToVector(hAngle, vAngle+Math.PI/2), distanceIn));
+            position = position.add(Vector3.multiply(Vector3.angleToVector(hAngle, vAngle+Math.PI/2), distanceIn));
         }
 
         public void mousePressed(MouseEvent e) 

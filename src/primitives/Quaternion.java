@@ -7,11 +7,11 @@ public class Quaternion
     /**
      * scalar part of the quaternion
      */
-    public double w;
+    public final double w;
     
-    public double x;
-    public double y;
-    public double z;
+    public final double x;
+    public final double y;
+    public final double z;
 
     /**
      * 
@@ -56,6 +56,7 @@ public class Quaternion
             q2.w*q1.x + q1.w*q2.x + q1.y*q2.z-q1.z*q2.y,  //x
             q2.w*q1.y + q1.w*q2.y + q1.z*q2.x-q1.x*q2.z,  //y
             q2.w*q1.z + q1.w*q2.z + q1.x*q2.y-q1.y*q2.x);  //z
+            
     }
 
     public static Quaternion toQuaternion(double pitch, double yaw, double roll)

@@ -69,7 +69,7 @@ public class Mesh
         shading = shaded;
         backFaceCull = shouldBackFaceCull;
         baseColor = Color.MAGENTA;
-        totalMovement = Vector3.zero();
+        totalMovement = Vector3.ZERO;
         
         if (modelFileName.endsWith(".obj"))
         {
@@ -92,7 +92,7 @@ public class Mesh
         shading = shaded;
         backFaceCull = shouldBackFaceCull;
         baseColor = (color == null)? Color.MAGENTA : color;
-        totalMovement = Vector3.zero();
+        totalMovement = Vector3.ZERO;
         
         if (modelFileName.endsWith(".obj"))
         {
@@ -117,7 +117,7 @@ public class Mesh
     {
         for (int i = 0; i < vertices.size(); i ++)
         {
-            vertices.get(i).set(Vector3.add(Vector3.rotate(Vector3.subtract(vertices.get(i), centerOfRotation), quaternion), centerOfRotation));
+            vertices.set(i, Vector3.add(Vector3.rotate(Vector3.subtract(vertices.get(i), centerOfRotation), quaternion), centerOfRotation));
         }
     }
 
@@ -126,7 +126,7 @@ public class Mesh
     {
         for (int i = 0; i < vertices.size(); i ++)
         {
-            vertices.get(i).set(Vector3.add(vertices.get(i), amount));
+            vertices.set(i, Vector3.add(vertices.get(i), amount));
         }
         totalMovement = Vector3.add(totalMovement, amount);
     }

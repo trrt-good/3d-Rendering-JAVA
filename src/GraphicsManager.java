@@ -29,7 +29,7 @@ public class GraphicsManager
         (
             "cat", 
             new Mesh("cat.obj", new Color(100, 100, 100), new Vector3(0, -100, 0), Quaternion.toQuaternion(0, 0, 0), 1, true, true), 
-            Vector3.zero()
+            Vector3.ZERO
         );
 
         // triangleTest = new GameObject
@@ -43,21 +43,21 @@ public class GraphicsManager
         // (
         //     "car", 
         //     new Mesh("car.obj", "carTexture.png", new Vector3(0, 0, 0), Quaternion.toQuaternion(0, 0, 0), 10, true, true), 
-        //     Vector3.zero()
+        //     Vector3.ZERO
         // );
 
         jet = new GameObject
         (
             "High Poly Jet",
-            new Mesh("jet.obj", new Color(100, 100, 100), Vector3.zero(), Quaternion.toQuaternion(0, 0, 0), 100, true, true), 
-            Vector3.zero()
+            new Mesh("jet.obj", new Color(100, 100, 100), Vector3.ZERO, Quaternion.toQuaternion(0, 0, 0), 100, true, true), 
+            Vector3.ZERO
         );
 
         // sphere = new GameObject
         // (
         //     "shere", 
         //     new Mesh("sphere.obj", new Color(100, 100, 100), new Vector3(0, 0, 0), Quaternion.toQuaternion(0, 0, 0), 20, true, true), 
-        //     Vector3.zero()
+        //     Vector3.ZERO
         // );
 
         System.out.println("Creating graphics... ");

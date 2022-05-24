@@ -1,15 +1,18 @@
 package src.testing;
 
 import src.*;
-import org.apache.commons.math3.util.FastMath;
+import src.primitives.Matrix3x3;
+import src.primitives.Quaternion;
+//import org.apache.commons.math3.util.FastMath;
+import src.primitives.Vector3;
 
 public class AlgorithmTesting
 {
-    public static final long ITERATIONS_PER_TEST = (int)Math.pow(10,4);
+    public static final long ITERATIONS_PER_TEST = (int)Math.pow(10,9);
 
     public static void main(String[] args) 
     {
-        runTests(1000);
+        runTests(100);
     }
 
     public static void runTests(int numberOfTests)
@@ -57,11 +60,10 @@ public class AlgorithmTesting
     public static long test1()
     {
         long start = System.nanoTime();
-        
-        double max = 0;
+        Matrix3x3 m = createRotationMatrix(1, -1);
         for(long i = 0; i < ITERATIONS_PER_TEST; i++) 
         {
-            Math.asin(FastMath.random()*Math.PI*1000);
+            Vector3.applyMatrix(m, Vector3.UP);
         }
 
         start = System.nanoTime() - start;
@@ -71,11 +73,10 @@ public class AlgorithmTesting
     public static long test2()
     {
         long start = System.nanoTime();
-        
-        double max = 0;
+        Quaternion q = createRotationQuaternion(1, -1);
         for(long i = 0; i < ITERATIONS_PER_TEST; i++) 
         {
-            FastMath.asin(FastMath.random()*1000);
+            Vector3.rotate(Vector3.UP, q);
         }
 
         start = System.nanoTime() - start;
@@ -98,4 +99,32 @@ public class AlgorithmTesting
             return String.format("%d seconds", (int)(ms/1000));
         }
     }
+
+    public static Quaternion createRotationQuaternion(double pitch, double yaw)
+    {
+        //x axis rotation first
+        pitch = Math.sin(pitch/2);
+        double w1 = Math.sqrt(1-pitch*pitch);
+
+        //y axis rotation
+        yaw = Math.sin(yaw/2);
+        double w2 = Math.sqrt(1-yaw*yaw);
+
+        return new Quaternion(w1*w2, w2*pitch, w1*yaw, pitch*yaw);  
+    }
+
+    public static Matrix3x3 createRotationMatrix(double pitch, double yaw)
+    {
+        final double sinYaw = Math.sin(yaw); 
+        final double cosYaw = Math.sqrt(1-sinYaw*sinYaw); //same as math.cos function
+
+        final double sinPitch = Math.sin(pitch); 
+        final double cosPitch = Math.sqrt(1-sinYaw*sinYaw); //same as math.cos function
+
+        return new Matrix3x3(
+            cosYaw, sinYaw*sinPitch, sinYaw*cosPitch, 
+            0, cosPitch, -sinPitch, 
+            -sinYaw, cosYaw*sinPitch, cosYaw*cosPitch);
+    }
+
 }
