@@ -489,7 +489,7 @@ public class RenderingPanel extends JPanel implements Runnable
                         scanlineEdge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-high.y)/((double)(low.y-high.y)/(low.x-high.x)) + high.x)));
                         int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
                         Arrays.fill(pixelData, rgb);
-                        drawHorizontalLine(Math.min(scanlineEdge1, scanlineEdge2), Math.max(scanlineEdge1, scanlineEdge2), yScanLine, pixelData);                    
+                        drawHorizontalLine(Math.min(scanlineEdge1, scanlineEdge2), yScanLine, pixelData);    
                     }
                 }
             }
@@ -503,7 +503,7 @@ public class RenderingPanel extends JPanel implements Runnable
                         scanlineEdge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-high.y)/((double)(middle.y-high.y)/(middle.x-high.x)) + high.x)));
                         int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
                         Arrays.fill(pixelData, rgb);
-                        drawHorizontalLine(Math.min(scanlineEdge1, scanlineEdge2), Math.max(scanlineEdge1, scanlineEdge2), yScanLine, pixelData);                    
+                        drawHorizontalLine(Math.min(scanlineEdge1, scanlineEdge2), yScanLine, pixelData);    
                     }
                 }
             }
@@ -518,7 +518,7 @@ public class RenderingPanel extends JPanel implements Runnable
 
                         int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
                         Arrays.fill(pixelData, rgb);
-                        drawHorizontalLine(Math.min(scanlineEdge1, scanlineEdge2), Math.max(scanlineEdge1, scanlineEdge2), yScanLine, pixelData);    
+                        drawHorizontalLine(Math.min(scanlineEdge1, scanlineEdge2), yScanLine, pixelData);    
                     }
                 }
             }
@@ -538,7 +538,7 @@ public class RenderingPanel extends JPanel implements Runnable
                         scanlineEdge2 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-low.y)/((double)(low.y-high.y)/(low.x-high.x)) + low.x)));
                         int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
                         Arrays.fill(pixelData, rgb);
-                        drawHorizontalLine(Math.min(scanlineEdge1, scanlineEdge2), Math.max(scanlineEdge1, scanlineEdge2), yScanLine, pixelData);                    
+                        drawHorizontalLine(Math.min(scanlineEdge1, scanlineEdge2), yScanLine, pixelData);    
                     }
                 }
             }
@@ -552,7 +552,7 @@ public class RenderingPanel extends JPanel implements Runnable
                         scanlineEdge1 = Math.max(0, Math.min(renderImage.getWidth(), (int)((yScanLine-low.y)/((double)(low.y-middle.y)/(low.x-middle.x)) + low.x)));
                         int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
                         Arrays.fill(pixelData, rgb);
-                        drawHorizontalLine(Math.min(scanlineEdge1, scanlineEdge2), Math.max(scanlineEdge1, scanlineEdge2), yScanLine, pixelData);                    
+                        drawHorizontalLine(Math.min(scanlineEdge1, scanlineEdge2), yScanLine, pixelData);    
                     }
                 }
             }
@@ -567,7 +567,7 @@ public class RenderingPanel extends JPanel implements Runnable
 
                         int[] pixelData = new int[Math.abs(scanlineEdge1-scanlineEdge2)+1];
                         Arrays.fill(pixelData, rgb);
-                        drawHorizontalLine(Math.min(scanlineEdge1, scanlineEdge2), Math.max(scanlineEdge1, scanlineEdge2), yScanLine, pixelData);    
+                        drawHorizontalLine(Math.min(scanlineEdge1, scanlineEdge2), yScanLine, pixelData);    
                     }
                 }
             }
@@ -575,9 +575,9 @@ public class RenderingPanel extends JPanel implements Runnable
     }
 
     //draws a horizontal line with the given constraints and the specified integer rgb color.
-    private void drawHorizontalLine(int startOFLineX, int endOfLineX, int levelY, int[] pixelColorData)
+    private void drawHorizontalLine(int startOFLineX, int levelY, int[] pixelColorData)
     {
-        renderImage.getRaster().setDataElements(startOFLineX, levelY, Math.abs(endOfLineX-startOFLineX), 1, pixelColorData);
+        renderImage.getRaster().setDataElements(startOFLineX, levelY, pixelColorData.length, 1, pixelColorData);
     }
 
     //Triangle2D class stores 2d triangle data before it is painted on the buffered image.
