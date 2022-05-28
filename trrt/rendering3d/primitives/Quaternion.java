@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 public class Quaternion implements Serializable
 {
+    private static final long serialVersionUID = 1;
+
     public static final Quaternion IDENTITY = new Quaternion(1, new Vector3(0, 0, 0));
 
     /** scalar part of the quaternion */

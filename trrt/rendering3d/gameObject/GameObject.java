@@ -7,6 +7,8 @@ import trrt.rendering3d.Main;
 
 public class GameObject implements Serializable
 {  
+    private static final long serialVersionUID = 1;
+
     //the mesh of the object
     private Mesh mesh;
 

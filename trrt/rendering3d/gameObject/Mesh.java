@@ -19,6 +19,8 @@ import trrt.rendering3d.Main;
 //a class for storing groups of triangles in a mesh.
 public class Mesh implements Serializable
 {
+    private static final long serialVersionUID = 1;
+
     //a collection of all the triangles in the mesh.
     private ArrayList<Triangle> triangles;
     private ArrayList<Vector3> vertices;

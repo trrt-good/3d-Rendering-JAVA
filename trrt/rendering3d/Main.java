@@ -10,7 +10,7 @@ import java.awt.event.WindowEvent;
 import trrt.testing.*;
 public class Main 
 {
-    public static final File RES = new File("res");
+    public static final File RES = new File("trrt\\rendering3d\\res");
     public static final File GAMEOBJECT_DIRECTORY = new File(RES, "gameObjectFiles");
 
     private static RenderingPanel renderingPanel;
@@ -60,7 +60,7 @@ class WindowCloseListener implements WindowListener
     @Override
     public void windowClosing(WindowEvent e) 
     {
-        TimingHelper.printSummary();
+        RenderingPanel.printPreformanceSummary();
     }
     
     @Override

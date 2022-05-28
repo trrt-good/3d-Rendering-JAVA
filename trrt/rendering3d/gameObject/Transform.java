@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 public class Transform implements Serializable
 {
+    private static final long serialVersionUID = 1;
+
     /** the game object parent that the transform is attached to */
     private GameObject gameObject;
 

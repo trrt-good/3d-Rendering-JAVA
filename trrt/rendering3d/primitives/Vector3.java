@@ -6,6 +6,8 @@ import java.io.Serializable;
  * An object which represents 3d points or directions, and includes many static methods for 3d math.  */ 
 public class Vector3 implements Serializable
 {    
+    private static final long serialVersionUID = 1;
+
     public static final Vector3 UP = new Vector3(0, 1, 0);
     public static final Vector3 RIGHT = new Vector3(1, 0, 0);
     public static final Vector3 FORWARD = new Vector3(0, 0, 1);

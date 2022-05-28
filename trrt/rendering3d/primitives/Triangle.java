@@ -6,6 +6,8 @@ import trrt.rendering3d.gameObject.*;
 import trrt.rendering3d.graphics.*;
 public class Triangle implements Serializable
 {
+    private static final long serialVersionUID = 1;
+
     //3d verticies of the triangle. 
     public Vector3 vertex1;
     public Vector3 vertex2;
