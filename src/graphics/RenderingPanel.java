@@ -39,23 +39,21 @@ public class RenderingPanel extends JPanel implements Runnable
     private double maxTriangleDistance;
     private double minTriangleDistance;
 
-
-    //Threads:
+    //multithreading:
     private Thread renderingThread;
     private boolean threadRunning;
     private int fps;
 
-    //Camera:
+    //Camera values:
     private Camera camera;
     private Vector3 camDirection;
     private Vector3 camPos;
     private double renderPlaneWidth;
 
-
     //lighting:
     private Lighting lightingObject; 
     
-    //fog:
+    //fog stats:
     private double fogStartDistance;
     private double fullFogDistance;
     private boolean fogEnabled = false;
@@ -69,6 +67,13 @@ public class RenderingPanel extends JPanel implements Runnable
     private TimingHelper trianglesCalculateTime = new TimingHelper("trianglesCalculateTime");
     private TimingHelper trianglesPaintTime = new TimingHelper("trianglesPaintTime");
 
+    /**
+     * creates a rendering panel with the specified with and height for the 
+     * buffered image renderer. Once set, the buffered image size cannot be 
+     * changed. 
+     * @param width width of the panel and buffered image 
+     * @param height width of the panel and buffered image 
+     */
     public RenderingPanel(int width, int height)
     {
         setPreferredSize(new Dimension(width, height));
@@ -114,7 +119,6 @@ public class RenderingPanel extends JPanel implements Runnable
             //show an error on the screen if there is no camera or no game object
             g.drawString((camera == null)? "NO CAMERA" : "NO GAMEOBJECTS", getWidth()/2, getHeight()/2);
         }
-        
     }
 
     /**
@@ -158,6 +162,10 @@ public class RenderingPanel extends JPanel implements Runnable
         }
     }
 
+    /**
+     * removes a game object based on it's name 
+     * @param name name of the game object
+     */
     public void removeGameObject(String name)
     {
         if (gameObjectIndices.containsKey(name))
@@ -170,7 +178,10 @@ public class RenderingPanel extends JPanel implements Runnable
         }
     }
 
-    //sets the camera 
+    /**
+     * sets the camera for the rendering panel 
+     * @param camIn camera 
+     */
     public void setCamera(Camera camIn)
     {
         if (camIn == null)
@@ -188,27 +199,40 @@ public class RenderingPanel extends JPanel implements Runnable
         renderPlane = new Plane(Vector3.add(Vector3.multiply(camDirection, camera.getRenderPlaneDistance()), camera.getPosition()), camDirection);;
     }
 
-    public void setFog(double fogStartDistanceIn, double fullFogDistanceIn, int r, int g, int b)
+    /**
+     * set the fog of the rendering panel, and automatically enables fog
+     * @param fogStartDistanceIn the distance where the fog starts 
+     * @param fullFogDistanceIn the distance at which objects become fully covered 
+     * by the fog, and become the fog color 
+     * @param color the color of the fog
+     */
+    public void setFog(double fogStartDistanceIn, double fullFogDistanceIn, Color color)
     {
         fogStartDistance = fogStartDistanceIn;
         fullFogDistance = fullFogDistanceIn;
-        fogR = r;
-        fogG = g;
-        fogB = b;
+        fogR = color.getRed();
+        fogG = color.getGreen();
+        fogB = color.getBlue();
         fogEnabled = true;
     }
 
+    /**
+     * enables fog 
+     */
     public void enableFog()
     {
         fogEnabled = true;
     }
 
+    /**
+     * dissables fog 
+     */
     public void dissableFog()
     {
         fogEnabled = false;
     }
 
-    public void computeTriangles()
+    private void computeTriangles()
     {
         maxTriangleDistance = 0;
         minTriangleDistance = camera.getFarClipDistancee();
@@ -235,7 +259,7 @@ public class RenderingPanel extends JPanel implements Runnable
         trianglesCalculateTime.stopClock();
     }
 
-    public Quaternion createRotationQuaternion(double pitch, double yaw)
+    private Quaternion createRotationQuaternion(double pitch, double yaw)
     {
         //x axis rotation first
         pitch = Math.sin(pitch/2);
@@ -248,7 +272,7 @@ public class RenderingPanel extends JPanel implements Runnable
         return new Quaternion(w1*w2, w2*pitch, w1*yaw, pitch*yaw);  
     }
 
-    public void sortTriangles()
+    private void sortTriangles()
     {
         trianglesOrderTime.startClock();
         for (int i = (int)maxTriangleDistance; i > minTriangleDistance-1; i--)
@@ -262,7 +286,7 @@ public class RenderingPanel extends JPanel implements Runnable
         trianglesOrderTime.stopClock();
     }
 
-    public void drawBufferedImage()
+    private void drawBufferedImage()
     {
         trianglesPaintTime.startClock();
         renderImage.getRaster().setDataElements(0, 0, renderImage.getWidth(), renderImage.getHeight(), blankImagePixelColorData);
@@ -275,6 +299,9 @@ public class RenderingPanel extends JPanel implements Runnable
         trianglesPaintTime.stopClock();
     }
 
+    /**
+     * starts the frame updates of the rendering panel 
+     */
     public void start()
     {
         validate();
@@ -287,6 +314,9 @@ public class RenderingPanel extends JPanel implements Runnable
         }
     }
 
+    /**
+     * the run method for the runnable thread  
+     */
     public void run() 
     {
         while(threadRunning)
@@ -304,6 +334,9 @@ public class RenderingPanel extends JPanel implements Runnable
         }
     }
 
+    /**
+     * stops the rendering panel frame updates 
+     */
     public void stopThread()
     {
         try
@@ -328,7 +361,6 @@ public class RenderingPanel extends JPanel implements Runnable
             maxTriangleDistance = distanceToTriangle;
         else if (distanceToTriangle < minTriangleDistance)
             minTriangleDistance = distanceToTriangle;
-        
         if 
         (
             Vector3.dotProduct(triangle.getPlane().normal, Vector3.subtract(triangleCenter, camPos)) > 0 //is the triangle facing away?
@@ -338,12 +370,10 @@ public class RenderingPanel extends JPanel implements Runnable
         )
             return;
 
+        //clone the triangle's vertices:
         Vector3 triangleVertex1 = new Vector3(triangle.vertex1);
         Vector3 triangleVertex2 = new Vector3(triangle.vertex2);
         Vector3 triangleVertex3 = new Vector3(triangle.vertex3);
-
-        //create local variables: 
-
         //the screen coords of the triangle, to be determined by the rest of the method.
         Point p1ScreenCoords = new Point();
         Point p2ScreenCoords = new Point();
@@ -351,26 +381,34 @@ public class RenderingPanel extends JPanel implements Runnable
         //boolean default false, but set true if just one of the verticies is within the camera's fov. 
         boolean shouldDrawTriangle = false;
 
+        //get intersection with render plane 
         triangleVertex1 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex1, camPos), camPos, renderPlane);
-        Vector3 rotatedPoint = Vector3.rotate(Vector3.subtract(triangleVertex1, camCenterPoint), pointRotationQuaternion);
-        if ((Math.abs(rotatedPoint.x) < renderPlaneWidth/2*1.2 && Math.abs(rotatedPoint.y) < renderPlaneWidth*((double)getHeight()/(double)getWidth())/2))
-            shouldDrawTriangle = true;
-        p1ScreenCoords.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
-        p1ScreenCoords.y = (int)(getHeight()/2 - rotatedPoint.y*pixelsPerUnit);
 
-        triangleVertex2 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex2, camPos), camPos, renderPlane);
-        rotatedPoint = Vector3.rotate(Vector3.subtract(triangleVertex2, camCenterPoint), pointRotationQuaternion);
-        if ((Math.abs(rotatedPoint.x) < renderPlaneWidth/2 && Math.abs(rotatedPoint.y) < renderPlaneWidth*((double)getHeight()/getWidth())/2))
+        //rotate the point: 
+        triangleVertex1 = Vector3.rotate(Vector3.subtract(triangleVertex1, camCenterPoint), pointRotationQuaternion);
+
+        //check if it's in the fov
+        if ((Math.abs(triangleVertex1.x) < renderPlaneWidth/2*1.2 && Math.abs(triangleVertex1.y) < renderPlaneWidth*((double)getHeight()/(double)getWidth())/2))
             shouldDrawTriangle = true;
-        p2ScreenCoords.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
-        p2ScreenCoords.y = (int)(getHeight()/2 - rotatedPoint.y*pixelsPerUnit);
+
+        //scale to the screen coordinates
+        p1ScreenCoords.x = (int)(getWidth()/2 + triangleVertex1.x*pixelsPerUnit);
+        p1ScreenCoords.y = (int)(getHeight()/2 - triangleVertex1.y*pixelsPerUnit);
+
+        //repeat for each of the other two vertices
+        triangleVertex2 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex2, camPos), camPos, renderPlane);
+        triangleVertex2 = Vector3.rotate(Vector3.subtract(triangleVertex2, camCenterPoint), pointRotationQuaternion);
+        if ((Math.abs(triangleVertex2.x) < renderPlaneWidth/2 && Math.abs(triangleVertex2.y) < renderPlaneWidth*((double)getHeight()/getWidth())/2))
+            shouldDrawTriangle = true;
+        p2ScreenCoords.x = (int)(getWidth()/2 + triangleVertex2.x*pixelsPerUnit);
+        p2ScreenCoords.y = (int)(getHeight()/2 - triangleVertex2.y*pixelsPerUnit);
 
         triangleVertex3 = Vector3.getIntersectionPoint(Vector3.subtract(triangleVertex3, camPos), camPos, renderPlane);
-        rotatedPoint = Vector3.rotate(Vector3.subtract(triangleVertex3, camCenterPoint), pointRotationQuaternion);
-        if ((Math.abs(rotatedPoint.x) < renderPlaneWidth/2 && Math.abs(rotatedPoint.y) < renderPlaneWidth*((double)getHeight()/getWidth())/2))
+        triangleVertex3 = Vector3.rotate(Vector3.subtract(triangleVertex3, camCenterPoint), pointRotationQuaternion);
+        if ((Math.abs(triangleVertex3.x) < renderPlaneWidth/2 && Math.abs(triangleVertex3.y) < renderPlaneWidth*((double)getHeight()/getWidth())/2))
             shouldDrawTriangle = true;
-        p3ScreenCoords.x = (int)(getWidth()/2 + rotatedPoint.x*pixelsPerUnit);
-        p3ScreenCoords.y = (int)(getHeight()/2 - rotatedPoint.y*pixelsPerUnit);
+        p3ScreenCoords.x = (int)(getWidth()/2 + triangleVertex3.x*pixelsPerUnit);
+        p3ScreenCoords.y = (int)(getHeight()/2 - triangleVertex3.y*pixelsPerUnit);
 
         if (shouldDrawTriangle)
         {
@@ -406,23 +444,38 @@ public class RenderingPanel extends JPanel implements Runnable
         }
     }
 
-    //returns the integer rgb value of a color, which is used for buffered images. 
+    /**
+     * calculates the integer rgb value of a color, which is used for buffered images. 
+     * @param r the red value of the color 
+     * @param g the green value of the color 
+     * @param b the blue value of the color 
+     * @return the integer rgb value of a color, which is used for buffered images.
+     */
     private int convertToIntRGB(int r, int g, int b)
     {
         return 65536 * r + 256 * g + b;
     }
 
-    //returns the integer rgb value of a color, which is used for buffered images. 
+    /**
+     * calculates the integer rgb value of a color, which is used for buffered images. 
+     * @param color a color object 
+     * @return the integer rgb value of a color, which is used for buffered images.
+     */
     private int convertToIntRGB(Color color)
     {
         return 65536 * color.getRed() + 256 * color.getGreen() + color.getBlue();
     }
 
-    //paints a solid triangle on the buffered image with verticies at "p1", "p2" and "p3". 
-    //rasterization algorithm starts at the top point, then draws horizontal lines from one 
-    //edge of the triangle to the other (using a simple slope-intercept equation), first 
-    //drawing the upper part and then the lower part of the triangle. 
-    //This method is much faster at drawing triangles than Graphics' fillPolygon() method.
+    /**
+     * paints a solid triangle on the buffered image with verticies at {@code p1}, {@code p2} and {@code p3}. 
+     * Uses a scanline algorithm by interpolating the left and right edge of the lines. 
+     * draws the upper part and then the lower part of the triangle. 
+     * This method is much faster at drawing triangles than Graphics' fillPolygon() method.
+     * @param p1 point 1 
+     * @param p2 point 2
+     * @param p3 point 3 
+     * @param rgb the color of the triangle using rgb
+     */
     private void paintTriangle(Point p1, Point p2, Point p3, int rgb)
     {
         Point high = p1;
@@ -582,7 +635,7 @@ public class RenderingPanel extends JPanel implements Runnable
 
     //Triangle2D class stores 2d triangle data before it is painted on the buffered image.
     //implements comparable to optimize sorting. 
-    class Triangle2D
+    private class Triangle2D
     {
         //three screen coordinate points. 
         public final Point p1;

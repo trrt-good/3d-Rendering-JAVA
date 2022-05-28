@@ -15,15 +15,16 @@ public class Triangle
     public Vector2 textureCoord2;
     public Vector2 textureCoord3;
     
-    //the default color of the triangle before lighting
+    /**the default color of the triangle before lighting*/
     private Color color;
 
-    //the mesh the this triangle is a part of (might be null)
+    /**the mesh the this triangle is a part of (might be null)*/
     private Mesh parentMesh;
 
-    //the color of the triangle with lighting calculations. 
+    /**the color of the triangle with lighting calculations. */
     private Color colorWithLighting;
 
+    /** creates a triangle object with specified vertices and parent mesh with default color MAGENTA*/
     public Triangle(Mesh parentMeshIn, Vector3 v1, Vector3 v2, Vector3 v3)
     {
         vertex1 = v1;
@@ -34,6 +35,7 @@ public class Triangle
         parentMesh = parentMeshIn;
     }
 
+    /** creates a triangle object with specified vertices and parent mesh and color*/
     public Triangle(Mesh parentMeshIn, Vector3 v1, Vector3 v2, Vector3 v3, Color colorIn)
     {
         vertex1 = v1;
@@ -44,6 +46,7 @@ public class Triangle
         parentMesh = parentMeshIn;
     }
 
+    /** creates a triangle object with specified parent mesh, vertices and corresponding texture coordinates */
     public Triangle(Mesh parentMeshIn, Vector3 v1, Vector3 v2, Vector3 v3, Vector2 t1, Vector2 t2, Vector2 t3)
     {
         vertex1 = v1;
@@ -56,6 +59,7 @@ public class Triangle
         color = calculateTextureColor();
         colorWithLighting = color;
     }
+
     public Mesh getMesh()
     {
         return parentMesh;
@@ -66,6 +70,9 @@ public class Triangle
         return new Plane(vertex1, vertex2, vertex3);
     }
 
+    /**
+     * @return the average cordinate of the three points
+     */
     public Vector3 getCenter()
     {
         return new Vector3
@@ -91,7 +98,10 @@ public class Triangle
         return colorWithLighting;
     }
 
-    //calculates the color of the triangle accounting for lighting, using the lighting object parameter.
+    /**
+     * calculates the color of the triangle accounting for lighting, using the lighting object parameter.
+     * @param lighting the lighting object responsible for lighting
+     */
     public void calculateLightingColor(Lighting lighting)
     {
         int brightness = 0;

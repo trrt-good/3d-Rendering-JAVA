@@ -4,9 +4,7 @@ public class Quaternion
 {
     public static final Quaternion IDENTITY = new Quaternion(1, new Vector3(0, 0, 0));
 
-    /**
-     * scalar part of the quaternion
-     */
+    /** scalar part of the quaternion */
     public final double w;
     
     public final double x;
@@ -14,8 +12,9 @@ public class Quaternion
     public final double z;
 
     /**
-     * 
-     * @param axis
+     * creates a quaternion which represents a rotation around {@code axis} 
+     * by {@code angle} degrees 
+     * @param axis the axis of rotation 
      * @param angle angle in radians 
      */
     public Quaternion(double angle, Vector3 axis)
@@ -30,6 +29,14 @@ public class Quaternion
         z = axis.z*sinAngle;
     }
 
+    /**
+     * creates a quaternion with specified components. warning: it doesn't normalize the values
+     * so be careful that only correct values are entered. 
+     * @param wIn scalar real part of the quaternion 
+     * @param iIn imaginary i 
+     * @param jIn imaginary j
+     * @param kIn imaginary k
+     */
     public Quaternion(double wIn, double iIn, double jIn, double kIn)
     {
         w = wIn;
@@ -39,16 +46,28 @@ public class Quaternion
         z = kIn;
     }
 
+    /**
+     * @return the inverse of the quaternion 
+     */
     public Quaternion getInverse()
     {
         return new Quaternion(w, -x, -y, -z);
     }
 
+    /**
+     * formats to string
+     */
     public String toString()
     {
         return new String(String.format("[%.3f, %.3f, %.3f, %.3f]", w, x, y, z));
     }
 
+    /**
+     * multiplies {@code q1} by {@code q2}
+     * @param q1 
+     * @param q2 
+     * @return the multiplied result 
+     */
     public static Quaternion multiply(Quaternion q1, Quaternion q2)
     {
         return new Quaternion(
@@ -59,6 +78,13 @@ public class Quaternion
             
     }
 
+    /**
+     * converts an euler angle into quaternion 
+     * @param pitch 
+     * @param yaw
+     * @param roll
+     * @return the quaternion equivilant 
+     */
     public static Quaternion toQuaternion(double pitch, double yaw, double roll)
     {
         double sy = Math.sin(roll * 0.5);

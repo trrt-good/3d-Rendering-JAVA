@@ -13,22 +13,35 @@ import src.primitives.Vector3;
 
 public class Camera
 {
-    //field of view of the camera.
-    private double fov; //strictly reffers to the horizontal fov as vertical fov is based off screen height 
+    /**field of view of the camera. Strictly reffers to the horizontal fov as vertical fov is based off screen height*/
+    private double fov; 
 
-    private Vector3 position; //position of camera in world-space
-    private Vector3 directionVector; //direction the camera is facing as a normalized vector
-    private double hAngle; //horizontal angle of camera
-    private double vAngle; //vertical angle of camera
-    private double renderPlaneDistance; //distance from the camera that the rendering plane is
-    private double farClipDistance; //how far away should triangles stop being rendered?
-    private double nearClipDistance; //how close should triangles stop being rendered?
+    /** position of the camera in world-space */
+    private Vector3 position;
+
+    /** the direction the camera is facing as a normalized vector */
+    private Vector3 directionVector; 
+
+    /** yaw of camera in radians */
+    private double hAngle; 
+
+    /** pitch of camera in radians */
+    private double vAngle; 
+
+    /** distance that the render plane is from the camera (this can be any reasonable number and has little effet on preformance) */
+    private double renderPlaneDistance; 
+
+    /** the maximum distance at which this camera will render triangles */
+    private double farClipDistance;
+
+    /** the minimum distance at which this camera will render triangles */
+    private double nearClipDistance;
 
     //movement controllers. 
     private OrbitCamController orbitController = null;
     private FreeCamController freeCamController = null;
 
-    //width of the render plane based off fov. 
+    /**width of the render plane based off fov. */
     private double renderPlaneWidth;
 
     public Camera(Vector3 positionIn, double farClipDistanceIn, double nearClipDistanceIn, double fovIn)
@@ -43,7 +56,10 @@ public class Camera
         setFov(fovIn);
     }
 
-    //sets the v and h angles to look at the specified position.
+    /**
+     * sets the v and h angles to look at the specified position.
+     * @param pos position to look at in world space
+     */
     public void lookAt(Vector3 pos)
     {
         hAngle = (pos.x-position.x < 0)? -Math.atan((pos.z-position.z)/(pos.x-position.x))-Math.PI/2 : Math.PI/2-Math.atan((pos.z-position.z)/(pos.x-position.x));
@@ -55,9 +71,11 @@ public class Camera
         directionVector = Vector3.angleToVector(hAngle, vAngle);
     }
 
-    //camera controller which orbits a specified GameObject. panning the camera will cause it to 
-    //circle around that object. The user can also use the scroll wheel to zoom in and out from 
-    //the game object. 
+    /**
+     * camera controller which orbits a specified GameObject. panning the camera will cause it to 
+     * circle around that object. The user can also use the scroll wheel to zoom in and out from 
+     * the game object. 
+     */
     class OrbitCamController implements MouseMotionListener, MouseWheelListener, MouseListener
     {
         private int maxDistance = 3000; //maximum distance the camera can be from the object

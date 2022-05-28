@@ -5,23 +5,25 @@ import src.primitives.Quaternion;
 
 public class Transform 
 {
-    private GameObject gameObject; //the gameobject that this transform is attached to
+    /** the game object parent that the transform is attached to */
+    private GameObject gameObject;
 
-    private Vector3 position; //position of transform in world-space.
+    /** position of the Transform in worldspace */
+    private Vector3 position; 
 
-    //the forward vector of the transform in world space. This is always the z-axis in local transform space
+    /**the forward vector of the transform in world space. This is always the z-axis in local transform space*/
     private Vector3 forward; 
 
-    //the rightwards vector of the transform in world space. This is always the x-axis in local transform space. 
+    /**the rightwards vector of the transform in world space. This is always the x-axis in local transform space. */
     private Vector3 right; 
 
-    //the upwards vector of the transform in world space. This is always the y-axis in local transform space. 
+    /**the upwards vector of the transform in world space. This is always the y-axis in local transform space. */
     private Vector3 up; 
 
-    //the quaternion rotation of the transform
+    /**the quaternion rotation of the transform*/
     private Quaternion rotation;
 
-    //default rotation always 0, 0, 0
+    /**default rotation always {@link Quaternion#IDENTITY}*/
     public Transform(Vector3 positionIn)
     {
         position = positionIn;
@@ -29,17 +31,6 @@ public class Transform
         forward = new Vector3(0, 0, 1);
         right = new Vector3(1, 0, 0);
         up = new Vector3(0, 1, 0);
-    }
-
-    public void lookTowards(Vector3 point)
-    {
-        // if (point.x != 0 && point.y != 0 && point.z != 0)
-        // {
-        //     point = transformToLocal(point);
-        //     setYaw(rotation.y + ((point.x < 0)? -Math.atan(point.z/point.x)-Math.PI/2 : Math.PI/2-Math.atan(point.z/point.x)));
-    
-        //     setPitch(rotation.x + Math.atan(point.y/Math.sqrt(point.x*point.x + point.z*point.z)));
-        // }
     }
 
     public void setPosition(Vector3 positionIn)
@@ -63,11 +54,15 @@ public class Transform
         up.rotate(q);
     }
 
-    //returns the world-space equivilant of "point" in local space. 
-    //example: in local space, the forward direction can always be 
-    //represented by (0, 0, 1), but translating that into world space will 
-    //return "forward" vector, which could be something like (0, 0.3, 0.4) if 
-    //the transform is pitched up. 
+    /**
+     * returns the world-space equivilant of {@code point} in local space. 
+     * example: in local space, the forward direction can always be 
+     * represented by (0, 0, 1), but translating that into world space will 
+     * return the instance's {@code forward} vector, which could be something like (0, 0.3, 0.4) if 
+     * the transform is pitched up. 
+     * @param point the point to transform 
+     * @return the world space coordinate
+     */
     public Vector3 transformToWorld(Vector3 point)
     {
         up = up.getNormalized();
@@ -76,8 +71,12 @@ public class Transform
         return Vector3.applyMatrix(new Matrix3x3(right, up, forward), point);
     }
 
-    //opposite of "transformToWorld". It returns a point with local-space
-    //coorindates equivilant to the inputted world-space coordinates.  
+    /**
+     * opposite of "transformToWorld". It returns a point with local-space
+     * coordindates equivilant to the inputted world-space coordinates.
+     * @param point the point to transform 
+     * @return the equivilant point in local space 
+     */  
     public Vector3 transformToLocal(Vector3 point)
     {
         up = up.getNormalized();

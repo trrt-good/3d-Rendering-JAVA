@@ -12,6 +12,7 @@ import java.awt.image.Raster;
 import javax.imageio.ImageIO;
 
 import src.graphics.Lighting;
+import src.primitives.Matrix3x3;
 import src.primitives.Quaternion;
 import src.primitives.Triangle;
 import src.primitives.Vector2;
@@ -41,14 +42,16 @@ public class Mesh
     private BufferedImage texture; 
     private Raster textureRaster;
 
-    //should the back face of the mesh be rendered? (keeping enabled greatly increases preformance, roughly 2x faster)*
-    //*however, due to a poor implementation of backFaceCulling, for some cases, it is recommended to dissable this, 
-    //which will may sacrafice preformance (especially for larger models), however it will mitigate the
-    //strange visual effects that it may cause for certain models. 
-    private boolean backFaceCull = true;
-
-    //overloaded constructor takes in the name of the model, transform offsets, color and the boolean values 
-    public Mesh(String modelFileName, String textureFileName, Vector3 modelOffsetAmount, Quaternion modelOffsetRotation, double scale, boolean shaded, boolean shouldBackFaceCull)
+    /**
+     * constructor for making a mesh with a texture
+     * @param modelFileName name of the 3d model file (.obj)
+     * @param textureFileName name of the texture image file 
+     * @param modelOffsetAmount a 3d offset for the model to be loaded with. Default is {@code Vector3.ZERO}
+     * @param modelOffsetRotation a rotation offset for the model to be loaded with. Default is {@code Quaternion.IDENTITY}
+     * @param scale the scale for the model to be loaded with. Default is 1
+     * @param shaded should the object recieve lighting? 
+     */
+    public Mesh(String modelFileName, String textureFileName, Vector3 modelOffsetAmount, Quaternion modelOffsetRotation, double scale, boolean shaded)
     {
         long start = System.nanoTime();
         texture = null;
@@ -67,7 +70,6 @@ public class Mesh
         vertices = new ArrayList<Vector3>();
         triangles = new ArrayList<Triangle>();
         shading = shaded;
-        backFaceCull = shouldBackFaceCull;
         baseColor = Color.MAGENTA;
         totalMovement = Vector3.ZERO;
         
@@ -82,7 +84,16 @@ public class Mesh
         System.out.println("mesh created: " + modelFileName + " in " + (System.nanoTime() - start)/1000000 + "ms\n\t- " + triangles.size() + " triangles");
     }
 
-    public Mesh(String modelFileName, Color color, Vector3 modelOffsetAmount, Quaternion modelOffsetRotation, double scale, boolean shaded, boolean shouldBackFaceCull)
+    /**
+     * constructor for making a mesh without a texture
+     * @param modelFileName name of the 3d model file (.obj)
+     * @param color color for the mesh
+     * @param modelOffsetAmount a 3d offset for the model to be loaded with. Default is {@code Vector3.ZERO}
+     * @param modelOffsetRotation a rotation offset for the model to be loaded with. Default is {@code Quaternion.IDENTITY}
+     * @param scale the scale for the model to be loaded with. Default is 1
+     * @param shaded should the object recieve lighting? 
+     */
+    public Mesh(String modelFileName, Color color, Vector3 modelOffsetAmount, Quaternion modelOffsetRotation, double scale, boolean shaded)
     {
         long start = System.nanoTime();
         texture = null;
@@ -90,7 +101,6 @@ public class Mesh
         vertices = new ArrayList<Vector3>();
         triangles = new ArrayList<Triangle>();
         shading = shaded;
-        backFaceCull = shouldBackFaceCull;
         baseColor = (color == null)? Color.MAGENTA : color;
         totalMovement = Vector3.ZERO;
         
@@ -108,11 +118,14 @@ public class Mesh
     protected Mesh(boolean shadedIn, boolean shouldBackFaceCull)
     {        
         shading = shadedIn;
-        backFaceCull = shouldBackFaceCull;
         triangles = new ArrayList<Triangle>();
     }
 
-    //rotates each triangle in the mesh according to a rotation matrix, and around the center of rotation.
+    /**
+     * rotates each triangle in the mesh according to a rotation matrix, and around the center of rotation.
+     * @param quaternion the rotation  
+     * @param centerOfRotation center of rotation 
+     */
     public void rotate(Quaternion quaternion, Vector3 centerOfRotation)
     {
         for (int i = 0; i < vertices.size(); i ++)
@@ -121,7 +134,23 @@ public class Mesh
         }
     }
 
-    //translates each triangle in the mesh by "amount" 
+    /**
+     * applies a 3x3 matrix to each vertex in the mesh 
+     * @param matrix the matrix applied 
+     * @param centerOfRotation the center of rotation for the mesh 
+     */
+    public void applyMatrix(Matrix3x3 matrix, Vector3 centerOfRotation)
+    {
+        for (int i = 0; i < vertices.size(); i ++)
+        {
+            vertices.set(i, Vector3.add(Vector3.applyMatrix(matrix, Vector3.subtract(vertices.get(i), centerOfRotation)), centerOfRotation));
+        }
+    }
+
+    /**
+     * translates each triangle in the mesh by {@code amount}
+     * @param amount the translation
+     */
     public void translate(Vector3 amount)
     {
         for (int i = 0; i < vertices.size(); i ++)
@@ -135,11 +164,6 @@ public class Mesh
     public boolean isShaded()
     {
         return shading;
-    }
-
-    public boolean backFaceCulling()
-    {
-        return backFaceCull;
     }
 
     public Raster getTextureRaster()
@@ -159,8 +183,11 @@ public class Mesh
 
     //#endregion
 
-    //calculates the lighting of each triangle in the mesh based off the given
-    //lighting object
+    /**
+     * calculates the lighting of each triangle in the mesh based off the given
+     * lighting object
+     * @param lightingIn the lighting object
+     */
     public void calculateLighting(Lighting lightingIn)
     {
         if (shading)
@@ -173,7 +200,9 @@ public class Mesh
         lighting = lightingIn;
     }
 
-    //refreshes the lighting based on the stored lighting object. 
+    /**
+     * refreshes the lighting based on the last used lighting object.
+     */ 
     public void refreshLighting()
     {
         if (shading)
@@ -185,10 +214,15 @@ public class Mesh
         }
     }
 
-    //reads a .obj file (a text file) and stores triangles inside the triangle list. 
+    /**
+     * reads a .obj file (a text file) and stores triangles inside the triangle list. 
+     * @param fileName .obj file name 
+     * @param offsetPosition 
+     * @param offsetOrientation  
+     * @param scale  
+     */
     private void createTriangles(String fileName, Vector3 offsetPosition, Quaternion offsetOrientation, double scale)
     {
-
         //vertices are temporarily stored before they are conbined into triangles and added into the main
         //triangle list.
         ArrayList<Vector2> textureCoords = new ArrayList<Vector2>();

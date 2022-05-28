@@ -15,6 +15,12 @@ public class GameObject implements Serializable
     //name
     private String name;
 
+    /**
+     * creates a game object with the given mesh and transform components 
+     * @param nameIn name of the game object
+     * @param meshIn mesh for the game object
+     * @param transformPos transform for the game object
+     */
     public GameObject(String nameIn, Mesh meshIn, Vector3 transformPos)
     {
         mesh = meshIn;

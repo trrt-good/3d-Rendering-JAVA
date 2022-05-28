@@ -5,18 +5,20 @@ package src.primitives;
  */
 public class Vector2 
 {
-    public double x;
-    public double y;
+    public static final Vector2 ZERO = new Vector2(0, 0);
+    /**
+     * x component of the vector2 with double accuracy 
+     */
+    public final double x;
+
+    /**
+     * y component of the vector2 with double accuracy 
+     */
+    public final double y;
 
     public Vector2 (double xIn, double yIn)
     {
         x = xIn;
         y = yIn;
-    }
-
-    public Vector2()
-    {
-        x = 0;
-        y = 0;
     }
 }
