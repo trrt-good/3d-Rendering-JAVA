@@ -9,7 +9,6 @@ import java.awt.event.MouseWheelListener;
 import javax.swing.JPanel;
 
 import trrt.rendering3d.gameObject.*;
-import trrt.rendering3d.graphics.*;
 import trrt.rendering3d.primitives.*;
 
 public class Camera

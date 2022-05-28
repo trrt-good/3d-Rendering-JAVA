@@ -2,7 +2,6 @@ package trrt.rendering3d.graphics;
 import java.util.ArrayList;
 
 import trrt.rendering3d.gameObject.*;
-import trrt.rendering3d.graphics.*;
 import trrt.rendering3d.primitives.*;
 public class Lighting
 {

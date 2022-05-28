@@ -12,7 +12,6 @@ import java.awt.image.Raster;
 
 import javax.imageio.ImageIO;
 
-import trrt.rendering3d.gameObject.*;
 import trrt.rendering3d.graphics.*;
 import trrt.rendering3d.primitives.*;
 import trrt.rendering3d.Main;

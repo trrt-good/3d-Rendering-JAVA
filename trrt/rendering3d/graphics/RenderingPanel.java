@@ -2,9 +2,7 @@ package trrt.rendering3d.graphics;
 import javax.swing.JPanel;
 
 import trrt.rendering3d.gameObject.*;
-import trrt.rendering3d.graphics.*;
 import trrt.rendering3d.primitives.*;
-import trrt.rendering3d.graphics.*;
 import trrt.testing.*;
 
 import java.util.ArrayList;
