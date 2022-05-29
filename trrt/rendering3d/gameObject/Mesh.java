@@ -14,7 +14,6 @@ import javax.imageio.ImageIO;
 
 import trrt.rendering3d.graphics.*;
 import trrt.rendering3d.primitives.*;
-import trrt.rendering3d.Main;
 
 //a class for storing groups of triangles in a mesh.
 public class Mesh implements Serializable
@@ -75,6 +74,14 @@ public class Mesh implements Serializable
         if (modelFile.getName().endsWith(".obj"))
         {
             createTriangles(modelFile, modelOffsetAmount, modelOffsetRotation, scale);
+            if (modelOffsetAmount == null)
+            {
+                Vector3 com = Mesh.centerOfMass(vertices);
+                for (int i = 0; i < vertices.size(); i++)
+                {
+                    vertices.set(i, Vector3.subtract(vertices.get(i), com));
+                }
+            }
         }
         else
         {
@@ -106,6 +113,21 @@ public class Mesh implements Serializable
         if (modelFile.getName().endsWith(".obj"))
         {
             createTriangles(modelFile, modelOffsetAmount, modelOffsetRotation, scale);
+            if (modelOffsetAmount == null)
+            {
+                Vector3 com = Mesh.centerOfMass(vertices);
+                System.out.println(com);
+                for (int i = 0; i < vertices.size(); i++)
+                {
+                    vertices.set(i, Vector3.subtract(vertices.get(i), com));
+                }
+                for (int i = 0; i < triangles.size(); i++)
+                {
+                    triangles.get(i).vertex1 = Vector3.subtract(triangles.get(i).vertex1, com);
+                    triangles.get(i).vertex2 = Vector3.subtract(triangles.get(i).vertex2, com);
+                    triangles.get(i).vertex3 = Vector3.subtract(triangles.get(i).vertex3, com);
+                }
+            }
         }
         else
         {
@@ -257,7 +279,8 @@ public class Mesh implements Serializable
                     //apply transformations to the Vector3 based on offset params
                     vertexCoordinate = Vector3.rotate(vertexCoordinate, offsetOrientation);
                     vertexCoordinate = Vector3.multiply(vertexCoordinate, scale);
-                    vertexCoordinate = Vector3.add(offsetPosition, vertexCoordinate);
+                    if (offsetPosition != null)
+                        vertexCoordinate = Vector3.add(offsetPosition, vertexCoordinate);
 
 
                     //adds the Vector3 to the array of vertices
@@ -315,5 +338,25 @@ public class Mesh implements Serializable
             }
         }
         scanner.close();
+    }
+
+    public static Vector3 centerOfMass(ArrayList<Vector3> vertices)
+    {
+        double sumX = 0;
+        double sumY = 0;
+        double sumZ = 0;
+
+        for (int i = 0; i < vertices.size(); i ++)
+        {
+            sumX += vertices.get(i).x;
+            sumY += vertices.get(i).y;
+            sumZ += vertices.get(i).z;
+        }
+
+        sumX /= vertices.size();
+        sumY /= vertices.size();
+        sumZ /= vertices.size();
+
+        return new Vector3(sumX, sumY, sumZ);
     }
 }
