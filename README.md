@@ -31,18 +31,19 @@ Very simple to use with the rendering3d.jar which can be run with any obj file.
 1. Clone or download the repo as zip
 3. Run the rendering3d.jar with a desired `.obj` file, or with the sample files in `res` 
 
+  for the demo cube: 
    ```
    java -jar rendering3d.jar
    ```
-   for the demo cube or 
+  for a specific mode:
    ```
    java -jar rendering3d.jar <model.obj> <scale>
    ```
-   for a specific model or 
+  for a textured model: 
    ```
    java -jar rendering3d.jar <model.obj> <texture.png> <scale>
    ```
-   for a textured model 
+    
 
 <!-- ROADMAP -->
 ## Roadmap
