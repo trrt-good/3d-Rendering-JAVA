@@ -32,12 +32,17 @@ Very simple to use with the rendering3d.jar which can be run with any obj file.
 3. Run the rendering3d.jar with a desired `.obj` file, or with the sample files in `res` 
 
    ```
+   java -jar rendering3d.jar
+   ```
+   for the demo cube or 
+   ```
    java -jar rendering3d.jar <model.obj> <scale>
    ```
-   or 
+   for a specific model or 
    ```
    java -jar rendering3d.jar <model.obj> <texture.png> <scale>
    ```
+   for a textured model 
 
 <!-- ROADMAP -->
 ## Roadmap
