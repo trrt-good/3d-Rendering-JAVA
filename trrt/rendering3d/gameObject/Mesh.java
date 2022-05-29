@@ -43,25 +43,25 @@ public class Mesh implements Serializable
 
     /**
      * constructor for making a mesh with a texture
-     * @param modelFileName name of the 3d model file (.obj)
-     * @param textureFileName name of the texture image file 
+     * @param modelFile 3d model file (.obj)
+     * @param textureFile the texture image file 
      * @param modelOffsetAmount a 3d offset for the model to be loaded with. Default is {@code Vector3.ZERO}
      * @param modelOffsetRotation a rotation offset for the model to be loaded with. Default is {@code Quaternion.IDENTITY}
      * @param scale the scale for the model to be loaded with. Default is 1
      * @param shaded should the object recieve lighting? 
      */
-    public Mesh(String modelFileName, String textureFileName, Vector3 modelOffsetAmount, Quaternion modelOffsetRotation, double scale, boolean shaded)
+    public Mesh(File modelFile, File textureFile, Vector3 modelOffsetAmount, Quaternion modelOffsetRotation, double scale, boolean shaded)
     {
         long start = System.nanoTime();
         texture = null;
         try
         {
-            if (textureFileName != null)
-                texture = ImageIO.read(new File(Main.RES, textureFileName));
+            if (textureFile != null)
+                texture = ImageIO.read(textureFile);
         } 
         catch (IOException e)
         {
-            System.err.println("ERROR at: Mesh/constructor:\n\tError while loading texture: " + textureFileName);
+            System.err.println("ERROR at: Mesh/constructor:\n\tError while loading texture: " + textureFile);
         }
         if (texture != null)
             textureRaster = texture.getData();
@@ -72,27 +72,27 @@ public class Mesh implements Serializable
         baseColor = Color.MAGENTA;
         totalMovement = Vector3.ZERO;
         
-        if (modelFileName.endsWith(".obj"))
+        if (modelFile.getName().endsWith(".obj"))
         {
-            createTriangles(modelFileName, modelOffsetAmount, modelOffsetRotation, scale);
+            createTriangles(modelFile, modelOffsetAmount, modelOffsetRotation, scale);
         }
         else
         {
             System.err.println("ERROR at: Mesh/constructor:\n\tUnsupported 3d model file type. Please use .obj files");
         }
-        System.out.println("mesh created: " + modelFileName + " in " + (System.nanoTime() - start)/1000000 + "ms\n\t- " + triangles.size() + " triangles");
+        System.out.println("mesh created: " + modelFile + " in " + (System.nanoTime() - start)/1000000 + "ms\n\t- " + triangles.size() + " triangles");
     }
 
     /**
      * constructor for making a mesh without a texture
-     * @param modelFileName name of the 3d model file (.obj)
+     * @param modelFile the 3d model file (.obj)
      * @param color color for the mesh
      * @param modelOffsetAmount a 3d offset for the model to be loaded with. Default is {@code Vector3.ZERO}
      * @param modelOffsetRotation a rotation offset for the model to be loaded with. Default is {@code Quaternion.IDENTITY}
      * @param scale the scale for the model to be loaded with. Default is 1
      * @param shaded should the object recieve lighting? 
      */
-    public Mesh(String modelFileName, Color color, Vector3 modelOffsetAmount, Quaternion modelOffsetRotation, double scale, boolean shaded)
+    public Mesh(File modelFile, Color color, Vector3 modelOffsetAmount, Quaternion modelOffsetRotation, double scale, boolean shaded)
     {
         long start = System.nanoTime();
         texture = null;
@@ -103,18 +103,18 @@ public class Mesh implements Serializable
         baseColor = (color == null)? Color.MAGENTA : color;
         totalMovement = Vector3.ZERO;
         
-        if (modelFileName.endsWith(".obj"))
+        if (modelFile.getName().endsWith(".obj"))
         {
-            createTriangles(modelFileName, modelOffsetAmount, modelOffsetRotation, scale);
+            createTriangles(modelFile, modelOffsetAmount, modelOffsetRotation, scale);
         }
         else
         {
             System.err.println("ERROR at: Mesh/constructor:\n\tUnsupported 3d model file type. Please use .obj files");
         }
-        System.out.println("mesh created: " + modelFileName + " in " + (System.nanoTime() - start)/1000000 + "ms\n\t- " + triangles.size() + " triangles");
+        System.out.println("mesh created: " + modelFile + " in " + (System.nanoTime() - start)/1000000 + "ms\n\t- " + triangles.size() + " triangles");
     }
 
-    protected Mesh(boolean shadedIn, boolean shouldBackFaceCull)
+    protected Mesh(boolean shadedIn)
     {        
         shading = shadedIn;
         triangles = new ArrayList<Triangle>();
@@ -215,12 +215,12 @@ public class Mesh implements Serializable
 
     /**
      * reads a .obj file (a text file) and stores triangles inside the triangle list. 
-     * @param fileName .obj file name 
+     * @param file .obj file name 
      * @param offsetPosition 
      * @param offsetOrientation  
      * @param scale  
      */
-    private void createTriangles(String fileName, Vector3 offsetPosition, Quaternion offsetOrientation, double scale)
+    private void createTriangles(File file, Vector3 offsetPosition, Quaternion offsetOrientation, double scale)
     {
         //vertices are temporarily stored before they are conbined into triangles and added into the main
         //triangle list.
@@ -231,11 +231,11 @@ public class Mesh implements Serializable
         //innitialize the scanner
         try 
         {
-            scanner = new Scanner(new File(Main.RES, fileName));   
+            scanner = new Scanner(file);   
         } 
         catch (FileNotFoundException e) 
         {
-            System.err.println("ERROR at: Mesh/readObjFile() method:\n\tfile " + fileName + " not found in " + Main.RES.getAbsolutePath());
+            System.err.println("ERROR at: Mesh/readObjFile() method:\n\tfile " + file.getName() + " not found in " + file.getAbsolutePath());
             return;
         }
 
@@ -314,5 +314,6 @@ public class Mesh implements Serializable
                 }
             }
         }
+        scanner.close();
     }
 }

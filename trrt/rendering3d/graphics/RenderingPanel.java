@@ -3,7 +3,6 @@ import javax.swing.JPanel;
 
 import trrt.rendering3d.gameObject.*;
 import trrt.rendering3d.primitives.*;
-import trrt.testing.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,6 +31,7 @@ public class RenderingPanel extends JPanel implements Runnable
     private Quaternion pointRotationQuaternion;
     private double pixelsPerUnit;
     private Vector3 camCenterPoint;
+    private boolean hasTrianglesToRender; 
     private double maxTriangleDistance;
     private double minTriangleDistance;
 
@@ -76,6 +76,7 @@ public class RenderingPanel extends JPanel implements Runnable
 
         //background color: 
         backgroundColor = bgColor;
+        setBackground(backgroundColor);
 
         //innitialize fields 
         camera = null;
@@ -86,6 +87,7 @@ public class RenderingPanel extends JPanel implements Runnable
         camPos = Vector3.ZERO;
         fps = -1;
         drawQeue = new ArrayList<Triangle2D>();
+        hasTrianglesToRender = false;
         
         //creates the buffered image which will be used to render triangles. 
         renderImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -102,19 +104,20 @@ public class RenderingPanel extends JPanel implements Runnable
         totalFrameTime.stopClock();
         totalFrameTime.startClock();
         //makes sure that there are triangles to render in the first place, and that the camera exists.
-        if (gameObjects.size() > 0 && camera != null)
+        if (gameObjects.size() > 0 && camera != null && hasTrianglesToRender)
         {
             computeTriangles();
             sortTriangles();
             rasterizeTriangles();
             g.drawImage(renderImage, 0, 0, this);
             //fps counter 
-            g.drawString("fps: " + (int)(1000/totalFrameTime.getDeltaTime()), 30, 30);
+            g.drawString("fps: " + (int)(1000/totalFrameTime.getDeltaTime()), 30, 30);    
         }
         else
         {
+            super.paintComponent(g);
             //show an error on the screen if there is no camera or no game object
-            g.drawString((camera == null)? "NO CAMERA" : "NO GAMEOBJECTS", getWidth()/2, getHeight()/2);
+            g.drawString((camera == null)? "NO CAMERA" : (hasTrianglesToRender)? "NO GAMEOBJECTS" : "GAMEOBJECT HAS NO TRIANGLES OR COULD NOT FIND A MODEL FILE", getWidth()/2, getHeight()/2);
         }
     }
 
@@ -154,13 +157,15 @@ public class RenderingPanel extends JPanel implements Runnable
         if (gameObject != null && gameObject.getName() != null)
         {
             gameObjectIndices.put(gameObject.getName(), gameObjects.size());
+            if (gameObject.getMesh().getTriangles().size() > 0)
+                hasTrianglesToRender = true;
             gameObjects.add(gameObject);
             if (lightingObject != null)
                 lightingObject.update(gameObjects);
         }
         else
         {
-            System.err.println("WARNING at: RenderingPanel/addMesh() method: \n\tGameObject or it's name is null. Object not added");
+            System.err.println("WARNING at: RenderingPanel/addGameObject() method: \n\tGameObject or it's name is null. Object not added");
         }
     }
 
@@ -280,7 +285,7 @@ public class RenderingPanel extends JPanel implements Runnable
     /** sorts triangles from far to near */
     private void sortTriangles()
     {
-        for (int i = (int)maxTriangleDistance; i > minTriangleDistance-1; i--)
+        for (int i = (int)maxTriangleDistance + 1; i > minTriangleDistance -1; i--)
         {
             if (i < sortQeue.length && sortQeue[i].size() > 0)
             {
@@ -358,7 +363,7 @@ public class RenderingPanel extends JPanel implements Runnable
     private void calculateTriangle(Triangle triangle)
     {
         Vector3 triangleCenter = triangle.getCenter();
-        double distanceToTriangle = Vector3.subtract(triangleCenter, camPos).getMagnitude();  
+        double distanceToTriangle = Vector3.subtract(triangleCenter, camPos).getMagnitude(); 
         if (distanceToTriangle > maxTriangleDistance)
             maxTriangleDistance = distanceToTriangle;
         else if (distanceToTriangle < minTriangleDistance)
@@ -442,7 +447,10 @@ public class RenderingPanel extends JPanel implements Runnable
                 colorUsed = convertToIntRGB(triangle.getBaseColor());
 
             //adds the 2d triangle object into the triangle2d array.
-            sortQeue[(int)distanceToTriangle].add(new Triangle2D(p1ScreenCoords, p2ScreenCoords, p3ScreenCoords, colorUsed, distanceToTriangle));
+            if ((int)distanceToTriangle < sortQeue.length)
+                sortQeue[(int)distanceToTriangle].add(new Triangle2D(p1ScreenCoords, p2ScreenCoords, p3ScreenCoords, colorUsed));
+            else
+                sortQeue[sortQeue.length-1].add(new Triangle2D(p1ScreenCoords, p2ScreenCoords, p3ScreenCoords, colorUsed));
         }
     }
 
@@ -648,7 +656,7 @@ public class RenderingPanel extends JPanel implements Runnable
         public final int color;
 
         //overloaded constructor. 
-        public Triangle2D(Point p1In, Point p2In, Point p3In, int colorIn, double triangle3DDistanceIn)
+        public Triangle2D(Point p1In, Point p2In, Point p3In, int colorIn)
         {
             p1 = p1In;
             p2 = p2In;
