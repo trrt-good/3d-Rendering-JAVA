@@ -434,7 +434,8 @@ public class Vector3 implements Serializable
     }
 
     /**
-     * rotates the specified vector by the specified quaternion 
+     * rotates the specified vector by the specified quaternion <pre>
+     * q*(v.x, v.y, v.z, 0)*inverse(q) </pre>
      * @param v the vector to be rotated
      * @param q the rotation to be applied as a quaternion
      * @return the resulting vector 
