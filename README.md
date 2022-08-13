@@ -1,5 +1,7 @@
 # 3d-Rendering-JAVA
 
+![alt text](https://cdn.discordapp.com/attachments/903515599097954354/1008136588947095572/unknown.png)
+
 <div id="top"></div>
 
 <!-- TABLE OF CONTENTS -->
@@ -19,12 +21,12 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-A simple 3d rendering package in java using perspective projection. Written with built in java no opengl.   
+A simple 3d rendering program in java and integrates smoothly with the swing api.    
 
 <!-- GETTING STARTED -->
 ## Getting Started
 
-Very simple to use with the rendering3d.jar which can be run with any obj file. 
+Very simple to use with the rendering3d.jar which can be run with any .obj file. 
 
 ### Usage
 
