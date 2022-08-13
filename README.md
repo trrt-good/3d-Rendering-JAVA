@@ -35,7 +35,7 @@ Very simple to use with the rendering3d.jar which can be run with any obj file.
    ```
    java -jar rendering3d.jar
    ```
-  for a specific mode:
+  for a specific model:
    ```
    java -jar rendering3d.jar <model.obj> <scale>
    ```
