@@ -1,27 +1,15 @@
 # 3d-Rendering-JAVA
 
-![alt text](https://cdn.discordapp.com/attachments/903515599097954354/1008136588947095572/unknown.png)
+
 
 <div id="top"></div>
-
-<!-- TABLE OF CONTENTS -->
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">About The Project</a>
-    </li>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-  </ol>
-</details>
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-A simple 3d rendering program in java and integrates smoothly with the swing api.    
+A very performant 3d rendering program in java and integrates smoothly with the swing api.    
+
+![alt text](https://cdn.discordapp.com/attachments/903515599097954354/1008136588947095572/unknown.png)
 
 <!-- GETTING STARTED -->
 ## Getting Started
