@@ -1,0 +1,2 @@
+java -jar C:\Users\tatwo\Desktop\Programs\Java\Rendering\rendering3d.jar C:\Users\tatwo\Desktop\Programs\Java\Rendering\res\car.obj C:\Users\tatwo\Desktop\Programs\Java\Rendering\res\carTexture.png 10
+java -jar C:\Users\tatwo\Desktop\Programs\Java\Rendering\rendering3d.jar
