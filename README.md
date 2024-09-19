@@ -9,7 +9,7 @@
 
 A very performant 3d rendering program in java and integrates smoothly with the swing api.    
 
-![alt text](https://cdn.discordapp.com/attachments/903515599097954354/1008136588947095572/unknown.png)
+![alt text](res/unknown.webp)
 
 <!-- GETTING STARTED -->
 ## Getting Started
